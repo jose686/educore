@@ -629,52 +629,5 @@ public class AdminController {
             redirectAttrs.addFlashAttribute("errorMsg",
                     "Error al procesar el reembolso con Stripe: " + e.getMessage());
         }
-        return "redirect:/admin/pedidos";
-    }
-
-}}
-
-    /**
-     * Fuerza la matriculación manual y limpia/resuelve la incidencia asociada.
-     */
-    @PostMapping("/admin/pedidos/{id}/matricular-manual")
-    public String matricularManualPedido(@PathVariable("id") Long id, RedirectAttributes redirectAttrs) {
-        try {
-            pedidoService.forzarMatriculacionManual(id);
-
-            // Resolving support tickets associated with this pedidoId
-            List<TicketSoporte> tickets = ticketSoporteRepository.findByPedidoId(id);
-            for (TicketSoporte ticket : tickets) {
-                ticket.setEstado("RESUELTO");
-                ticketSoporteRepository.save(ticket);
-            }
-
-            redirectAttrs.addFlashAttribute("successMsg",
-                    "Matriculación forzada manualmente y ticket de soporte resuelto para el pedido #" + id + ".");
-        } catch (Exception e) {
-            redirectAttrs.addFlashAttribute("errorMsg",
-                    "Error al forzar la matriculación manual: " + e.getMessage());
-        }
-        return "redirect:/admin/pedidos/" + id;
-    }
-
-    /**
-     * Procesa un reembolso de pedido desde el backoffice.
-     * Ejecuta la devolución en Stripe, cambia el estado del pedido a REEMBOLSADO
-     * y revoca automáticamente el acceso del alumno al Aula Virtual.
-     */
-    @PostMapping("/admin/pedidos/{id}/reembolsar")
-    public String reembolsarPedido(@PathVariable("id") Long id, RedirectAttributes redirectAttrs) {
-        try {
-            pedidoService.reembolsarPedido(id);
-            redirectAttrs.addFlashAttribute("successMsg",
-                    "Reembolso ejecutado correctamente para el pedido #" + id + ".");
-        } catch (IllegalStateException e) {
-            redirectAttrs.addFlashAttribute("errorMsg", e.getMessage());
-        } catch (Exception e) {
-            redirectAttrs.addFlashAttribute("errorMsg",
-                    "Error al procesar el reembolso con Stripe: " + e.getMessage());
-        }
-        return "redirect:/admin/pedidos";
     }
 }
