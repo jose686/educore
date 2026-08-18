@@ -86,10 +86,10 @@ public class DatabaseSeeder implements CommandLineRunner {
     public void run(String... args) throws Exception {
         // mediaService.syncDatabaseWithStorage();
         seedUsuarios();
-        // seedLmsAndCatalog();
-        // seedBlog();
-        // seedDatosFiscales();
-        // seedRecursosInteractivos();
+        seedLmsAndCatalog();
+        seedBlog();
+        seedDatosFiscales();
+        seedRecursosInteractivos();
     }
 
     private void seedDatosFiscales() {
