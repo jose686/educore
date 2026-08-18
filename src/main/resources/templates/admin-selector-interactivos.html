@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Selector de Interactivos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #ffffff;
+            font-family: system-ui, -apple-system, sans-serif;
+            padding: 20px;
+        }
+        .text-purple-custom {
+            color: #c084fc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Search bar -->
+        <form th:action="@{/admin/biblioteca-interactivos/selector}" method="GET" class="mb-3">
+            <div class="input-group">
+                <input type="text" name="search" th:value="${search}" class="form-control bg-dark border-secondary text-white" placeholder="Buscar por identificador o título...">
+                <button type="submit" class="btn btn-outline-light"><i class="bi bi-search"></i> Buscar</button>
+            </div>
+        </form>
+
+        <!-- Listing table -->
+        <div class="table-responsive">
+            <table class="table table-dark table-hover mb-0 align-middle">
+                <thead>
+                    <tr class="text-secondary fs-8 border-bottom border-white border-opacity-10">
+                        <th>Identificador</th>
+                        <th>Título</th>
+                        <th>Etiquetas</th>
+                        <th class="text-end">Acción</th>
+                    </tr>
+                </thead>
+                <tbody class="fs-7">
+                    <tr th:each="rec : ${recursos}" class="border-bottom border-white border-opacity-5">
+                        <td><code class="text-purple-custom fw-bold" th:text="${rec.identificador}">ID</code></td>
+                        <td>
+                            <span th:text="${rec.titulo}">Título</span>
+                            <small class="text-muted d-block fs-9 text-truncate" style="max-width: 200px;" th:text="${rec.descripcion}">Descripción</small>
+                        </td>
+                        <td>
+                            <span th:each="tag : ${rec.etiquetas}" class="badge bg-secondary me-1" th:text="${tag}">Tag</span>
+                            <span th:if="${#lists.isEmpty(rec.etiquetas)}" class="text-muted">-</span>
+                        </td>
+                        <td class="text-end">
+                            <button type="button" class="btn btn-primary btn-sm rounded-pill px-3" 
+                                    th:onclick="'seleccionarRecurso(\'' + ${rec.identificador} + '\')'">
+                                Seleccionar
+                            </button>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(recursos)}">
+                        <td colspan="4" class="text-center py-4 text-secondary">
+                            No se han encontrado recursos interactivos para cursos.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function seleccionarRecurso(id) {
+            if (window.parent && window.parent.onMinijuegoSelected) {
+                window.parent.onMinijuegoSelected(id);
+            }
+        }
+    </script>
+</body>
+</html>

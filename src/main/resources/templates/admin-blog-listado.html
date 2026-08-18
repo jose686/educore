@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: common-head('Listado de Artículos')}"></head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside th:replace="~{layout :: admin-sidebar('blog')}"></aside>
+
+        <!-- Main Area -->
+        <div class="admin-main">
+            <!-- Navbar -->
+            <header th:replace="~{layout :: admin-navbar('Gestión del Blog')}"></header>
+
+            <!-- Content Body -->
+            <main class="admin-content-body">
+                
+                <!-- Header Actions -->
+                <div class="row mb-4 align-items-center">
+                    <div class="col-md-8">
+                        <h2 class="fw-bold text-white mb-2">Artículos Publicados</h2>
+                        <p class="text-muted-custom fs-5 mb-0">Listado completo de entradas publicadas y herramientas de edición del blog.</p>
+                    </div>
+                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                        <a th:href="@{/admin/blog/nuevo}" class="btn btn-gradient py-2.5 px-4 fs-8 fw-semibold rounded-pill">
+                            Redactar Artículo <i class="bi bi-plus-lg ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Success notification -->
+                <div th:if="${param.success}" class="alert alert-success border-0 bg-success bg-opacity-10 text-success rounded-4 py-3 px-4 mb-4" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                        <span th:if="${param.success[0] == 'create'}">¡Artículo creado correctamente!</span>
+                        <span th:if="${param.success[0] == 'update'}">¡Artículo actualizado con éxito!</span>
+                        <span th:if="${param.success[0] == 'delete'}">¡Artículo eliminado del blog!</span>
+                    </div>
+                </div>
+
+                <!-- Articles Table Card -->
+                <div class="card glass-card border border-white border-opacity-10 rounded-4 overflow-hidden shadow-lg">
+                    
+                    <!-- Table Container -->
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead class="bg-black bg-opacity-40 text-secondary fs-8 border-bottom border-white border-opacity-10">
+                                <tr>
+                                    <th class="ps-4 py-3">Título</th>
+                                    <th class="py-3">Autor</th>
+                                    <th class="py-3">Fecha de Publicación</th>
+                                    <th class="py-3 text-end pe-4">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="fs-7 border-0">
+                                
+                                <!-- Loop articles -->
+                                <tr class="border-bottom border-white border-opacity-5" th:each="art : ${articulos}">
+                                    <td class="ps-4 py-3 fw-semibold text-white">
+                                        <a th:href="@{'/blog/' + ${art.slug}}" target="_blank" class="text-white text-decoration-none hover-primary">
+                                            <span th:text="${art.titulo}">Título del Artículo</span> <i class="bi bi-box-arrow-up-right fs-9 text-secondary ms-1"></i>
+                                        </a>
+                                    </td>
+                                    <td class="text-muted-custom py-3" th:text="${autoresMap[art.usuarioId] != null ? autoresMap[art.usuarioId] : 'Desconocido'}">Autor</td>
+                                    <td class="text-muted-custom py-3" th:text="${#temporals.format(art.fechaPublicacion, 'dd/MM/yyyy HH:mm')}">Fecha</td>
+                                    <td class="text-end pe-4 py-3">
+                                        <div class="d-inline-flex gap-2">
+                                            <!-- Edit Link -->
+                                            <a th:href="@{'/admin/blog/editar/' + ${art.id}}" class="btn btn-outline-light border-white border-opacity-10 btn-sm rounded-pill py-1 px-3 fs-8">
+                                                <i class="bi bi-pencil-square me-1"></i> Editar
+                                            </a>
+                                            <!-- Delete Form -->
+                                            <form th:action="@{'/admin/blog/eliminar/' + ${art.id}}" method="POST" class="d-inline" onsubmit="return confirm('¿Seguro que deseas eliminar definitivamente este artículo del blog?');">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill py-1 px-3 fs-8">
+                                                    <i class="bi bi-trash me-1"></i> Eliminar
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- Empty State -->
+                                <tr th:if="${#lists.isEmpty(articulos)}">
+                                    <td colspan="4" class="text-center py-5 text-secondary">
+                                        <i class="bi bi-journal-x fs-1 d-block mb-3 opacity-50"></i>
+                                        <span class="fs-7">No se han redactado artículos de blog todavía.</span>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <div th:replace="~{layout :: bootstrap-js}"></div>
+</body>
+</html>

@@ -1,0 +1,22 @@
+# Compilados de Java / Maven / Gradle
+target/
+*.class
+.mvn/
+*.jar
+*.war
+
+# Configuración de IDEs y editores
+.idea/
+*.iml
+.vscode/
+*.classpath
+*.project
+.settings/
+
+# Archivos de sistema y logs
+*.log
+.DS_Store
+.env
+.env.local
+*.env
+uploads/

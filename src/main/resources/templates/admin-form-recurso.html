@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <div th:replace="~{layout :: common-head(${isEdit} ? 'Editar Recurso' : 'Registrar Recurso')}"></div>
+    <style>
+        .hover-bg-white-5:hover {
+            background: rgba(255, 255, 255, 0.05) !important;
+            border-color: rgba(139, 92, 246, 0.4) !important;
+        }
+        .cursor-pointer {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside th:replace="~{layout :: admin-sidebar('biblioteca')}"></aside>
+
+        <!-- Main Area -->
+        <div class="admin-main">
+            <!-- Navbar -->
+            <header th:replace="~{layout :: admin-navbar(${isEdit} ? 'Editar Recurso Interactivo' : 'Registrar Recurso')}"></header>
+
+            <!-- Content Body -->
+            <main class="admin-content-body">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-xl-10">
+                        
+                        <!-- Back Link -->
+                        <div class="mb-4">
+                            <a th:href="@{/admin/biblioteca-interactivos}" class="text-secondary text-decoration-none fs-7 hover-white">
+                                <i class="bi bi-arrow-left me-1"></i> Volver al listado
+                            </a>
+                        </div>
+
+                        <!-- Error notification -->
+                        <div th:if="${param.error}" class="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger rounded-4 py-3 px-4 mb-4 shadow" role="alert">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+                                <span th:if="${param.error[0] == 'id_exists'}">Error: El identificador único ingresado ya existe en la base de datos para otro recurso interactivo. Por favor ingresa uno nuevo.</span>
+                            </div>
+                        </div>
+
+                        <!-- Glassmorphic Form Card -->
+                        <div class="card glass-card p-4 p-md-5 border border-white border-opacity-10 shadow-lg">
+                            <h2 class="fw-bold text-white mb-4" th:text="${isEdit} ? 'Editar Configuración de Recurso' : 'Registrar Minijuego'">Registrar Minijuego</h2>
+                            
+                            <form th:action="${isEdit} ? @{'/admin/biblioteca-interactivos/editar/' + ${recurso.id}} : @{/admin/biblioteca-interactivos/nuevo}" th:object="${recurso}" method="POST">
+                                
+                                <div class="row">
+                                    <!-- Identificador -->
+                                    <div class="col-md-6 mb-4">
+                                        <label for="identificador" class="form-label">Identificador Único (ID interno, ej: CHESS-PUZZLE-MATE1)</label>
+                                        <input type="text" id="identificador" th:field="*{identificador}" class="form-control" placeholder="ej: juego_el_ahorcado" required th:readonly="${isEdit}">
+                                        <div class="invalid-feedback">El identificador es obligatorio.</div>
+                                    </div>
+
+                                    <!-- Title -->
+                                    <div class="col-md-6 mb-4">
+                                        <label for="titulo" class="form-label">Título del Recurso</label>
+                                        <input type="text" id="titulo" th:field="*{titulo}" class="form-control" placeholder="ej: Tres en Raya Leyenda" required>
+                                        <div class="invalid-feedback">El título es obligatorio.</div>
+                                    </div>
+                                </div>
+
+                                <!-- Description -->
+                                <div class="mb-4">
+                                    <label for="descripcion" class="form-label">Descripción o Instrucciones</label>
+                                    <textarea id="descripcion" th:field="*{descripcion}" rows="3" class="form-control" placeholder="Instrucciones simples o de qué trata el interactivo..."></textarea>
+                                </div>
+
+                                <!-- Portada Image -->
+                                <div class="mb-4">
+                                    <label class="form-label">Imagen de Portada (Opcional, útil para Minijuegos)</label>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <!-- Preview Thumbnail -->
+                                        <div id="thumbnail-preview-container" class="ratio ratio-16x9 bg-black bg-opacity-40 rounded-3 border border-white border-opacity-10 d-flex align-items-center justify-content-center overflow-hidden" style="width: 160px; height: 90px; min-width: 160px;">
+                                            <img id="thumbnail-preview-img" th:src="*{imagenPortadaUrl}" th:class="*{imagenPortadaUrl != null && !imagenPortadaUrl.isEmpty()} ? 'w-100 h-100 object-fit-cover' : 'd-none'" alt="Vista previa">
+                                            <span id="thumbnail-preview-placeholder" th:class="*{imagenPortadaUrl != null && !imagenPortadaUrl.isEmpty()} ? 'd-none text-muted-custom fs-9' : 'text-muted-custom fs-9'"><i class="bi bi-image me-1"></i> Sin imagen</span>
+                                        </div>
+                                        <!-- Button and Clear -->
+                                        <div>
+                                            <button type="button" class="btn btn-outline-light border-white border-opacity-10 btn-sm rounded-pill px-3 py-1.5 fs-8 mb-2" id="btn-select-featured-image">
+                                                <i class="bi bi-images me-1"></i> Seleccionar de Galería
+                                            </button>
+                                            <br>
+                                            <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1.5 fs-8" th:classappend="*{imagenPortadaUrl != null && !imagenPortadaUrl.isEmpty()} ? '' : 'd-none'" id="btn-clear-featured-image">
+                                                <i class="bi bi-x-circle me-1"></i> Quitar
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" id="imagenPortadaUrl" th:field="*{imagenPortadaUrl}">
+                                </div>
+
+                                <!-- HTML URL / Iframe Link -->
+                                <div class="mb-4">
+                                    <label for="htmlUrl" class="form-label">Ruta HTML del Recurso o Enlace Iframe</label>
+                                    <div class="input-group">
+                                        <input type="text" id="htmlUrl" th:field="*{htmlUrl}" class="form-control" placeholder="ej: /media/uuid.html o alias del archivo" required>
+                                        <div class="invalid-feedback">Debes indicar la ruta HTML del minijuego o seleccionarla desde la galería.</div>
+                                        <button type="button" class="btn btn-outline-light border-white border-opacity-10 fs-8 px-3" id="btn-select-html-resource">
+                                            Seleccionar Minijuego <i class="bi bi-folder2-open ms-1"></i>
+                                        </button>
+                                    </div>
+                                    <small class="text-muted-custom fs-9 mt-1.5 d-block">Selecciona un archivo HTML o PDF desde la Biblioteca de Medios o escribe una URL externa.</small>
+                                </div>
+
+                                <div class="row">
+
+                                    <!-- Etiquetas (Tags Raw) -->
+                                    <div class="col-md-6 mb-4">
+                                        <label for="tagsRaw" class="form-label">Etiquetas (Separadas por comas)</label>
+                                        <input type="text" id="tagsRaw" name="tagsRaw" th:value="${tagsRaw}" class="form-control" placeholder="ej: Arcade, Encuesta, Lógica, Estrategia">
+                                        <small class="text-muted-custom fs-9 mt-1 d-block">Facilita el filtrado en la biblioteca introduciendo temas o categorías.</small>
+                                    </div>
+                                </div>
+
+                                <!-- Es Gratis -->
+                                <div class="form-check form-switch mb-4">
+                                    <input class="form-check-input" type="checkbox" id="esGratis" th:field="*{esGratis}">
+                                    <label class="form-check-label text-muted-custom fw-semibold fs-7" for="esGratis">¿Es de acceso gratuito?</label>
+                                </div>
+
+                                <!-- Credit Cost (conditional) -->
+                                <div class="mb-4" id="costeCreditosContainer">
+                                    <label for="costeCreditos" class="form-label">Coste de Acceso en Créditos (Minijuegos)</label>
+                                    <input type="number" id="costeCreditos" th:field="*{costeCreditos}" min="1" class="form-control" placeholder="ej: 20">
+                                </div>
+
+                                <!-- Activo -->
+                                <div class="form-check form-switch mb-4">
+                                    <input class="form-check-input" type="checkbox" id="activo" th:field="*{activo}">
+                                    <label class="form-check-label text-muted-custom fw-semibold fs-7" for="activo">Recurso activo</label>
+                                </div>
+
+                                <!-- Submit Button -->
+                                <button type="submit" class="btn btn-gradient w-100 py-3 mt-3" th:text="${isEdit} ? 'Guardar Cambios' : 'Registrar Minijuego'">
+                                    Registrar Minijuego <i class="bi bi-controller ms-2 align-middle fs-7"></i>
+                                </button>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal de Galería de Medios (Portadas - filtradas por tipo=IMAGE) -->
+    <div class="modal fade" id="mediaGalleryModal" tabindex="-1" aria-labelledby="mediaGalleryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content glass-card border border-white border-opacity-10 text-white shadow-lg">
+                <div class="modal-header border-bottom border-white border-opacity-10 py-3">
+                    <h5 class="modal-title fw-bold" id="mediaGalleryModalLabel">Seleccionar de Biblioteca de Medios</h5>
+                    <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body py-4">
+                    <!-- Loader spinner -->
+                    <div id="modal-media-loader" class="text-center py-5">
+                        <div class="spinner-border text-gradient" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                        <p class="text-muted-custom fs-8 mt-2">Cargando archivos de la biblioteca...</p>
+                    </div>
+                    <!-- Container for images -->
+                    <div id="modal-media-grid" class="row row-cols-3 g-3 d-none">
+                        <!-- Images will be populated dynamically -->
+                    </div>
+                    <!-- Empty library warning -->
+                    <div id="modal-media-empty" class="text-center py-5 d-none">
+                        <i class="bi bi-images text-gradient fs-1 d-block mb-3"></i>
+                        <h5 class="text-white fw-bold">Biblioteca Vacía</h5>
+                        <p class="text-muted-custom mb-0">No hay archivos multimedia subidos al servidor.</p>
+                    </div>
+                </div>
+                <div class="modal-footer border-top border-white border-opacity-10 py-3">
+                    <button type="button" class="btn btn-outline-light border-white border-opacity-10 py-1.5 px-3 fs-8 rounded-pill" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Selección de HTML / Interactivos (filtrado por tipo=HTML_INTERACTIVO) -->
+    <div class="modal fade" id="htmlGalleryModal" tabindex="-1" aria-labelledby="htmlGalleryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content glass-card border border-white border-opacity-10 text-white shadow-lg" style="background: #0f172a;">
+                <div class="modal-header border-bottom border-white border-opacity-10 py-3">
+                    <h5 class="modal-title fw-bold" id="htmlGalleryModalLabel">Seleccionar Minijuego</h5>
+                    <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body py-4">
+                    <!-- Loader spinner -->
+                    <div id="modal-html-loader" class="text-center py-5">
+                        <div class="spinner-border text-gradient" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                        <p class="text-muted-custom fs-8 mt-2">Cargando minijuegos...</p>
+                    </div>
+                    <!-- Container for interactive assets -->
+                    <div id="modal-html-grid" class="row row-cols-3 g-3 d-none">
+                        <!-- Items will be populated dynamically -->
+                    </div>
+                    <!-- Empty library warning -->
+                    <div id="modal-html-empty" class="text-center py-5 d-none">
+                        <i class="bi bi-controller text-gradient fs-1 d-block mb-3"></i>
+                        <h5 class="text-white fw-bold">Sin Minijuegos</h5>
+                        <p class="text-muted-custom mb-0">No hay archivos HTML interactivos de categoría MINIJUEGO subidos a la Biblioteca de Medios.</p>
+                    </div>
+                </div>
+                <div class="modal-footer border-top border-white border-opacity-10 py-3">
+                    <button type="button" class="btn btn-outline-light border-white border-opacity-10 py-1.5 px-3 fs-8 rounded-pill" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <div th:replace="~{layout :: bootstrap-js}"></div>
+
+    <!-- Script to manage image selecting and conditional credit cost visibility -->
+    <script>
+        var mediaGalleryModal = null;
+        var htmlGalleryModal = null;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Lógica del check de Es Gratis y el coste en créditos
+            const esGratisCheck = document.getElementById('esGratis');
+            const costeContainer = document.getElementById('costeCreditosContainer');
+            const costeInput = document.getElementById('costeCreditos');
+
+            function toggleCosteVisibility() {
+                if (esGratisCheck.checked) {
+                    costeContainer.style.display = 'none';
+                    costeInput.required = false;
+                    costeInput.value = '0';
+                } else {
+                    costeContainer.style.display = 'block';
+                    costeInput.required = true;
+                    if (!costeInput.value || costeInput.value === '0') {
+                        costeInput.value = '20';
+                    }
+                }
+            }
+
+            esGratisCheck.addEventListener('change', toggleCosteVisibility);
+            toggleCosteVisibility(); // Ejecutar en carga inicial
+
+            // --- Autogeneración del slug desde el título ---
+            var tituloInput = document.getElementById('titulo');
+            var identificadorInput = document.getElementById('identificador');
+            var isEdit = identificadorInput.hasAttribute('readonly');
+            var slugEditadoManualmente = false;
+
+            function generarSlug(texto) {
+                return texto
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // quitar tildes
+                    .toLowerCase()
+                    .replace(/[^a-z0-9\s_-]/g, '') // quitar caracteres especiales
+                    .trim()
+                    .replace(/[\s-]+/g, '_'); // espacios y guiones a guiones bajos
+            }
+
+            if (!isEdit) {
+                tituloInput.addEventListener('input', function () {
+                    if (!slugEditadoManualmente) {
+                        identificadorInput.value = generarSlug(this.value);
+                    }
+                });
+                identificadorInput.addEventListener('input', function () {
+                    slugEditadoManualmente = true;
+                });
+                identificadorInput.addEventListener('focus', function () {
+                    // Permitir re-vinculación si el usuario borra el campo manualmente
+                    if (this.value === '') {
+                        slugEditadoManualmente = false;
+                    }
+                });
+            }
+
+            // --- Validación manual del formulario con feedback visual ---
+            var form = document.querySelector('form');
+            form.setAttribute('novalidate', 'true'); // desactivar tooltips nativos HTML5
+
+            form.addEventListener('submit', function (e) {
+                // Limpiar estado previo
+                form.querySelectorAll('.is-invalid').forEach(function(el) {
+                    el.classList.remove('is-invalid');
+                });
+
+                var isValid = true;
+                var requiredFields = form.querySelectorAll('[required]');
+                requiredFields.forEach(function (field) {
+                    if (!field.value || field.value.trim() === '') {
+                        field.classList.add('is-invalid');
+                        isValid = false;
+                    }
+                });
+
+                if (!isValid) {
+                    e.preventDefault();
+                    // Hacer scroll al primer campo inválido
+                    var firstInvalid = form.querySelector('.is-invalid');
+                    if (firstInvalid) {
+                        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        firstInvalid.focus();
+                    }
+                }
+            });
+
+            // Quitar is-invalid al escribir
+            form.querySelectorAll('[required]').forEach(function (field) {
+                field.addEventListener('input', function () {
+                    if (this.value && this.value.trim() !== '') {
+                        this.classList.remove('is-invalid');
+                    }
+                });
+            });
+
+            // Controladores para Selección de Portada
+            document.getElementById('btn-select-featured-image').addEventListener('click', function() {
+                openMediaGalleryModal();
+            });
+
+            document.getElementById('btn-clear-featured-image').addEventListener('click', function() {
+                document.getElementById('imagenPortadaUrl').value = '';
+                var previewImg = document.getElementById('thumbnail-preview-img');
+                var previewPlaceholder = document.getElementById('thumbnail-preview-placeholder');
+                
+                previewImg.src = '';
+                previewImg.classList.add('d-none');
+                previewPlaceholder.classList.remove('d-none');
+                this.classList.add('d-none');
+            });
+
+            // Controladores para Selección de Recurso HTML
+            document.getElementById('btn-select-html-resource').addEventListener('click', function() {
+                openHtmlGalleryModal();
+            });
+        });
+
+        function openMediaGalleryModal() {
+            if (!mediaGalleryModal) {
+                mediaGalleryModal = new bootstrap.Modal(document.getElementById('mediaGalleryModal'));
+            }
+            mediaGalleryModal.show();
+            loadMediaFilesInModal();
+        }
+
+        function loadMediaFilesInModal() {
+            var loader = document.getElementById('modal-media-loader');
+            var grid = document.getElementById('modal-media-grid');
+            var empty = document.getElementById('modal-media-empty');
+            
+            loader.classList.remove('d-none');
+            grid.classList.add('d-none');
+            empty.classList.add('d-none');
+            
+            fetch('/admin/media?tipo=IMAGEN')
+                .then(function(response) {
+                    if (!response.ok) throw new Error('Error al cargar medios');
+                    return response.text();
+                })
+                .then(function(html) {
+                    var parser = new DOMParser();
+                    var doc = parser.parseFromString(html, 'text/html');
+                    var imgElements = doc.querySelectorAll('#mediaGrid img');
+                    
+                    grid.innerHTML = '';
+                    
+                    if (imgElements.length === 0) {
+                        empty.classList.remove('d-none');
+                    } else {
+                        imgElements.forEach(function(img) {
+                            var src = img.getAttribute('src');
+                            var col = document.createElement('div');
+                            col.className = 'col-md-4 col-6';
+                            col.innerHTML = `
+                                <div class="card glass-card border border-white border-opacity-10 p-2 h-100 cursor-pointer hover-bg-white-5" onclick="selectImage('${src}')" style="transition: all 0.2s ease;">
+                                    <div class="ratio ratio-4x3 bg-black bg-opacity-40 rounded-3 overflow-hidden d-flex align-items-center justify-content-center border border-white border-opacity-5">
+                                        <img src="${src}" class="img-fluid object-fit-cover w-100 h-100" alt="Medio">
+                                    </div>
+                                    <div class="fs-9 text-muted-custom text-truncate mt-2 text-center" style="max-width: 100%;">${src.substring(src.lastIndexOf('/') + 1)}</div>
+                                </div>
+                            `;
+                            grid.appendChild(col);
+                        });
+                        grid.classList.remove('d-none');
+                    }
+                })
+                .catch(function(err) {
+                    console.error(err);
+                    empty.innerHTML = `<i class="bi bi-exclamation-triangle-fill text-danger fs-1 d-block mb-3"></i><h5 class="text-white fw-bold">Error de carga</h5><p class="text-muted-custom mb-0">${err.message}</p>`;
+                    empty.classList.remove('d-none');
+                })
+                .finally(function() {
+                    loader.classList.add('d-none');
+                });
+        }
+
+        function selectImage(url) {
+            document.getElementById('imagenPortadaUrl').value = url;
+            var previewImg = document.getElementById('thumbnail-preview-img');
+            var previewPlaceholder = document.getElementById('thumbnail-preview-placeholder');
+            var btnClear = document.getElementById('btn-clear-featured-image');
+            
+            previewImg.src = url;
+            previewImg.classList.remove('d-none');
+            previewImg.classList.add('w-100', 'h-100', 'object-fit-cover');
+            previewPlaceholder.classList.add('d-none');
+            btnClear.classList.remove('d-none');
+            
+            mediaGalleryModal.hide();
+        }
+
+        function openHtmlGalleryModal() {
+            if (!htmlGalleryModal) {
+                htmlGalleryModal = new bootstrap.Modal(document.getElementById('htmlGalleryModal'));
+            }
+            htmlGalleryModal.show();
+            loadHtmlFilesInModal();
+        }
+
+        function loadHtmlFilesInModal() {
+            var loader = document.getElementById('modal-html-loader');
+            var grid = document.getElementById('modal-html-grid');
+            var empty = document.getElementById('modal-html-empty');
+            
+            loader.classList.remove('d-none');
+            grid.classList.add('d-none');
+            empty.classList.add('d-none');
+            
+            fetch('/admin/media?categoria=MINIJUEGO&tipo=HTML_INTERACTIVO')
+                .then(function(response) {
+                    if (!response.ok) throw new Error('Error al cargar medios');
+                    return response.text();
+                })
+                .then(function(html) {
+                    var parser = new DOMParser();
+                    var doc = parser.parseFromString(html, 'text/html');
+                    var cards = doc.querySelectorAll('#mediaGrid [data-url]');
+                    
+                    grid.innerHTML = '';
+                    
+                    if (cards.length === 0) {
+                        empty.classList.remove('d-none');
+                    } else {
+                        cards.forEach(function(card) {
+                            var src = card.getAttribute('data-url');
+                            var titleSpan = card.querySelector('span.fs-8');
+                            var title = titleSpan ? titleSpan.textContent : src.substring(src.lastIndexOf('/') + 1);
+                            
+                            var col = document.createElement('div');
+                            col.className = 'col-md-4 col-6';
+                            col.innerHTML = `
+                                <div class="card glass-card border border-white border-opacity-10 p-2 h-100 cursor-pointer hover-bg-white-5" onclick="selectHtml('${src}')" style="transition: all 0.2s ease;">
+                                    <div class="ratio ratio-4x3 bg-black bg-opacity-40 rounded-3 overflow-hidden d-flex align-items-center justify-content-center border border-white border-opacity-5">
+                                        <i class="bi bi-controller fs-2 text-gradient"></i>
+                                    </div>
+                                    <div class="fs-9 text-white text-truncate mt-2 text-center fw-bold" style="max-width: 100%;">${title}</div>
+                                    <div class="fs-9 text-muted-custom text-truncate text-center" style="max-width: 100%;">${src}</div>
+                                </div>
+                            `;
+                            grid.appendChild(col);
+                        });
+                        grid.classList.remove('d-none');
+                    }
+                })
+                .catch(function(err) {
+                    console.error(err);
+                    empty.innerHTML = `<i class="bi bi-exclamation-triangle-fill text-danger fs-1 d-block mb-3"></i><h5 class="text-white fw-bold">Error de carga</h5><p class="text-muted-custom mb-0">${err.message}</p>`;
+                    empty.classList.remove('d-none');
+                })
+                .finally(function() {
+                    loader.classList.add('d-none');
+                });
+        }
+
+        function selectHtml(url) {
+            document.getElementById('htmlUrl').value = url;
+            htmlGalleryModal.hide();
+        }
+    </script>
+</body>
+</html>

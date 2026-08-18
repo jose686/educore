@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <div th:replace="~{layout :: common-head('Redactar Artículo')}"></div>
+    <!-- Quill WYSIWYG Theme CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+    <style>
+        /* Ajustes específicos para el editor Quill en dark-mode */
+        .ql-toolbar {
+            background: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+        .ql-toolbar .ql-stroke {
+            stroke: #cbd5e1 !important;
+        }
+        .ql-toolbar .ql-fill {
+            fill: #cbd5e1 !important;
+        }
+        .ql-toolbar .ql-picker {
+            color: #cbd5e1 !important;
+        }
+        .ql-container {
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            color: #f8fafc !important;
+            background: rgba(255, 255, 255, 0.01);
+            min-height: 250px;
+        }
+        .ql-editor.ql-blank::before {
+            color: #64748b !important;
+            font-style: normal;
+        }
+        .ql-editor img {
+            max-width: 100% !important;
+            height: auto !important;
+            margin: 15px 0 !important;
+            display: block !important;
+        }
+        .hover-bg-white-5:hover {
+            background: rgba(255, 255, 255, 0.05) !important;
+            border-color: rgba(139, 92, 246, 0.4) !important;
+        }
+        .cursor-pointer {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside th:replace="~{layout :: admin-sidebar('blog')}"></aside>
+
+        <!-- Main Area -->
+        <div class="admin-main">
+            <!-- Navbar -->
+            <header th:replace="~{layout :: admin-navbar(${isEdit} ? 'Editar Artículo' : 'Redactar Artículo')}"></header>
+
+            <!-- Content Body -->
+            <main class="admin-content-body">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-xl-10">
+                        
+                        <!-- Back Link -->
+                        <div class="mb-4">
+                            <a th:href="@{/admin/blog/listado}" class="text-secondary text-decoration-none fs-7 hover-white">
+                                <i class="bi bi-arrow-left me-1"></i> Volver al listado
+                            </a>
+                        </div>
+
+                        <!-- Glassmorphic Form Card -->
+                        <div class="card glass-card p-4 p-md-5 border border-white border-opacity-10 shadow-lg">
+                            <h2 class="fw-bold text-white mb-4" th:text="${isEdit} ? 'Modificar Artículo del Blog' : 'Crear Artículo de Blog'">Redactar Artículo de Blog</h2>
+                            
+                            <form th:action="${isEdit} ? @{'/admin/blog/editar/' + ${articulo.id}} : @{/admin/blog/nuevo}" th:object="${articulo}" method="POST" id="articuloForm">
+                                
+                                <!-- Title -->
+                                <div class="mb-4">
+                                    <label for="titulo" class="form-label">Título del Artículo</label>
+                                    <input type="text" id="titulo" th:field="*{titulo}" class="form-control" placeholder="Escribe el título..." required>
+                                </div>
+
+                                <!-- Slug -->
+                                <div class="mb-4">
+                                    <label for="slug" class="form-label">Slug de la URL (Único)</label>
+                                    <input type="text" id="slug" th:field="*{slug}" class="form-control" placeholder="ej: introduccion-apertura-siciliana" required>
+                                    <small class="text-muted-custom fs-9 mt-1 d-block">Identificador único en minúsculas separado por guiones.</small>
+                                </div>
+
+                                <!-- Summary -->
+                                <div class="mb-4">
+                                    <label for="resumenCorto" class="form-label">Resumen Corto (SEO)</label>
+                                    <textarea id="resumenCorto" th:field="*{resumenCorto}" rows="3" class="form-control" placeholder="Introduce un extracto para buscadores (Google)..." required></textarea>
+                                </div>
+
+                                <!-- Imagen Destacada -->
+                                <div class="mb-4">
+                                    <label class="form-label">Imagen Destacada (Thumbnail)</label>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <!-- Preview Thumbnail -->
+                                        <div id="thumbnail-preview-container" class="ratio ratio-16x9 bg-black bg-opacity-40 rounded-3 border border-white border-opacity-10 d-flex align-items-center justify-content-center overflow-hidden" style="width: 160px; height: 90px; min-width: 160px;">
+                                            <img id="thumbnail-preview-img" th:src="*{featuredImageUrl}" th:class="*{featuredImageUrl != null && !featuredImageUrl.isEmpty()} ? 'w-100 h-100 object-fit-cover' : 'd-none'" alt="Vista previa">
+                                            <span id="thumbnail-preview-placeholder" th:class="*{featuredImageUrl != null && !featuredImageUrl.isEmpty()} ? 'd-none text-muted-custom fs-9' : 'text-muted-custom fs-9'"><i class="bi bi-image me-1"></i> Sin imagen</span>
+                                        </div>
+                                        <!-- Button and Clear -->
+                                        <div>
+                                            <button type="button" class="btn btn-outline-light border-white border-opacity-10 btn-sm rounded-pill px-3 py-1.5 fs-8 mb-2" id="btn-select-featured-image">
+                                                <i class="bi bi-images me-1"></i> Seleccionar de Galería
+                                            </button>
+                                            <br>
+                                            <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1.5 fs-8" th:classappend="*{featuredImageUrl != null && !featuredImageUrl.isEmpty()} ? '' : 'd-none'" id="btn-clear-featured-image">
+                                                <i class="bi bi-x-circle me-1"></i> Quitar
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" id="featuredImageUrl" th:field="*{featuredImageUrl}">
+                                </div>
+
+                                <!-- Hidden Author field -->
+                                <input type="hidden" th:field="*{usuarioId}">
+
+                                <!-- Content Area (Quill Rich text WYSIWYG) -->
+                                <div class="mb-4">
+                                    <label class="form-label">Contenido Completo (HTML Enriquecido)</label>
+                                    
+                                    <!-- Editor container -->
+                                    <div id="editor-container"></div>
+                                    
+                                    <!-- Hidden input field to hold HTML payload on submit -->
+                                    <textarea th:field="*{contenido}" id="contenido-hidden" class="d-none"></textarea>
+                                </div>
+
+                                <!-- Submit Button -->
+                                <button type="submit" class="btn btn-gradient w-100 py-3 mt-3" th:text="${isEdit} ? 'Guardar Cambios' : 'Publicar Artículo'">
+                                    Publicar Artículo <i class="bi bi-send-fill ms-2 align-middle fs-7"></i>
+                                </button>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal de Galería de Medios -->
+    <div class="modal fade" id="mediaGalleryModal" tabindex="-1" aria-labelledby="mediaGalleryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content glass-card border border-white border-opacity-10 text-white shadow-lg">
+                <div class="modal-header border-bottom border-white border-opacity-10 py-3">
+                    <h5 class="modal-title fw-bold" id="mediaGalleryModalLabel">Seleccionar de Biblioteca de Medios</h5>
+                    <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body py-4">
+                    <!-- Loader spinner -->
+                    <div id="modal-media-loader" class="text-center py-5">
+                        <div class="spinner-border text-gradient" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                        <p class="text-muted-custom fs-8 mt-2">Cargando archivos de la biblioteca...</p>
+                    </div>
+                    <!-- Container for images -->
+                    <div id="modal-media-grid" class="row row-cols-3 g-3 d-none">
+                        <!-- Images will be populated dynamically -->
+                    </div>
+                    <!-- Empty library warning -->
+                    <div id="modal-media-empty" class="text-center py-5 d-none">
+                        <i class="bi bi-images text-gradient fs-1 d-block mb-3"></i>
+                        <h5 class="text-white fw-bold">Biblioteca Vacía</h5>
+                        <p class="text-muted-custom mb-0">No hay archivos multimedia subidos al servidor.</p>
+                    </div>
+                </div>
+                <div class="modal-footer border-top border-white border-opacity-10 py-3">
+                    <button type="button" class="btn btn-outline-light border-white border-opacity-10 py-1.5 px-3 fs-8 rounded-pill" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <div th:replace="~{layout :: bootstrap-js}"></div>
+
+    <!-- Quill JS Library from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+
+    <!-- Script to manage image selecting and Quill toolbar configuration -->
+    <script>
+        var quill;
+        var mediaGalleryModal = null;
+        var currentSelectionTarget = 'featured'; // 'featured' or 'editor'
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Generación automática de Slug
+            var tituloInput = document.getElementById('titulo');
+            var slugInput = document.getElementById('slug');
+            
+            tituloInput.addEventListener('input', function() {
+                var val = this.value;
+                val = val.toLowerCase();
+                val = val.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                val = val.replace(/[^a-z0-9\s-]/g, '')
+                         .trim()
+                         .replace(/\s+/g, '-')
+                         .replace(/-+/g, '-');
+                slugInput.value = val;
+            });
+
+            // Configurar barra de herramientas extendida
+            var toolbarOptions = [
+                ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
+                ['blockquote', 'code-block'],
+
+                [{ 'header': 1 }, { 'header': 2 }],               // custom button values
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                [{ 'indent': '-1'}, { 'indent': '+1' }],          // indent/outdent
+
+                [{ 'size': ['small', false, 'large', 'huge'] }],  // custom dropdown
+                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+
+                [{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
+                [{ 'align': [] }],
+
+                ['link', 'image', 'video'],                       // link and media
+                ['clean']                                         // remove formatting button
+            ];
+
+            // Inicializar el editor Quill con soporte para herramientas multimedia y de código
+            quill = new Quill('#editor-container', {
+                modules: {
+                    toolbar: toolbarOptions
+                },
+                theme: 'snow',
+                placeholder: 'Redacta aquí el contenido del artículo usando formatos enriquecidos...'
+            });
+
+            // Registrar manejador personalizado para el botón de imagen
+            var toolbar = quill.getModule('toolbar');
+            toolbar.addHandler('image', function() {
+                currentSelectionTarget = 'editor';
+                openMediaGalleryModal();
+            });
+
+            // Precargar contenido si existe (edición)
+            var contenidoHidden = document.getElementById('contenido-hidden');
+            if (contenidoHidden && contenidoHidden.value) {
+                quill.root.innerHTML = contenidoHidden.value;
+            }
+
+            // Al enviar el formulario, volcamos el contenido HTML enriquecido al input oculto de Thymeleaf
+            var form = document.getElementById('articuloForm');
+            form.addEventListener('submit', function (e) {
+                var contenidoHidden = document.getElementById('contenido-hidden');
+                // Capturar el HTML completo generado por Quill
+                contenidoHidden.value = quill.root.innerHTML;
+                
+                // Validación básica de contenido vacío
+                if (quill.getText().trim().length === 0) {
+                    alert('El contenido del artículo no puede estar vacío.');
+                    e.preventDefault();
+                }
+            });
+
+            // Controladores para Selección de Imagen Destacada
+            document.getElementById('btn-select-featured-image').addEventListener('click', function() {
+                currentSelectionTarget = 'featured';
+                openMediaGalleryModal();
+            });
+
+            document.getElementById('btn-clear-featured-image').addEventListener('click', function() {
+                document.getElementById('featuredImageUrl').value = '';
+                var previewImg = document.getElementById('thumbnail-preview-img');
+                var previewPlaceholder = document.getElementById('thumbnail-preview-placeholder');
+                
+                previewImg.src = '';
+                previewImg.classList.add('d-none');
+                previewPlaceholder.classList.remove('d-none');
+                this.classList.add('d-none');
+            });
+        });
+
+        function openMediaGalleryModal() {
+            if (!mediaGalleryModal) {
+                mediaGalleryModal = new bootstrap.Modal(document.getElementById('mediaGalleryModal'));
+            }
+            mediaGalleryModal.show();
+            loadMediaFilesInModal();
+        }
+
+        function loadMediaFilesInModal() {
+            var loader = document.getElementById('modal-media-loader');
+            var grid = document.getElementById('modal-media-grid');
+            var empty = document.getElementById('modal-media-empty');
+            
+            loader.classList.remove('d-none');
+            grid.classList.add('d-none');
+            empty.classList.add('d-none');
+            
+            fetch('/admin/media')
+                .then(function(response) {
+                    if (!response.ok) throw new Error('Error al cargar medios');
+                    return response.text();
+                })
+                .then(function(html) {
+                    var parser = new DOMParser();
+                    var doc = parser.parseFromString(html, 'text/html');
+                    var imgElements = doc.querySelectorAll('#mediaGrid img');
+                    
+                    grid.innerHTML = '';
+                    
+                    if (imgElements.length === 0) {
+                        empty.classList.remove('d-none');
+                    } else {
+                        imgElements.forEach(function(img) {
+                            var src = img.getAttribute('src');
+                            var col = document.createElement('div');
+                            col.className = 'col-md-4 col-6';
+                            col.innerHTML = `
+                                <div class="card glass-card border border-white border-opacity-10 p-2 h-100 cursor-pointer hover-bg-white-5" onclick="selectImage('${src}')" style="transition: all 0.2s ease;">
+                                    <div class="ratio ratio-4x3 bg-black bg-opacity-40 rounded-3 overflow-hidden d-flex align-items-center justify-content-center border border-white border-opacity-5">
+                                        <img src="${src}" class="img-fluid object-fit-cover w-100 h-100" alt="Medio">
+                                    </div>
+                                    <div class="fs-9 text-muted-custom text-truncate mt-2 text-center" style="max-width: 100%;">${src.substring(src.lastIndexOf('/') + 1)}</div>
+                                </div>
+                            `;
+                            grid.appendChild(col);
+                        });
+                        grid.classList.remove('d-none');
+                    }
+                })
+                .catch(function(err) {
+                    console.error(err);
+                    empty.innerHTML = `<i class="bi bi-exclamation-triangle-fill text-danger fs-1 d-block mb-3"></i><h5 class="text-white fw-bold">Error de carga</h5><p class="text-muted-custom mb-0">${err.message}</p>`;
+                    empty.classList.remove('d-none');
+                })
+                .finally(function() {
+                    loader.classList.add('d-none');
+                });
+        }
+
+        function selectImage(url) {
+            if (currentSelectionTarget === 'featured') {
+                document.getElementById('featuredImageUrl').value = url;
+                var previewImg = document.getElementById('thumbnail-preview-img');
+                var previewPlaceholder = document.getElementById('thumbnail-preview-placeholder');
+                var btnClear = document.getElementById('btn-clear-featured-image');
+                
+                previewImg.src = url;
+                previewImg.classList.remove('d-none');
+                previewImg.classList.add('w-100', 'h-100', 'object-fit-cover');
+                previewPlaceholder.classList.add('d-none');
+                btnClear.classList.remove('d-none');
+            } else if (currentSelectionTarget === 'editor') {
+                var range = quill.getSelection();
+                var index = range ? range.index : 0;
+                quill.insertEmbed(index, 'image', url);
+                // Insert paragraph break directly after image and set cursor position
+                quill.insertText(index + 1, '\n');
+                quill.setSelection(index + 2);
+            }
+            mediaGalleryModal.hide();
+        }
+    </script>
+</body>
+</html>

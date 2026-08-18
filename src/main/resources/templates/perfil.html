@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout :: common-head('Mi Perfil')}"></head>
+<body>
+    <!-- Navbar -->
+    <header th:replace="~{layout :: navbar}"></header>
+
+    <!-- Main Content Container -->
+    <main class="container my-5 flex-grow-1 d-flex align-items-center justify-content-center">
+        <div class="row w-100 justify-content-center">
+            <div class="col-lg-8 col-md-10">
+                
+                <!-- Welcome & Intro -->
+                <div class="mb-4 text-center text-md-start">
+                    <span class="text-gradient fw-bold text-uppercase fs-7 mb-2 d-inline-block">Configuración</span>
+                    <h1 class="fw-bold text-white mb-2">Mi Perfil</h1>
+                    <p class="text-muted-custom fs-6">Administra tus datos personales y canjea tokens de acceso.</p>
+                </div>
+
+                <div class="row g-4">
+                    
+                    <!-- Profile Info Card -->
+                    <div class="col-md-6">
+                        <div class="card glass-card h-100 p-4 border border-white border-opacity-10 d-flex flex-column justify-content-between">
+                            <div>
+                                <div class="d-flex align-items-center gap-3 mb-4">
+                                    <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-circle border border-primary border-opacity-10">
+                                        <i class="bi bi-person-bounding-box fs-2 text-gradient"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-white fw-bold mb-0" th:text="${usuario.nombre}">Nombre de Usuario</h4>
+                                        <span class="badge bg-secondary bg-opacity-15 text-white border border-white border-opacity-10 fs-9 mt-1 px-2.5 py-1 rounded-pill" th:text="${usuario.role}">ROL</span>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3 pt-3 border-top border-white border-opacity-5">
+                                    <span class="fs-8 text-secondary uppercase d-block">Correo Electrónico</span>
+                                    <span class="text-white fw-semibold fs-7" th:text="${usuario.email}">email@educore.com</span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <span class="fs-8 text-secondary uppercase d-block">Estado de Cuenta</span>
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-20 fs-9 px-2.5 py-1 rounded-pill mt-1">
+                                        <i class="bi bi-check-circle-fill me-1"></i> Activa
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <p class="text-secondary fs-8 mb-0 mt-4 border-top border-white border-opacity-5 pt-3">
+                                <i class="bi bi-shield-lock me-1"></i> Los datos de tu sesión están protegidos de acuerdo a las directivas de seguridad Spring Security 6.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Token Redemption Card -->
+                    <div class="col-md-6">
+                        <div class="card glass-card h-100 p-4 border border-white border-opacity-10 d-flex flex-column justify-content-between">
+                            <div>
+                                <h4 class="text-white fw-bold mb-2">Canjear Token</h4>
+                                <p class="text-muted-custom fs-8 mb-4">Introduce un Token de Invitado para desbloquear accesos gratuitos a cursos de ajedrez y desarrollo de forma inmediata.</p>
+
+                                <form th:action="@{/perfil/canjear-token}" method="POST">
+                                    <div class="mb-3">
+                                        <label class="form-label mb-2 text-muted-custom">Código del Token</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-white bg-opacity-5 border border-white border-opacity-10 text-muted-custom"><i class="bi bi-key-fill"></i></span>
+                                            <input type="text" name="token" class="form-control text-uppercase" placeholder="INV-XXXXXXXX" required style="text-transform: uppercase;">
+                                        </div>
+                                    </div>
+
+                                    <!-- Success/Error Messages -->
+                                    <div th:if="${param.token_exito}" class="alert alert-success border-0 bg-success bg-opacity-10 text-success rounded-3 py-2.5 px-3 mt-3 fs-8">
+                                        <i class="bi bi-check-circle-fill me-1"></i><span th:text="${param.token_exito}"></span>
+                                    </div>
+                                    <div th:if="${param.token_error}" class="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger rounded-3 py-2.5 px-3 mt-3 fs-8">
+                                        <i class="bi bi-exclamation-circle-fill me-1"></i><span th:text="${param.token_error}"></span>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-gradient w-100 py-2.5 mt-4 fs-7">
+                                        <i class="bi bi-key me-1"></i> Canjear Invitación
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Purchase History Card -->
+                    <div class="col-12">
+                        <a href="/perfil/compras" class="text-decoration-none">
+                            <div class="card glass-card p-4 border border-white border-opacity-10 d-flex flex-row align-items-center gap-4"
+                                 style="transition: border-color 0.2s ease, transform 0.2s ease;"
+                                 onmouseover="this.style.borderColor='rgba(99,102,241,0.4)'; this.style.transform='translateY(-2px)'"
+                                 onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.transform='translateY(0)'">
+                                <div class="bg-indigo bg-opacity-10 p-3 rounded-3 border border-indigo border-opacity-15 flex-shrink-0">
+                                    <i class="bi bi-receipt-cutoff fs-3 text-gradient"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h5 class="text-white fw-bold mb-1">Historial de Compras</h5>
+                                    <p class="text-muted-custom fs-8 mb-0">Consulta tus transacciones, pedidos completados y reembolsos.</p>
+                                </div>
+                                <i class="bi bi-chevron-right text-secondary fs-5 flex-shrink-0"></i>
+                            </div>
+                        </a>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer th:replace="~{layout :: footer}"></footer>
+
+    <!-- Bootstrap JS -->
+    <div th:replace="~{layout :: bootstrap-js}"></div>
+</body>
+</html>

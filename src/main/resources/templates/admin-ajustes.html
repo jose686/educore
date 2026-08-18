@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: common-head('Ajustes Fiscales - Administrador')}"></head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside th:replace="~{layout :: admin-sidebar('ajustes')}"></aside>
+
+        <!-- Main Area -->
+        <div class="admin-main">
+            <!-- Navbar -->
+            <header th:replace="~{layout :: admin-navbar('Datos Fiscales y Facturación')}"></header>
+
+            <!-- Content Body -->
+            <main class="admin-content-body">
+                
+                <!-- Welcome section -->
+                <div class="row mb-5 text-center text-md-start align-items-center">
+                    <div class="col-md-12">
+                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-20 px-3 py-1.5 fs-8 rounded-pill mb-2">
+                            <i class="bi bi-shield-lock-fill me-1"></i> Configuración Global
+                        </span>
+                        <h2 class="fw-bold text-white mb-2">Datos Fiscales de Facturación</h2>
+                        <p class="text-muted-custom fs-6 mb-0">Define los datos comerciales que se renderizarán dinámicamente en las facturas y tickets emitidos a los alumnos.</p>
+                    </div>
+                </div>
+
+                <!-- Form Card -->
+                <div class="card glass-card border border-white border-opacity-10 rounded-4 p-4 p-md-5" style="max-width: 800px;">
+                    
+                    <!-- Alert Message -->
+                    <div th:if="${exito}" class="alert alert-success bg-success bg-opacity-10 text-success border border-success border-opacity-20 rounded-3 mb-4 fs-7 py-3 px-4">
+                        <i class="bi bi-check-circle-fill me-2 fs-6 align-middle"></i>
+                        <span th:text="${exito}" class="align-middle">Operación exitosa.</span>
+                    </div>
+
+                    <!-- Form -->
+                    <form th:action="@{/admin/ajustes}" th:object="${config}" method="POST" class="needs-validation" novalidate>
+                        <!-- Hidden ID to update correct row -->
+                        <input type="hidden" th:field="*{id}" />
+
+                        <!-- Row 1: Razon Social & NIF -->
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-8">
+                                <label for="razonSocial" class="form-label text-secondary fw-semibold fs-8 mb-2">Razón Social</label>
+                                <input type="text" id="razonSocial" th:field="*{razonSocial}" class="form-control bg-dark bg-opacity-50 text-white border-white border-opacity-10 py-2.5 px-3 fs-7" required style="color: #ffffff;" />
+                                <div class="invalid-feedback">Por favor, introduce la razón social.</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="cifNif" class="form-label text-secondary fw-semibold fs-8 mb-2">NIF / CIF</label>
+                                <input type="text" id="cifNif" th:field="*{cifNif}" class="form-control bg-dark bg-opacity-50 text-white border-white border-opacity-10 py-2.5 px-3 fs-7" required style="color: #ffffff;" />
+                                <div class="invalid-feedback">Introduce un NIF/CIF válido.</div>
+                            </div>
+                        </div>
+
+                        <!-- Row 2: Direccion Fiscal -->
+                        <div class="mb-4">
+                            <label for="direccionFiscal" class="form-label text-secondary fw-semibold fs-8 mb-2">Dirección Fiscal</label>
+                            <textarea id="direccionFiscal" th:field="*{direccionFiscal}" rows="3" class="form-control bg-dark bg-opacity-50 text-white border-white border-opacity-10 py-2.5 px-3 fs-7" required style="color: #ffffff;"></textarea>
+                            <div class="invalid-feedback">Introduce la dirección fiscal completa.</div>
+                        </div>
+
+                        <!-- Row 3: Email & Telefono -->
+                        <div class="row g-4 mb-5">
+                            <div class="col-md-6">
+                                <label for="emailContacto" class="form-label text-secondary fw-semibold fs-8 mb-2">Email de Contacto</label>
+                                <input type="email" id="emailContacto" th:field="*{emailContacto}" class="form-control bg-dark bg-opacity-50 text-white border-white border-opacity-10 py-2.5 px-3 fs-7" required style="color: #ffffff;" />
+                                <div class="invalid-feedback">Introduce una dirección de email válida.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="telefono" class="form-label text-secondary fw-semibold fs-8 mb-2">Teléfono de Soporte</label>
+                                <input type="text" id="telefono" th:field="*{telefono}" class="form-control bg-dark bg-opacity-50 text-white border-white border-opacity-10 py-2.5 px-3 fs-7" required style="color: #ffffff;" />
+                                <div class="invalid-feedback">Introduce un número de teléfono.</div>
+                            </div>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-flex gap-3 justify-content-end pt-3 border-top border-white border-opacity-5">
+                            <a th:href="@{/admin}" class="btn btn-outline-light border-white border-opacity-10 py-2.5 px-4 fs-8 rounded-pill text-muted-custom">
+                                Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-gradient py-2.5 px-5 fs-8 rounded-pill">
+                                <i class="bi bi-floppy me-1"></i> Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS validation script -->
+    <script>
+        (function () {
+            'use strict'
+            var forms = document.querySelectorAll('.needs-validation')
+            Array.prototype.slice.call(forms)
+                .forEach(function (forms) {
+                    forms.addEventListener('submit', function (event) {
+                        if (!forms.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+                        forms.classList.add('was-validated')
+                    }, false)
+                })
+        })()
+    </script>
+
+    <!-- Bootstrap JS -->
+    <div th:replace="~{layout :: bootstrap-js}"></div>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: common-head('Soporte y Contacto')}"></head>
+<body>
+    <!-- Navbar -->
+    <header th:replace="~{layout :: navbar}"></header>
+
+    <main class="container my-5 flex-grow-1">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10">
+                
+                <div class="mb-5 text-center">
+                    <span class="text-gradient fw-bold text-uppercase fs-7 mb-2 d-inline-block">Centro de Ayuda</span>
+                    <h1 class="fw-bold text-white mb-2">Contacto y Soporte Técnico</h1>
+                    <p class="text-muted-custom fs-6">Resuelve tus dudas rápidamente o envíanos un mensaje.</p>
+                </div>
+
+                <!-- 1. Sección de Preguntas Frecuentes (FAQs) antes del formulario -->
+                <div class="mb-5">
+                    <h3 class="fw-bold text-white mb-4"><i class="bi bi-question-circle text-gradient me-2"></i>Preguntas Frecuentes</h3>
+                    
+                    <div class="accordion accordion-custom" id="faqAccordion">
+                        
+                        <div class="accordion-item glass-card mb-3 border border-white border-opacity-10 rounded-4 overflow-hidden text-white" style="background: rgba(255, 255, 255, 0.03);">
+                            <h2 class="accordion-header" id="faqHeadingOne">
+                                <button class="accordion-button collapsed bg-transparent text-white fw-semibold py-3 px-4 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapseOne" aria-expanded="false" aria-controls="faqCollapseOne">
+                                    ¿Cómo accedo a mis cursos tras completar el pago?
+                                </button>
+                            </h2>
+                            <div id="faqCollapseOne" class="accordion-collapse collapse" aria-labelledby="faqHeadingOne" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-white text-opacity-75 px-4 pb-4">
+                                    El acceso al Aula Virtual se habilita de forma completamente automática e instantánea una vez procesado el pago. Encontrarás todos tus cursos matriculados en la pestaña "Mi Aula Virtual" en la barra de navegación superior.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item glass-card mb-3 border border-white border-opacity-10 rounded-4 overflow-hidden text-white" style="background: rgba(255, 255, 255, 0.03);">
+                            <h2 class="accordion-header" id="faqHeadingTwo">
+                                <button class="accordion-button collapsed bg-transparent text-white fw-semibold py-3 px-4 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapseTwo" aria-expanded="false" aria-controls="faqCollapseTwo">
+                                    ¿Cuál es la política de reembolsos?
+                                </button>
+                            </h2>
+                            <div id="faqCollapseTwo" class="accordion-collapse collapse" aria-labelledby="faqHeadingTwo" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-white text-opacity-75 px-4 pb-4">
+                                    Ofrecemos reembolso completo para compras de cursos individuales dentro de los primeros 14 días posteriores a la transacción, siempre y cuando no se haya visualizado más del 20% del contenido de las lecciones.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item glass-card mb-3 border border-white border-opacity-10 rounded-4 overflow-hidden text-white" style="background: rgba(255, 255, 255, 0.03);">
+                            <h2 class="accordion-header" id="faqHeadingThree">
+                                <button class="accordion-button collapsed bg-transparent text-white fw-semibold py-3 px-4 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapseThree" aria-expanded="false" aria-controls="faqCollapseThree">
+                                    ¿Qué hago si tengo un fallo técnico en un minijuego interactivo?
+                                </button>
+                            </h2>
+                            <div id="faqCollapseThree" class="accordion-collapse collapse" aria-labelledby="faqHeadingThree" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-white text-opacity-75 px-4 pb-4">
+                                    Te recomendamos borrar la caché de tu navegador y volver a iniciar sesión. Si el problema persiste, rellena el formulario de abajo indicando el motivo "Fallo Técnico" y adjunta detalles del error.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item glass-card mb-3 border border-white border-opacity-10 rounded-4 overflow-hidden text-white" style="background: rgba(255, 255, 255, 0.03);">
+                            <h2 class="accordion-header" id="faqHeadingFour">
+                                <button class="accordion-button collapsed bg-transparent text-white fw-semibold py-3 px-4 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapseFour" aria-expanded="false" aria-controls="faqCollapseFour">
+                                    ¿Los cupones de descuento son acumulables?
+                                </button>
+                            </h2>
+                            <div id="faqCollapseFour" class="accordion-collapse collapse" aria-labelledby="faqHeadingFour" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-white text-opacity-75 px-4 pb-4">
+                                    No, solo se permite aplicar un único cupón de descuento por compra en la cesta. Puedes canjear tu código de cupón preferido directamente durante el proceso de checkout.
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <hr class="border-white border-opacity-10 my-5">
+
+                <!-- Alert successMsg -->
+                <div th:if="${successMsg}" class="alert border-0 bg-success bg-opacity-10 text-success rounded-4 py-3 px-4 mb-4" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i><span th:text="${successMsg}"></span>
+                </div>
+
+                <!-- Alert pedidoId -->
+                <div th:if="${pedidoId}" class="alert border-0 bg-warning bg-opacity-10 text-warning rounded-4 py-3 px-4 mb-4 d-flex align-items-center gap-2" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                    <span>La consulta actual está asociada al <strong>Pedido #<span th:text="${pedidoId}"></span></strong>.</span>
+                </div>
+
+                <h3 class="fw-bold text-white mb-4"><i class="bi bi-envelope-paper text-gradient me-2"></i>Formulario de Consulta</h3>
+
+                <!-- Formulario de Contacto -->
+                <div class="card glass-card p-4 border border-white border-opacity-10 rounded-4" style="background: rgba(255, 255, 255, 0.02);">
+                    <form th:action="@{/contacto}" method="POST">
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-white text-opacity-75 fs-7">Nombre Completo</label>
+                                <input type="text" name="nombre" class="form-control text-white rounded-3 py-2 shadow-none" style="background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1);" th:value="${nombreUsuario}" placeholder="Tu nombre completo" required>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-white text-opacity-75 fs-7">Correo Electrónico</label>
+                                <input type="email" name="email" class="form-control text-white rounded-3 py-2 shadow-none" style="background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1);" th:value="${emailUsuario}" placeholder="correo@ejemplo.com" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-white text-opacity-75 fs-7">Motivo de la Consulta</label>
+                                <select name="motivo" class="form-select text-white rounded-3 py-2 shadow-none" style="background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1);" required id="motivoSelector">
+                                    <option value="" disabled th:selected="${pedidoId == null}">Selecciona un motivo</option>
+                                    <option value="Fallo Técnico">Fallo Técnico</option>
+                                    <option value="Pagos/Reembolsos" th:selected="${pedidoId != null}">Pagos/Reembolsos</option>
+                                    <option value="Dudas de Cursos">Dudas de Cursos</option>
+                                    <option value="Sugerencias">Sugerencias</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-3" id="pedidoIdWrapper" th:style="${pedidoId != null} ? 'display: block' : 'display: none'">
+                                <label class="form-label text-white text-opacity-75 fs-7">ID del Pedido Asociado</label>
+                                <input type="number" name="pedidoId" class="form-control text-white rounded-3 py-2 shadow-none" style="background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1);" th:value="${pedidoId}" placeholder="Ej. 12345">
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label text-white text-opacity-75 fs-7">Mensaje o Detalles del Problema</label>
+                            <textarea name="mensaje" class="form-control text-white rounded-3 shadow-none" style="background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1);" rows="5" placeholder="Explica detalladamente tu consulta..." required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-gradient w-100 py-3 fs-6 rounded-3 fw-semibold">
+                            <i class="bi bi-send me-1"></i> Enviar Mensaje de Soporte
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer th:replace="~{layout :: footer}"></footer>
+
+    <!-- Bootstrap JS -->
+    <div th:replace="~{layout :: bootstrap-js}"></div>
+    
+    <script>
+        const motivoSelector = document.getElementById('motivoSelector');
+        const pedidoIdWrapper = document.getElementById('pedidoIdWrapper');
+        
+        motivoSelector.addEventListener('change', function() {
+            if (this.value === 'Pagos/Reembolsos') {
+                pedidoIdWrapper.style.display = 'block';
+            } else {
+                pedidoIdWrapper.style.display = 'none';
+            }
+        });
+        
+        // Initial setup
+        if (motivoSelector.value === 'Pagos/Reembolsos' || document.querySelector('input[name="pedidoId"]').value) {
+            pedidoIdWrapper.style.display = 'block';
+            if (!motivoSelector.value) {
+                motivoSelector.value = 'Pagos/Reembolsos';
+            }
+        }
+    </script>
+</body>
+</html>

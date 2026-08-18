@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: common-head('Listado de Cursos')}"></head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside th:replace="~{layout :: admin-sidebar('cursos')}"></aside>
+
+        <!-- Main Area -->
+        <div class="admin-main">
+            <!-- Navbar -->
+            <header th:replace="~{layout :: admin-navbar('Catálogo de Cursos')}"></header>
+
+            <!-- Content Body -->
+            <main class="admin-content-body">
+                
+                <!-- Header Actions -->
+                <div class="row mb-4 align-items-center">
+                    <div class="col-md-8">
+                        <h2 class="fw-bold text-white mb-2">Ofertas en Catálogo</h2>
+                        <p class="text-muted-custom fs-5 mb-0">Listado de ofertas comerciales registradas en el e-commerce y asignación de temarios en el LMS.</p>
+                    </div>
+                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                        <a th:href="@{/admin/cursos/nuevo}" class="btn btn-gradient py-2.5 px-4 fs-8 fw-semibold rounded-pill">
+                            Vender Nuevo Curso <i class="bi bi-plus-lg ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Success notification -->
+                <div th:if="${param.success}" class="alert alert-success border-0 bg-success bg-opacity-10 text-success rounded-4 py-3 px-4 mb-4" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                        <span th:if="${param.success[0] == 'create'}">¡Curso catalogado comercialmente correctamente!</span>
+                        <span th:if="${param.success[0] == 'update'}">¡Información comercial del curso actualizada con éxito!</span>
+                        <span th:if="${param.success[0] == 'delete'}">¡Curso retirado del catálogo comercial!</span>
+                    </div>
+                </div>
+
+                <!-- Courses Table Card -->
+                <div class="card glass-card border border-white border-opacity-10 rounded-4 overflow-hidden shadow-lg">
+                    
+                    <!-- Table Container -->
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead class="bg-black bg-opacity-40 text-secondary fs-8 border-bottom border-white border-opacity-10">
+                                <tr>
+                                    <th class="ps-4 py-3">Título Comercial</th>
+                                    <th class="py-3">LMS ID</th>
+                                    <th class="py-3">Precio</th>
+                                    <th class="py-3">Estado</th>
+                                    <th class="py-3 text-end pe-4">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="fs-7 border-0">
+                                
+                                <!-- Loop courses -->
+                                <tr class="border-bottom border-white border-opacity-5" th:each="curso : ${cursos}">
+                                    <td class="ps-4 py-3 fw-semibold text-white">
+                                        <span th:text="${curso.titulo}">Título del Curso</span>
+                                    </td>
+                                    <td class="text-muted-custom py-3">
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-white border-opacity-10" th:text="${curso.lmsCursoId}">1</span>
+                                    </td>
+                                    <td class="text-white fw-bold py-3" th:text="${curso.precio} + ' €'">29.99 €</td>
+                                    <td class="py-3">
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-10 fs-9 rounded-pill" th:text="${curso.estado}">PUBLISHED</span>
+                                    </td>
+                                    <td class="text-end pe-4 py-3">
+                                        <div class="d-inline-flex gap-2">
+                                            <!-- Manage Syllabus (LMS Temario) -->
+                                            <a th:href="@{'/admin/lms/cursos/' + ${curso.lmsCursoId} + '/temario'}" class="btn btn-gradient btn-sm rounded-pill py-1 px-3 fs-8">
+                                                <i class="bi bi-diagram-3 me-1"></i> Temario
+                                            </a>
+                                            <!-- Edit Link -->
+                                            <a th:href="@{'/admin/cursos/editar/' + ${curso.id}}" class="btn btn-outline-light border-white border-opacity-10 btn-sm rounded-pill py-1 px-3 fs-8">
+                                                <i class="bi bi-pencil-square me-1"></i> Editar
+                                            </a>
+                                            <!-- Delete Form -->
+                                            <form th:action="@{'/admin/cursos/eliminar/' + ${curso.id}}" method="POST" class="d-inline" onsubmit="return confirm('¿Seguro que deseas retirar este curso del catálogo comercial?');">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill py-1 px-3 fs-8">
+                                                    <i class="bi bi-trash me-1"></i> Retirar
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- Empty State -->
+                                <tr th:if="${#lists.isEmpty(cursos)}">
+                                    <td colspan="5" class="text-center py-5 text-secondary">
+                                        <i class="bi bi-tags-fill fs-1 d-block mb-3 opacity-50"></i>
+                                        <span class="fs-7">No se han registrado ofertas comerciales de cursos.</span>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <div th:replace="~{layout :: bootstrap-js}"></div>
+</body>
+</html>

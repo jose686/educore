@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: common-head('Biblioteca de Interactivos')}"></head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside th:replace="~{layout :: admin-sidebar('biblioteca')}"></aside>
+
+        <!-- Main Area -->
+        <div class="admin-main">
+            <!-- Navbar -->
+            <header th:replace="~{layout :: admin-navbar('Biblioteca de Interactivos')}"></header>
+
+            <!-- Content Body -->
+            <main class="admin-content-body">
+                
+                <!-- Header Actions -->
+                <div class="row mb-4 align-items-center">
+                    <div class="col-md-8">
+                        <h2 class="fw-bold text-white mb-2">Biblioteca de Recursos Interactivos HTML5</h2>
+                        <p class="text-muted-custom fs-5 mb-0">Administra los módulos interactivos HTML5/iframe que pueden ser vinculados a las lecciones del Aula Virtual o publicados en la Zona de Minijuegos.</p>
+                    </div>
+                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                        <a th:href="@{/admin/biblioteca-interactivos/nuevo}" class="btn btn-gradient py-2.5 px-4 fs-8 fw-semibold rounded-pill">
+                            Nuevo Recurso <i class="bi bi-plus-lg ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Success notification -->
+                <div th:if="${param.success}" class="alert alert-success border-0 bg-success bg-opacity-10 text-success rounded-4 py-3 px-4 mb-4" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                        <span th:if="${param.success[0] == 'create'}">¡Recurso interactivo registrado correctamente!</span>
+                        <span th:if="${param.success[0] == 'update'}">¡Recurso interactivo actualizado con éxito!</span>
+                        <span th:if="${param.success[0] == 'delete'}">¡Recurso interactivo eliminado de la biblioteca!</span>
+                        <span th:if="${param.success[0] == 'toggle'}">¡Estado de activación del recurso interactivo modificado!</span>
+                    </div>
+                </div>
+
+                <!-- Filters & Search Form -->
+                <div class="card glass-card border border-white border-opacity-10 rounded-4 p-4 mb-4 shadow-sm">
+                    <form th:action="@{/admin/biblioteca-interactivos}" method="GET" class="row g-3 align-items-end">
+                        <!-- Search Bar -->
+                        <div class="col-12 col-md-4">
+                            <label for="search" class="form-label text-muted-custom fs-8 fw-semibold">Buscador</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0 border-white border-opacity-10 text-secondary"><i class="bi bi-search"></i></span>
+                                <input type="text" id="search" name="search" th:value="${currentSearch}" class="form-control border-start-0" placeholder="Buscar por identificador o título...">
+                            </div>
+                        </div>
+
+
+
+                        <!-- Etiquetas Filter -->
+                        <div class="col-12 col-sm-6 col-md-3">
+                            <label for="etiqueta" class="form-label text-muted-custom fs-8 fw-semibold">Etiqueta/Tag</label>
+                            <select id="etiqueta" name="etiqueta" class="form-select">
+                                <option value="">Todas las Etiquetas</option>
+                                <option th:each="tag : ${etiquetas}" 
+                                        th:value="${tag}" 
+                                        th:text="${tag}"
+                                        th:selected="${tag == currentEtiqueta}">Etiqueta</option>
+                            </select>
+                        </div>
+
+                        <!-- Submit and Clear buttons -->
+                        <div class="col-12 col-md-2 d-flex gap-2">
+                            <button type="submit" class="btn btn-gradient py-2 w-100 fs-8">Filtrar</button>
+                            <a th:href="@{/admin/biblioteca-interactivos}" class="btn btn-outline-light border-white border-opacity-10 py-2 w-100 fs-8">Limpiar</a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Resources Table Card -->
+                <div class="card glass-card border border-white border-opacity-10 rounded-4 overflow-hidden shadow-lg">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead class="bg-black bg-opacity-40 text-secondary fs-8 border-bottom border-white border-opacity-10">
+                                <tr>
+                                    <th class="ps-4 py-3" style="width: 80px;">Portada</th>
+                                    <th class="py-3">Identificador</th>
+                                    <th class="py-3">Título</th>
+                                    <th class="py-3">Etiquetas</th>
+                                    <th class="py-3">Precio</th>
+                                    <th class="py-3">Estado</th>
+                                    <th class="py-3 text-end pe-4">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="fs-7 border-0">
+                                
+                                <!-- Loop resources -->
+                                <tr class="border-bottom border-white border-opacity-5" th:each="recurso : ${recursos}">
+                                    <td class="ps-4 py-3">
+                                        <div class="ratio ratio-16x9 bg-black bg-opacity-40 rounded border border-white border-opacity-10 overflow-hidden" style="width: 70px; height: 40px;">
+                                            <img th:if="${recurso.imagenPortadaUrl}" th:src="${recurso.imagenPortadaUrl}" class="object-fit-cover w-100 h-100" alt="Portada">
+                                            <div th:unless="${recurso.imagenPortadaUrl}" class="d-flex align-items-center justify-content-center h-100 w-100 text-muted-custom fs-9">
+                                                <i class="bi bi-controller"></i>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3 fw-bold text-white">
+                                        <code class="text-purple-custom" th:text="${recurso.identificador}">HTML-TEST-TEMA1</code>
+                                    </td>
+                                    <td class="py-3 fw-semibold text-white">
+                                        <span th:text="${recurso.titulo}">Título</span>
+                                        <small class="text-muted-custom d-block fs-9 text-truncate" style="max-width: 200px;" th:text="${recurso.descripcion}">Descripción</small>
+                                    </td>
+                                    <td class="py-3">
+                                        <span th:each="tag : ${recurso.etiquetas}" class="badge bg-secondary bg-opacity-20 text-white border border-white border-opacity-10 me-1 fs-9 py-1" th:text="${tag}">Etiqueta</span>
+                                        <span th:if="${#lists.isEmpty(recurso.etiquetas)}" class="text-muted-custom fs-9">-</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <span th:if="${recurso.esGratis}" class="text-success fw-bold">Gratis</span>
+                                        <span th:unless="${recurso.esGratis}" class="text-white fw-bold" th:text="${recurso.costeCreditos} + ' 🪙'">20 🪙</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <span th:if="${recurso.activo}" class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-10 fs-9 rounded-pill">Activo</span>
+                                        <span th:unless="${recurso.activo}" class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-10 fs-9 rounded-pill">Inactivo</span>
+                                    </td>
+                                    <td class="text-end pe-4 py-3">
+                                        <div class="d-inline-flex gap-2">
+                                            <!-- Toggle status Form -->
+                                            <form th:action="@{'/admin/biblioteca-interactivos/toggle/' + ${recurso.id}}" method="POST" class="d-inline">
+                                                <button type="submit" class="btn btn-outline-light border-white border-opacity-10 btn-sm rounded-pill py-1 px-2.5 fs-8">
+                                                    <i class="bi" th:classappend="${recurso.activo} ? 'bi-eye-slash-fill text-warning' : 'bi-eye-fill text-success'"></i>
+                                                    <span th:text="${recurso.activo} ? 'Desactivar' : 'Activar'">Activar</span>
+                                                </button>
+                                            </form>
+                                            <!-- Edit Link -->
+                                            <a th:href="@{'/admin/biblioteca-interactivos/editar/' + ${recurso.id}}" class="btn btn-outline-light border-white border-opacity-10 btn-sm rounded-pill py-1 px-3 fs-8">
+                                                <i class="bi bi-pencil-square me-1"></i> Editar
+                                            </a>
+                                            <!-- Delete Form -->
+                                            <form th:action="@{'/admin/biblioteca-interactivos/eliminar/' + ${recurso.id}}" method="POST" class="d-inline" onsubmit="return confirm('¿Seguro que deseas eliminar definitivamente este recurso de la biblioteca?');">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill py-1 px-3 fs-8">
+                                                    <i class="bi bi-trash me-1"></i> Eliminar
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- Empty State -->
+                                <tr th:if="${#lists.isEmpty(recursos)}">
+                                    <td colspan="8" class="text-center py-5 text-secondary">
+                                        <i class="bi bi-folder-x fs-1 d-block mb-3 opacity-50"></i>
+                                        <span class="fs-7">No se han encontrado recursos interactivos en la biblioteca.</span>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <div th:replace="~{layout :: bootstrap-js}"></div>
+</body>
+</html>

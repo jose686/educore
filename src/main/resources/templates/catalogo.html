@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout :: common-head('Catálogo de Cursos')}"></head>
+<body>
+    <!-- Navbar -->
+    <header th:replace="~{layout :: navbar}"></header>
+
+    <!-- Main Content Container -->
+    <main class="container my-5 flex-grow-1">
+        
+        <!-- Welcome section -->
+        <div class="row mb-5 text-center text-md-start align-items-center">
+            <div class="col-md-8">
+                <h1 class="fw-bold text-white mb-2">Aprende sin límites</h1>
+                <p class="text-muted-custom fs-5 mb-0">Explora nuestro catálogo de cursos profesionales de ajedrez y programación.</p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0" sec:authorize="isAuthenticated()">
+                <span class="badge bg-secondary bg-opacity-10 text-gradient border border-white border-opacity-10 py-2 px-3 fs-6 rounded-pill">
+                    <i class="bi bi-person-check-fill me-1"></i> Sesión iniciada como <span class="fw-bold" sec:authentication="name">usuario</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Success add-to-cart alert -->
+        <div th:if="${param.agregado_exito}" class="alert alert-success border-0 bg-success bg-opacity-10 text-success rounded-4 py-3 px-4 mb-4 shadow" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-cart-check-fill me-2 fs-4 text-success"></i>
+                <div class="fs-7">
+                    ¡Producto añadido al carrito con éxito! Puedes verlo y gestionarlo en tu <a th:href="@{/carrito}" class="alert-link text-success text-decoration-underline fw-bold">Carrito de Compras</a>.
+                </div>
+            </div>
+        </div>
+
+        <!-- Success purchase alert -->
+        <div th:if="${param.compra_exitosa}" class="alert alert-success border-0 bg-success bg-opacity-10 text-success rounded-4 py-4 px-4 mb-5 shadow-lg" role="alert">
+            <div class="d-flex align-items-start">
+                <i class="bi bi-patch-check-fill me-3 fs-3 text-success"></i>
+                <div>
+                    <h5 class="alert-heading fw-bold mb-1">¡Compra Simbólica Exitosa!</h5>
+                    <p class="mb-0">Se ha emitido el evento <code class="text-success fw-bold">CursoCompradoEvent</code> de forma asíncrona. Los módulos correspondientes registrarán tu acceso al aula virtual.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Catalog Grid -->
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            
+            <!-- Loop through products -->
+            <div class="col" th:each="producto : ${productos}">
+                <div class="card h-100 glass-card overflow-hidden d-flex flex-column border border-white border-opacity-10">
+                    
+                    <!-- Cover image or placeholder -->
+                    <div class="ratio ratio-16x9 bg-dark bg-opacity-50 border-bottom border-white border-opacity-10 d-flex align-items-center justify-content-center">
+                        <img th:if="${producto.imagenPortadaUrl != null && !producto.imagenPortadaUrl.isEmpty()}" 
+                             th:src="${producto.imagenPortadaUrl}" 
+                             class="img-fluid object-fit-cover" 
+                             th:alt="${producto.titulo}">
+                        <div th:unless="${producto.imagenPortadaUrl != null && !producto.imagenPortadaUrl.isEmpty()}" 
+                             class="d-flex flex-column align-items-center justify-content-center text-secondary h-100">
+                            <i class="bi bi-journal-code fs-1 text-gradient"></i>
+                            <span class="fs-7 mt-2">EduCore Premium</span>
+                        </div>
+                    </div>
+
+                    <!-- Card Body -->
+                    <div class="card-body p-4 d-flex flex-column">
+                        <h4 class="card-title text-white fw-bold mb-2" th:text="${producto.titulo}">Título del Curso</h4>
+                        <p class="card-text text-muted-custom fs-7 flex-grow-1" th:text="${producto.descripcionCorta}">Descripción breve del curso...</p>
+                        
+                        <!-- Price and purchase row -->
+                        <div class="d-flex align-items-center justify-content-between mt-4 pt-3 border-top border-white border-opacity-10">
+                            <div class="d-flex flex-column">
+                                <span class="fs-8 text-secondary uppercase">Precio</span>
+                                <!-- Jerarquía: Base - Auto - Cupón -->
+                                <th:block th:with="
+                                    autoDesc=${descuentosAutomaticos != null and descuentosAutomaticos[producto.lmsCursoId] != null ? descuentosAutomaticos[producto.lmsCursoId] : 0},
+                                    cupDesc=${cuponDescuento != null ? cuponDescuento.descuentoPorcentaje : 0},
+                                    totalDesc=${(autoDesc + cupDesc > 100) ? 100 : (autoDesc + cupDesc)},
+                                    precioFinal=${producto.precio * (100 - totalDesc) / 100.0}
+                                ">
+                                    <div th:if="${totalDesc > 0}">
+                                        <span class="fs-7 text-decoration-line-through text-secondary" th:text="${#numbers.formatDecimal(producto.precio, 1, 'POINT', 2, 'COMMA')} + ' €'"></span>
+                                        <span th:if="${autoDesc > 0}" class="badge bg-danger bg-opacity-15 text-danger border border-danger border-opacity-20 fs-9 ms-1" th:text="'-' + ${autoDesc} + '%'" ></span>
+                                        <span class="fs-4 fw-bold text-white d-block" th:text="${#numbers.formatDecimal(precioFinal, 1, 'POINT', 2, 'COMMA')} + ' €'"></span>
+                                    </div>
+                                    <div th:unless="${totalDesc > 0}">
+                                        <span class="fs-4 fw-bold text-white" th:text="${#numbers.formatDecimal(producto.precio, 1, 'POINT', 2, 'COMMA')} + ' €'"></span>
+                                    </div>
+                                </th:block>
+                            </div>
+
+                            <!-- Add to Cart Form -->
+                            <form th:action="@{/carrito/agregar}" method="POST" class="m-0">
+                                <input type="hidden" name="tipo" value="curso">
+                                <input type="hidden" name="id" th:value="${producto.id}">
+                                <button type="submit" class="btn btn-gradient d-flex align-items-center fs-8 py-2 px-3">
+                                    Añadir al Carrito <i class="bi bi-cart-plus ms-2"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty state placeholder if no courses are available -->
+            <div class="col-12 w-100 text-center py-5" th:if="${#lists.isEmpty(productos)}">
+                <div class="py-5 glass-card d-inline-block px-5 rounded-4">
+                    <i class="bi bi-folder2-open text-gradient fs-1 d-block mb-3"></i>
+                    <h3 class="text-white fw-bold">Catálogo vacío</h3>
+                    <p class="text-muted-custom mb-0">No hay cursos disponibles para la venta en este momento.</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Paquetes / Bundles Section -->
+        <div th:if="${not #lists.isEmpty(paquetes)}" class="mt-5">
+            <h2 class="fw-bold text-white mb-2">Paquetes Especiales</h2>
+            <p class="text-muted-custom fs-6 mb-4">Accede a múltiples cursos por un precio único y empieza hoy.</p>
+            <div class="row row-cols-1 row-cols-md-2 g-4">
+                <div class="col" th:each="pack : ${paquetes}">
+                    <div class="card glass-card h-100 border border-white border-opacity-10 overflow-hidden">
+                        <div class="card-body p-4 d-flex flex-column">
+                            <div class="d-flex align-items-start gap-3 mb-3">
+                                <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-3 border border-primary border-opacity-10 flex-shrink-0">
+                                    <i class="bi bi-box-seam fs-4 text-gradient"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-white fw-bold mb-1" th:text="${pack.titulo}"></h4>
+                                    <p class="text-muted-custom fs-8 mb-0" th:text="${pack.descripcion}"></p>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between mt-auto pt-3 border-top border-white border-opacity-10">
+                                <div>
+                                    <div class="fs-8 text-secondary">Pack completo</div>
+                                    <div class="fs-3 fw-bold text-gradient" th:text="${#numbers.formatDecimal(pack.precio,1,'POINT',2,'COMMA')} + ' €'"></div>
+                                </div>
+                                <form th:action="@{/carrito/agregar}" method="POST" class="m-0">
+                                    <input type="hidden" name="tipo" value="paquete">
+                                    <input type="hidden" name="id" th:value="${pack.id}">
+                                    <button type="submit" class="btn btn-gradient d-flex align-items-center fs-8 py-2 px-3">
+                                        Añadir al Carrito <i class="bi bi-cart-plus ms-2"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer th:replace="~{layout :: footer}"></footer>
+
+    <!-- Bootstrap JS -->
+    <div th:replace="~{layout :: bootstrap-js}"></div>
+</body>
+</html>

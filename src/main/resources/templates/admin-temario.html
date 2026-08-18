@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <div th:replace="~{layout :: common-head('Gestionar Temario')}"></div>
+
+    <!-- Quill WYSIWYG Theme CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+    <style>
+        /* Ajustes específicos para el editor Quill en dark-mode */
+        .ql-toolbar {
+            background: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+        .ql-toolbar .ql-stroke {
+            stroke: #cbd5e1 !important;
+        }
+        .ql-toolbar .ql-fill {
+            fill: #cbd5e1 !important;
+        }
+        .ql-toolbar .ql-picker {
+            color: #cbd5e1 !important;
+        }
+        .ql-container {
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            color: #f8fafc !important;
+            background: rgba(255, 255, 255, 0.01);
+            min-height: 200px;
+        }
+        .ql-editor.ql-blank::before {
+            color: #64748b !important;
+            font-style: normal;
+        }
+        .hover-white:hover {
+            color: #ffffff !important;
+        }
+        .hover-danger-light:hover {
+            color: #f87171 !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside th:replace="~{layout :: admin-sidebar('cursos')}"></aside>
+
+        <!-- Main Area -->
+        <div class="admin-main">
+            <!-- Navbar -->
+            <header th:replace="~{layout :: admin-navbar('Temario de Curso')}"></header>
+
+            <!-- Content Body -->
+            <main class="admin-content-body">
+                
+                <!-- Back Link & Header -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <a th:href="@{/admin/cursos/listado}" class="text-secondary text-decoration-none fs-7 hover-white mb-3 d-inline-block">
+                            <i class="bi bi-arrow-left me-1"></i> Volver al catálogo de cursos
+                        </a>
+                        <h2 class="fw-bold text-white mb-2" th:text="'Temario: ' + ${curso.titulo}">Temario del Curso</h2>
+                        <p class="text-muted-custom fs-5 mb-0">Gestiona los módulos de aprendizaje y añade las lecciones correspondientes.</p>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <!-- Left Side: Syllabus Structure (col-xl-8) -->
+                    <div class="col-12 col-xl-8">
+                        
+                        <!-- If no modules exist -->
+                        <div th:if="${#lists.isEmpty(curso.modulos)}" class="glass-card text-center py-5 border border-white border-opacity-10 mb-4 rounded-4">
+                            <i class="bi bi-grid-1x2-fill text-gradient fs-1 d-block mb-3"></i>
+                            <h4 class="text-white fw-bold">Sin módulos aún</h4>
+                            <p class="text-muted-custom mb-0">Comienza rellenando el formulario lateral para estructurar el curso.</p>
+                        </div>
+
+                        <!-- Loop modules -->
+                        <div class="card glass-card border border-white border-opacity-10 p-4 mb-4 rounded-4" th:each="moduloItem : ${curso.modulos}">
+                            <div class="d-flex align-items-center justify-content-between pb-3 mb-3 border-bottom border-white border-opacity-10">
+                                <div class="d-flex align-items-center">
+                                    <h4 class="text-white fw-bold mb-0 d-flex align-items-center">
+                                        <span class="badge bg-indigo bg-opacity-25 text-indigo-300 border border-indigo border-opacity-20 fs-8 me-2" th:text="'Orden: ' + ${moduloItem.orden}">0</span>
+                                        <span th:text="${moduloItem.nombre}">Nombre de Módulo</span>
+                                    </h4>
+                                    <div class="ms-3 d-flex gap-2">
+                                        <button class="btn btn-link text-muted-custom hover-white p-0 fs-7 border-0 bg-transparent btn-editar-modulo" th:data-id="${moduloItem.id}" th:data-nombre="${moduloItem.nombre}" title="Editar Módulo">
+                                            <i class="bi bi-pencil-fill"></i>
+                                        </button>
+                                        <button class="btn btn-link text-danger hover-danger-light p-0 fs-7 border-0 bg-transparent btn-eliminar-modulo" th:data-id="${moduloItem.id}" th:data-nombre="${moduloItem.nombre}" title="Eliminar Módulo">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <a th:href="@{'/admin/lms/modulos/' + ${moduloItem.id} + '/lecciones/nuevo'}" class="btn btn-outline-light border-white border-opacity-10 btn-sm rounded-pill fs-8">
+                                    Añadir Lección <i class="bi bi-plus-lg ms-1"></i>
+                                </a>
+                            </div>
+
+                            <!-- Lesson lists -->
+                            <ul class="list-group list-group-flush bg-transparent">
+                                
+                                <!-- Loop lessons -->
+                                <li class="list-group-item bg-transparent border-0 px-0 py-2 d-flex align-items-center justify-content-between text-muted-custom fs-7" th:each="lec : ${moduloItem.lecciones}">
+                                    <span class="text-white d-flex align-items-center">
+                                        <i class="bi bi-play-circle text-gradient me-2"></i>
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-white border-opacity-10 fs-9 me-2" th:text="'Lec ' + ${lec.orden}">0</span>
+                                        <span th:text="${lec.titulo}">Título Lección</span>
+                                    </span>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span th:if="${lec.videoUrl != null && !lec.videoUrl.isEmpty()}" class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-10 fs-9 rounded-pill">
+                                            <i class="bi bi-film me-1"></i> Video
+                                        </span>
+                                        <span th:if="${lec.rutaScriptInteractivo != null && !lec.rutaScriptInteractivo.isEmpty()}" class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-10 fs-9 rounded-pill">
+                                            <i class="bi bi-puzzle me-1"></i> Interactivo
+                                        </span>
+                                        <button class="btn btn-link text-muted-custom hover-white p-0 fs-8 border-0 bg-transparent btn-editar-leccion" th:data-id="${lec.id}" title="Editar Lección">
+                                            <i class="bi bi-pencil-fill"></i>
+                                        </button>
+                                        <button class="btn btn-link text-danger hover-danger-light p-0 fs-8 border-0 bg-transparent btn-eliminar-leccion" th:data-id="${lec.id}" th:data-titulo="${lec.titulo}" title="Eliminar Lección">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </button>
+                                    </div>
+                                </li>
+
+                                <!-- Empty state for module lessons -->
+                                <li class="list-group-item bg-transparent border-0 text-center text-secondary py-3 fs-8" th:if="${#lists.isEmpty(moduloItem.lecciones)}">
+                                    <i class="bi bi-info-circle me-1"></i> Aún no has añadido ninguna clase a este módulo.
+                                </li>
+
+                            </ul>
+                        </div>
+
+                    </div>
+
+                    <!-- Right Side: Creation form for Modules (col-xl-4) -->
+                    <div class="col-12 col-xl-4">
+                        <div class="card glass-card border border-white border-opacity-10 p-4 rounded-4 shadow-lg sticky-xl-top" style="top: 24px; z-index: 10;">
+                            <h4 class="text-white fw-bold mb-4 pb-2 border-bottom border-white border-opacity-10">Nuevo Módulo</h4>
+                            
+                            <form th:action="@{'/admin/lms/cursos/' + ${curso.id} + '/modulos/nuevo'}" th:object="${moduloDto}" method="POST">
+                                <!-- Module Name -->
+                                <div class="mb-4">
+                                    <label for="nombre" class="form-label">Nombre del Módulo</label>
+                                    <input type="text" id="nombre" th:field="*{nombre}" class="form-control" placeholder="ej: Módulo 1: Fundamentos" required>
+                                </div>
+
+                                <!-- Order (Auto-calculated in backend, hidden in frontend) -->
+                                <div class="mb-4 d-none">
+                                    <input type="number" id="orden" th:field="*{orden}">
+                                </div>
+
+                                <!-- Submit Module -->
+                                <button type="submit" class="btn btn-gradient w-100 py-2.5">
+                                    Crear Módulo <i class="bi bi-plus-lg ms-1"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal Editar Módulo -->
+    <div class="modal fade" id="modalEditarModulo" tabindex="-1" aria-labelledby="modalEditarModuloLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content glass-card border border-white border-opacity-10 shadow-lg text-white" style="background: #0f172a; backdrop-filter: blur(16px);">
+                <div class="modal-header border-bottom border-white border-opacity-10">
+                    <h5 class="modal-title fw-bold" id="modalEditarModuloLabel">Editar Módulo</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formEditarModulo">
+                        <input type="hidden" id="editModuloId">
+                        <div class="mb-3">
+                            <label for="editModuloNombre" class="form-label text-muted-custom">Nombre del Módulo</label>
+                            <input type="text" id="editModuloNombre" class="form-control" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-top border-white border-opacity-10">
+                    <button type="button" class="btn btn-outline-light border-white border-opacity-10 rounded-pill py-2 px-4 fs-8" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" id="btnGuardarModulo" class="btn btn-gradient py-2 px-4 fs-8">Guardar Cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Lección -->
+    <div class="modal fade" id="modalEditarLeccion" tabindex="-1" aria-labelledby="modalEditarLeccionLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content glass-card border border-white border-opacity-10 shadow-lg text-white" style="background: #0f172a; backdrop-filter: blur(16px);">
+                <div class="modal-header border-bottom border-white border-opacity-10">
+                    <h5 class="modal-title fw-bold" id="modalEditarLeccionLabel">Editar Lección</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formEditarLeccion">
+                        <input type="hidden" id="editLeccionId">
+                        
+                        <div class="mb-3">
+                            <label for="editLeccionTitulo" class="form-label text-muted-custom">Título de la Lección</label>
+                            <input type="text" id="editLeccionTitulo" class="form-control" required>
+                        </div>
+
+                        <!-- Origen del Vídeo -->
+                        <div class="mb-3">
+                            <label class="form-label d-block text-muted-custom fw-semibold fs-7 mb-2">Origen del Vídeo</label>
+                            <div class="btn-group w-100" role="group" aria-label="Origen del Vídeo">
+                                <input type="radio" class="btn-check" name="editEsVideoLocal" id="editVideoSourceExterno" value="false" checked>
+                                <label class="btn btn-outline-light border-white border-opacity-10 py-2 fs-8 fw-semibold rounded-start-pill" for="editVideoSourceExterno">Vídeo Externo (YouTube/Vimeo)</label>
+                                
+                                <input type="radio" class="btn-check" name="editEsVideoLocal" id="editVideoSourceLocal" value="true">
+                                <label class="btn btn-outline-light border-white border-opacity-10 py-2 fs-8 fw-semibold rounded-end-pill" for="editVideoSourceLocal">Vídeo Local (Biblioteca)</label>
+                            </div>
+                        </div>
+
+                        <!-- Video URL -->
+                        <div class="mb-3" id="edit-div-video-url">
+                            <label for="editLeccionVideoUrl" class="form-label text-muted-custom">Ruta / Enlace de Vídeo</label>
+                            <div class="input-group">
+                                <input type="text" id="editLeccionVideoUrl" class="form-control" placeholder="ej: https://www.youtube.com/watch?v=...">
+                                <button class="btn btn-outline-light border-white border-opacity-10 fs-8 px-3 d-none" type="button" id="btnEditSeleccionarVideoLocal">
+                                    Seleccionar Vídeo <i class="bi bi-film ms-1"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted-custom fs-9 mt-1.5 d-block" id="editVideoHelpText">Pega el enlace al vídeo de YouTube o Vimeo.</small>
+                        </div>
+
+
+                        <!-- Toggle switch for interactive zone in edit modal -->
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" role="switch" id="editToggleInteractivo">
+                            <label class="form-check-label text-muted-custom fw-semibold fs-7" for="editToggleInteractivo">Habilitar Zona Interactiva / Minijuego</label>
+                        </div>
+
+                        <!-- Interactive HTML URL (Conditional rendering) -->
+                        <div class="mb-3" id="edit-div-interactivo" style="display: none;">
+                            <label for="editLeccionRutaScript" class="form-label text-muted-custom">URL del Minijuego (Iframe HTML)</label>
+                            <div class="input-group">
+                                <input type="text" id="editLeccionRutaScript" class="form-control" placeholder="ej: /js/minigames/chess.html">
+                                <button class="btn btn-outline-light border-white border-opacity-10 fs-8 px-3" type="button" id="btnEditSeleccionarMinijuego">
+                                    Seleccionar Recurso Educativo <i class="bi bi-controller ms-1"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted-custom fs-9 mt-1.5 d-block">Pega la URL del archivo .html interactivo. Se renderizará de forma segura en un iframe aislado.</small>
+                        </div>
+
+
+
+                        <div class="mb-3">
+                            <label class="form-label text-muted-custom">Contenido Teórico (HTML Enriquecido)</label>
+                            <div id="editor-container-edit"></div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-top border-white border-opacity-10">
+                    <button type="button" class="btn btn-outline-light border-white border-opacity-10 rounded-pill py-2 px-4 fs-8" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" id="btnGuardarLeccion" class="btn btn-gradient py-2 px-4 fs-8">Guardar Cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quill JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+
+    <!-- AJAX CRUD Script -->
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            // CSRF Configuration
+            const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+            // Initialize Quill for Edit Lesson Modal
+            const quillEdit = new Quill('#editor-container-edit', {
+                theme: 'snow',
+                placeholder: 'Redacta el contenido teórico o las explicaciones de la lección...'
+            });
+
+            // Toggle Switch Logic for Edit Modal
+            const editToggleInteractivo = document.getElementById('editToggleInteractivo');
+            const editDivInteractivo = document.getElementById('edit-div-interactivo');
+            const editInputInteractivo = document.getElementById('editLeccionRutaScript');
+
+            editToggleInteractivo.addEventListener('change', function () {
+                if (this.checked) {
+                    editDivInteractivo.style.display = 'block';
+                } else {
+                    editDivInteractivo.style.display = 'none';
+                    editInputInteractivo.value = '';
+                }
+            });
+
+            // Video Source Selector Switch (Edit Modal)
+            const editSourceExterno = document.getElementById('editVideoSourceExterno');
+            const editSourceLocal = document.getElementById('editVideoSourceLocal');
+            const editVideoUrlInput = document.getElementById('editLeccionVideoUrl');
+            const editBtnSeleccionarVideo = document.getElementById('btnEditSeleccionarVideoLocal');
+            const editVideoHelpText = document.getElementById('editVideoHelpText');
+
+            function updateEditVideoSourceUI() {
+                if (editSourceLocal.checked) {
+                    editVideoUrlInput.readOnly = true;
+                    editVideoUrlInput.placeholder = 'Selecciona un vídeo local...';
+                    editBtnSeleccionarVideo.classList.remove('d-none');
+                    editVideoHelpText.textContent = 'Selecciona un vídeo local de la biblioteca.';
+                } else {
+                    editVideoUrlInput.readOnly = false;
+                    editVideoUrlInput.placeholder = 'ej: https://www.youtube.com/watch?v=...';
+                    editBtnSeleccionarVideo.classList.add('d-none');
+                    editVideoHelpText.textContent = 'Pega el enlace al vídeo de YouTube o Vimeo.';
+                }
+            }
+
+            editSourceExterno.addEventListener('change', updateEditVideoSourceUI);
+            editSourceLocal.addEventListener('change', updateEditVideoSourceUI);
+
+
+            // Modals Instantiation (Bootstrap 5)
+            const modalEditarModulo = new bootstrap.Modal(document.getElementById('modalEditarModulo'));
+            const modalEditarLeccion = new bootstrap.Modal(document.getElementById('modalEditarLeccion'));
+
+            // 1. EDIT MODULE
+            document.querySelectorAll('.btn-editar-modulo').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const moduloId = this.getAttribute('data-id');
+                    const moduloNombre = this.getAttribute('data-nombre');
+
+                    document.getElementById('editModuloId').value = moduloId;
+                    document.getElementById('editModuloNombre').value = moduloNombre;
+
+                    modalEditarModulo.show();
+                });
+            });
+
+            document.getElementById('btnGuardarModulo').addEventListener('click', function () {
+                const moduloId = document.getElementById('editModuloId').value;
+                const moduloNombre = document.getElementById('editModuloNombre').value;
+
+                if (!moduloNombre.trim()) {
+                    alert('El nombre del módulo no puede estar vacío.');
+                    return;
+                }
+
+                this.disabled = true;
+
+                fetch(`/admin/lms/modulos/${moduloId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [csrfHeader]: csrfToken
+                    },
+                    body: JSON.stringify({ nombre: moduloNombre })
+                })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('Error al guardar los cambios del módulo.');
+                        this.disabled = false;
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Error en la conexión con el servidor.');
+                    this.disabled = false;
+                });
+            });
+
+            // 2. DELETE MODULE
+            document.querySelectorAll('.btn-eliminar-modulo').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const moduloId = this.getAttribute('data-id');
+                    const moduloNombre = this.getAttribute('data-nombre');
+
+                    if (confirm(`¿Estás seguro de que deseas eliminar el módulo "${moduloNombre}" y todas sus lecciones asociadas? Esta acción no se puede deshacer.`)) {
+                        this.disabled = true;
+                        fetch(`/admin/lms/modulos/${moduloId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                [csrfHeader]: csrfToken
+                            }
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                window.location.reload();
+                            } else {
+                                alert('Error al eliminar el módulo.');
+                                this.disabled = false;
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            alert('Error de red al intentar eliminar el módulo.');
+                            this.disabled = false;
+                        });
+                    }
+                });
+            });
+
+            // 3. EDIT LESSON (FETCH AND FILL)
+            document.querySelectorAll('.btn-editar-leccion').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const leccionId = this.getAttribute('data-id');
+
+                    // Fetch details
+                    fetch(`/admin/lms/lecciones/${leccionId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            document.getElementById('editLeccionId').value = leccionId;
+                            document.getElementById('editLeccionTitulo').value = data.titulo;
+                            document.getElementById('editLeccionVideoUrl').value = data.videoUrl || '';
+                            
+                            const isLocal = data.esVideoLocal || false;
+                            if (isLocal) {
+                                editSourceLocal.checked = true;
+                            } else {
+                                editSourceExterno.checked = true;
+                            }
+                            updateEditVideoSourceUI();
+
+                            const scriptUrl = data.rutaScriptInteractivo || '';
+                            document.getElementById('editLeccionRutaScript').value = scriptUrl;
+                            
+                            if (scriptUrl.trim() !== '') {
+                                editToggleInteractivo.checked = true;
+                                editDivInteractivo.style.display = 'block';
+                            } else {
+                                editToggleInteractivo.checked = false;
+                                editDivInteractivo.style.display = 'none';
+                            }
+                            
+                            quillEdit.root.innerHTML = data.contenido || '';
+
+                            modalEditarLeccion.show();
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            alert('Error al cargar la información de la lección.');
+                        });
+                });
+            });
+
+            document.getElementById('btnGuardarLeccion').addEventListener('click', function () {
+                const leccionId = document.getElementById('editLeccionId').value;
+                const titulo = document.getElementById('editLeccionTitulo').value;
+                const videoUrl = document.getElementById('editLeccionVideoUrl').value;
+                const esVideoLocal = editSourceLocal.checked;
+                const rutaScript = editToggleInteractivo.checked ? document.getElementById('editLeccionRutaScript').value : '';
+                const contenido = quillEdit.root.innerHTML;
+
+                if (!titulo.trim()) {
+                    alert('El título de la lección es obligatorio.');
+                    return;
+                }
+
+                if (quillEdit.getText().trim().length === 0) {
+                    alert('El contenido teórico no puede estar vacío.');
+                    return;
+                }
+
+                this.disabled = true;
+
+                fetch(`/admin/lms/lecciones/${leccionId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [csrfHeader]: csrfToken
+                    },
+                    body: JSON.stringify({
+                        titulo: titulo,
+                        videoUrl: videoUrl,
+                        esVideoLocal: esVideoLocal,
+                        rutaScriptInteractivo: rutaScript,
+                        contenido: contenido
+                    })
+                })
+
+                .then(response => {
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('Error al guardar la lección.');
+                        this.disabled = false;
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Error en la comunicación con el servidor.');
+                    this.disabled = false;
+                });
+            });
+
+
+            // 4. DELETE LESSON
+            document.querySelectorAll('.btn-eliminar-leccion').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const leccionId = this.getAttribute('data-id');
+                    const leccionTitulo = this.getAttribute('data-titulo');
+
+                    if (confirm(`¿Estás seguro de que deseas eliminar la lección "${leccionTitulo}"?`)) {
+                        this.disabled = true;
+                        fetch(`/admin/lms/lecciones/${leccionId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                [csrfHeader]: csrfToken
+                            }
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                window.location.reload();
+                            } else {
+                                alert('Error al eliminar la lección.');
+                                this.disabled = false;
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            alert('Error en la comunicación con el servidor.');
+                            this.disabled = false;
+                        });
+                    }
+                });
+            });
+
+            // Selection callback for minijuego (Edit mode)
+            const modalSeleccionarEdit = new bootstrap.Modal(document.getElementById('modalSeleccionarMinijuegoEdit'));
+            document.getElementById('btnEditSeleccionarMinijuego').addEventListener('click', function () {
+                modalSeleccionarEdit.show();
+            });
+
+            const modalSeleccionarVideoEdit = new bootstrap.Modal(document.getElementById('modalSeleccionarVideoEdit'));
+            document.getElementById('btnEditSeleccionarVideoLocal').addEventListener('click', function () {
+                modalSeleccionarVideoEdit.show();
+            });
+
+            window.onMinijuegoSelected = function (url) {
+                if (document.getElementById('modalSeleccionarVideoEdit').classList.contains('show')) {
+                    editVideoUrlInput.value = url;
+                    modalSeleccionarVideoEdit.hide();
+                } else if (document.getElementById('modalSeleccionarMinijuegoEdit').classList.contains('show')) {
+                    editInputInteractivo.value = url;
+                    modalSeleccionarEdit.hide();
+                }
+            };
+        });
+    </script>
+
+    <!-- Modal Seleccionar Minijuego (Edición) -->
+    <div class="modal fade" id="modalSeleccionarMinijuegoEdit" tabindex="-1" aria-labelledby="modalSeleccionarMinijuegoEditLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content glass-card border border-white border-opacity-10 text-white shadow-lg" style="background: #0f172a;">
+                <div class="modal-header border-bottom border-white border-opacity-10">
+                    <h5 class="modal-title fw-bold" id="modalSeleccionarMinijuegoEditLabel">Seleccionar Recurso Educativo</h5>
+                    <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0" style="height: 600px;">
+                    <iframe src="/admin/media?tipo=HTML_INTERACTIVO,DOCUMENTO_PDF&categoria=RECURSO_CURSO&selectMode=true" style="width: 100%; height: 100%; border: none;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Seleccionar Vídeo Local (Edición) -->
+    <div class="modal fade" id="modalSeleccionarVideoEdit" tabindex="-1" aria-labelledby="modalSeleccionarVideoEditLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content glass-card border border-white border-opacity-10 text-white shadow-lg" style="background: #0f172a;">
+                <div class="modal-header border-bottom border-white border-opacity-10">
+                    <h5 class="modal-title fw-bold" id="modalSeleccionarVideoEditLabel">Seleccionar Vídeo de la Biblioteca</h5>
+                    <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0" style="height: 600px;">
+                    <iframe src="/admin/media?tipo=VIDEO&selectMode=true" style="width: 100%; height: 100%; border: none;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <div th:replace="~{layout :: bootstrap-js}"></div>
+
+</body>
+</html>
+
+

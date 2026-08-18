@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: common-head('Blog y Noticias')}"></head>
+<body>
+    <!-- Navbar -->
+    <header th:replace="~{layout :: navbar}"></header>
+
+    <!-- Main Content Container -->
+    <main class="container my-5 flex-grow-1">
+        
+        <!-- Header Section -->
+        <div class="row mb-5 text-center text-md-start align-items-center">
+            <div class="col-md-8">
+                <span class="text-gradient fw-bold text-uppercase fs-7 mb-2 d-inline-block">Recursos Gratuitos</span>
+                <h1 class="fw-bold text-white mb-2">Artículos & Tutorías</h1>
+                <p class="text-muted-custom fs-5 mb-0">Consejos tácticos de ajedrez, estrategias y programación en el desarrollo moderno.</p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <span class="badge bg-secondary bg-opacity-10 border border-white border-opacity-10 py-2 px-3 fs-8 rounded-pill text-muted-custom">
+                    Contenido indexado para SEO <i class="bi bi-google ms-1 text-success"></i>
+                </span>
+            </div>
+        </div>
+
+        <!-- Article List Grid -->
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+            
+            <!-- Loop through articles -->
+            <div class="col" th:each="articulo : ${articulos}">
+                <div class="card h-100 glass-card border border-white border-opacity-10 p-4 d-flex flex-column justify-content-between">
+                    
+                    <div>
+                        <!-- Optional Featured Image Cover -->
+                        <div th:if="${articulo.featuredImageUrl != null && !articulo.featuredImageUrl.isEmpty()}" class="ratio ratio-21x9 bg-black bg-opacity-40 rounded-3 overflow-hidden mb-4 border border-white border-opacity-5">
+                            <img th:src="${articulo.featuredImageUrl}" class="img-fluid object-fit-cover w-100 h-100" alt="Portada de artículo">
+                        </div>
+
+                        <!-- Author & Date Header metadata -->
+                        <div class="d-flex align-items-center mb-3 fs-8 text-secondary">
+                            <span class="d-flex align-items-center me-3">
+                                <i class="bi bi-person-circle text-gradient me-1.5"></i>
+                                <span th:text="${autoresMap[articulo.usuarioId] != null ? autoresMap[articulo.usuarioId] : 'Autor desconocido'}">Autor</span>
+                            </span>
+                            <span class="d-flex align-items-center">
+                                <i class="bi bi-calendar3 me-1.5"></i>
+                                <span th:text="${#temporals.format(articulo.fechaPublicacion, 'dd MMM, yyyy')}">Fecha</span>
+                            </span>
+                        </div>
+
+                        <!-- Title and Summary -->
+                        <h3 class="card-title text-white fw-bold mb-3">
+                            <a th:href="@{'/blog/' + ${articulo.slug}}" class="text-white text-decoration-none hover-indigo" th:text="${articulo.titulo}">
+                                Título del Artículo
+                            </a>
+                        </h3>
+                        <p class="card-text text-muted-custom fs-7 lh-lg" th:text="${articulo.resumenCorto}">
+                            Resumen corto o extracto del artículo para capturar la atención en motores de búsqueda...
+                        </p>
+                    </div>
+
+                    <!-- CTA Read More link -->
+                    <div class="mt-4 pt-3 border-top border-white border-opacity-10 text-end">
+                        <a th:href="@{'/blog/' + ${articulo.slug}}" class="text-gradient text-decoration-none fw-semibold d-inline-flex align-items-center hover-translate-x fs-7">
+                            Seguir leyendo <i class="bi bi-arrow-right ms-1 fs-6"></i>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Empty state placeholder if no articles are published -->
+            <div class="col-12 w-100 text-center py-5" th:if="${#lists.isEmpty(articulos)}">
+                <div class="py-5 glass-card d-inline-block px-5 rounded-4">
+                    <i class="bi bi-pencil-square text-gradient fs-1 d-block mb-3"></i>
+                    <h3 class="text-white fw-bold">Próximamente</h3>
+                    <p class="text-muted-custom mb-0">Nuestros redactores están preparando las primeras guías de táctica.</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer th:replace="~{layout :: footer}"></footer>
+
+    <!-- Bootstrap JS -->
+    <div th:replace="~{layout :: bootstrap-js}"></div>
+</body>
+</html>

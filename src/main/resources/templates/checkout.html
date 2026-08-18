@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout :: common-head('Carrito de Compras')}"></head>
+<body>
+    <!-- Navbar -->
+    <header th:replace="~{layout :: navbar}"></header>
+
+    <!-- Main Content Container -->
+    <main class="container my-5 flex-grow-1 d-flex align-items-center justify-content-center">
+        <div class="row w-100 justify-content-center">
+            <div class="col-lg-10 col-xl-8">
+                
+                <!-- Back Link -->
+                <div class="mb-4">
+                    <a th:href="@{/catalogo}" class="text-decoration-none text-secondary hover-white transition-all">
+                        <i class="bi bi-arrow-left me-2"></i> Volver al Catálogo
+                    </a>
+                </div>
+
+                <!-- Empty State -->
+                <div th:if="${carritoVacio}" class="text-center py-5 glass-card p-5 border border-white border-opacity-10 rounded-4">
+                    <i class="bi bi-cart-x text-gradient fs-1 d-block mb-3"></i>
+                    <h3 class="text-white fw-bold">Tu carrito está vacío</h3>
+                    <p class="text-muted-custom mb-4">Agrega cursos, paquetes o servicios desde el catálogo para empezar.</p>
+                    <a th:href="@{/catalogo}" class="btn btn-gradient px-4">
+                        Explorar Catálogo <i class="bi bi-arrow-right-short ms-1 fs-5"></i>
+                    </a>
+                </div>
+
+                <!-- Active Checkout Card -->
+                <div th:unless="${carritoVacio}" class="card glass-card overflow-hidden border border-white border-opacity-10 shadow-lg">
+                    <div class="card-header border-bottom border-white border-opacity-10 py-4 px-4 bg-dark bg-opacity-20">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <h3 class="fw-bold text-white mb-0">
+                                <i class="bi bi-cart3 text-gradient me-2"></i> Carrito de Compras
+                            </h3>
+                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-20 py-2 px-3 rounded-pill uppercase font-weight-bold fs-9">
+                                Pago Seguro
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-4 p-md-5">
+                        <div class="row g-5">
+                            
+                            <!-- Cart Items Column -->
+                            <div class="col-md-6 border-end-md border-white border-opacity-10">
+                                <h5 class="fw-bold text-white mb-4">Tus Productos Seleccionados</h5>
+                                
+                                <div class="d-flex flex-column gap-3">
+                                    <div th:each="item : ${carrito}" class="d-flex align-items-center justify-content-between p-3 bg-white bg-opacity-5 rounded-3 border border-white border-opacity-5">
+                                        <div>
+                                            <span class="d-block text-white fw-semibold fs-7" th:text="${item.titulo}">Título del Producto</span>
+                                            <span class="badge bg-secondary bg-opacity-10 text-muted-custom border border-white border-opacity-5 fs-9 mt-1 px-2 py-0.5 rounded-pill text-uppercase" th:text="${item.tipo}">TIPO</span>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <span class="text-white fw-bold fs-7" th:text="${#numbers.formatDecimal(item.precio, 1, 'POINT', 2, 'COMMA')} + ' €'">0,00 €</span>
+                                            <form th:action="@{/carrito/eliminar}" method="POST" class="m-0">
+                                                <input type="hidden" name="tipo" th:value="${item.tipo}">
+                                                <input type="hidden" name="id" th:value="${item.id}">
+                                                <button type="submit" class="btn btn-link text-danger p-0 border-0 fs-5 hover-scale transition-all" title="Eliminar del carrito">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Stripe secure notice -->
+                                <div class="mt-4 p-3 bg-white bg-opacity-5 rounded-3 border border-white border-opacity-5 d-flex align-items-center">
+                                    <i class="bi bi-credit-card-2-front text-gradient fs-3 me-3"></i>
+                                    <div>
+                                        <span class="d-block text-white fw-semibold small">Procesado por Stripe</span>
+                                        <span class="d-block text-muted-custom fs-8">Tus datos bancarios están seguros y cifrados.</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Summary & Checkout Column -->
+                            <div class="col-md-6 d-flex flex-column justify-content-between">
+                                <div>
+                                    <h5 class="fw-bold text-white mb-4">Resumen del Pedido</h5>
+
+                                    <!-- Price Details -->
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted-custom">Subtotal</span>
+                                        <span class="text-white fw-semibold" th:text="${#numbers.formatDecimal(subtotal, 1, 'POINT', 2, 'COMMA')} + ' €'">0,00 €</span>
+                                    </div>
+
+                                    <!-- Coupon discount -->
+                                    <div th:if="${cupDesc > 0}" class="d-flex justify-content-between mb-2 text-success">
+                                        <span>Descuento Cupón (<span th:text="${cupDesc} + '%'"></span>)</span>
+                                        <span th:text="'-' + ${#numbers.formatDecimal(descuentoCuponMonto, 1, 'POINT', 2, 'COMMA')} + ' €'">-0,00 €</span>
+                                    </div>
+
+                                    <hr class="border-white border-opacity-10 my-3">
+
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <span class="text-white fw-bold fs-5">Monto Total</span>
+                                        <span class="text-white fw-bold fs-3 text-gradient" th:text="${#numbers.formatDecimal(precioFinal, 1, 'POINT', 2, 'COMMA')} + ' €'">0,00 €</span>
+                                    </div>
+
+                                    <!-- Coupon Form -->
+                                    <div class="mb-4">
+                                        <label class="form-label mb-2 text-muted-custom">¿Tienes un cupón de descuento?</label>
+                                        <form th:action="@{/carrito}" method="GET" class="d-flex gap-2">
+                                            <input type="text" name="coupon" class="form-control text-uppercase" placeholder="Código de Cupón" th:value="${cuponCodigo != null ? cuponCodigo : ''}">
+                                            <button type="submit" class="btn btn-gradient text-nowrap px-3 fs-8">Aplicar</button>
+                                        </form>
+
+                                        <!-- Success/Error Feedback -->
+                                        <div th:if="${cuponExito}" class="alert alert-success border-0 bg-success bg-opacity-10 text-success rounded-3 py-2 px-3 mt-2 mb-0 fs-8">
+                                            <i class="bi bi-check-circle-fill me-1"></i><span th:text="${cuponExito}"></span>
+                                        </div>
+                                        <div th:if="${cuponError}" class="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger rounded-3 py-2 px-3 mt-2 mb-0 fs-8">
+                                            <i class="bi bi-exclamation-circle-fill me-1"></i><span th:text="${cuponError}"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Payment Submit Form -->
+                                <div>
+                                    <form th:action="@{/carrito/pay}" method="POST">
+                                        <input type="hidden" name="coupon" th:value="${cuponCodigo}">
+                                        
+                                        <div th:if="${param.error_stripe}" class="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger rounded-3 py-2 px-3 mb-3 fs-8">
+                                            <i class="bi bi-exclamation-triangle-fill me-1"></i> Hubo un error al iniciar el pago con Stripe. Reintente por favor.
+                                        </div>
+
+                                        <button type="button" id="btn-proceder-pago" class="btn btn-gradient w-100 py-3 d-flex align-items-center justify-content-center">
+                                             <span>Proceder al Pago</span>
+                                             <i class="bi bi-credit-card-2-front ms-2"></i>
+                                         </button>
+                                    </form>
+                                    
+                                    <p class="text-center text-secondary small fs-9 mt-3 mb-0">
+                                        Al hacer clic, serás redirigido de forma segura al formulario de pago de Stripe.
+                                    </p>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer th:replace="~{layout :: footer}"></footer>
+
+    <!-- Bootstrap JS -->
+    <div th:replace="~{layout :: bootstrap-js}"></div>
+
+    <!-- Stripe SDK & Client Flow -->
+    <script src="https://js.stripe.com/v3/"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener("DOMContentLoaded", function() {
+            const publishableKey = [[${stripePublishableKey != null ? stripePublishableKey : ''}]];
+            if (publishableKey && publishableKey.trim() !== '') {
+                try {
+                    const stripe = Stripe(publishableKey);
+                    console.log("Stripe JS cargado e inicializado correctamente.");
+                } catch (e) {
+                    console.error("Error al inicializar Stripe JS:", e);
+                }
+            }
+
+            const btnPagar = document.getElementById("btn-proceder-pago");
+            if (btnPagar) {
+                btnPagar.addEventListener("click", function(e) {
+                    e.preventDefault();
+
+                    btnPagar.disabled = true;
+                    btnPagar.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Procesando...';
+
+                    const couponCode = [[${cuponCodigo != null ? cuponCodigo : ''}]];
+                    const csrfToken = document.querySelector('input[name="_csrf"]')?.value;
+
+                    const urlParams = new URLSearchParams();
+                    if (couponCode) {
+                        urlParams.append('coupon', couponCode);
+                    }
+
+                    fetch('/api/v1/checkout/create-session?' + urlParams.toString(), {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(err => { throw new Error(err.error || 'Error al iniciar el pago.'); });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.url) {
+                            window.location.href = data.url;
+                        } else {
+                            throw new Error("No se obtuvo la URL de checkout de Stripe.");
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert(err.message || "Error al procesar el pago con Stripe.");
+                        btnPagar.disabled = false;
+                        btnPagar.innerHTML = '<span>Proceder al Pago</span><i class="bi bi-credit-card-2-front ms-2"></i>';
+                    });
+                });
+            }
+        });
+        /*]]>*/
+    </script>
+</body>
+</html>

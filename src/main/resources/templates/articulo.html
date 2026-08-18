@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <div th:replace="~{layout :: common-head(${articulo.titulo})}"></div>
+    <style>
+        .blog-content {
+            color: #f8fafc !important;
+            font-size: 1.1rem !important;
+            line-height: 1.75 !important;
+        }
+        .blog-content img {
+            max-width: 100% !important;
+            height: auto !important;
+            display: block !important;
+            margin: 2rem auto !important;
+            border-radius: 8px !important;
+        }
+        .blog-content h2, .blog-content h3, .blog-content h4 {
+            color: #ffffff !important;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+        .blog-content p {
+            margin-bottom: 1.25rem;
+        }
+        .blog-content blockquote {
+            border-left: 4px solid rgba(139, 92, 246, 0.6);
+            padding-left: 1.25rem;
+            margin: 1.5rem 0;
+            color: #cbd5e1;
+            font-style: italic;
+        }
+        .blog-content pre {
+            background: rgba(0, 0, 0, 0.3) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+        .blog-content code {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <header th:replace="~{layout :: navbar}"></header>
+
+    <!-- Main Content Container (optimized width for reading) -->
+    <main class="container my-5 flex-grow-1">
+        <div class="row justify-content-center">
+            <div class="col-12" style="max-width: 900px; width: 80vw; margin: 0 auto;">
+                
+                <!-- Back Link -->
+                <div class="mb-4">
+                    <a th:href="@{/blog}" class="text-secondary text-decoration-none fs-7 hover-white">
+                        <i class="bi bi-arrow-left me-1"></i> Volver a artículos
+                    </a>
+                </div>
+
+                <!-- Glassmorphic Article Container -->
+                <article class="card glass-card p-4 p-md-5 border border-white border-opacity-10 shadow-lg">
+                    
+                    <!-- Optional Featured Image Cover -->
+                    <div th:if="${articulo.featuredImageUrl != null && !articulo.featuredImageUrl.isEmpty()}" class="ratio ratio-21x9 bg-black bg-opacity-40 rounded-4 overflow-hidden mb-4 border border-white border-opacity-10 shadow-sm">
+                        <img th:src="${articulo.featuredImageUrl}" class="img-fluid object-fit-cover w-100 h-100" alt="Portada de artículo">
+                    </div>
+
+                    <!-- Article Metadata Header -->
+                    <header class="border-bottom border-white border-opacity-10 pb-3 mb-4">
+                        <div class="d-flex align-items-center mb-3 fs-8 text-secondary">
+                            <span class="d-flex align-items-center me-3">
+                                <i class="bi bi-person-circle text-gradient me-1.5"></i>
+                                <span th:text="${autorNombre}">Nombre del Autor</span>
+                            </span>
+                            <span class="d-flex align-items-center">
+                                <i class="bi bi-calendar3 me-1.5"></i>
+                                <span th:text="${#temporals.format(articulo.fechaPublicacion, 'dd MMMM, yyyy')}">Fecha de publicación</span>
+                            </span>
+                        </div>
+
+                        <!-- Crucial SEO Element: Single H1 tag per page -->
+                        <h1 class="fw-bold text-white mb-0" th:text="${articulo.titulo}">Título del Artículo</h1>
+                    </header>
+
+                    <!-- Crucial SEO & Rendering Element: Unescaped rich text body (HTML format supported) -->
+                    <section class="mt-2 blog-content" th:utext="${articulo.contenido}">
+                        Aquí se renderizará el texto completo.
+                    </section>
+
+                </article>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer th:replace="~{layout :: footer}"></footer>
+
+    <!-- Bootstrap JS -->
+    <div th:replace="~{layout :: bootstrap-js}"></div>
+</body>
+</html>

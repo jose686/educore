@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout :: common-head('Mis Cursos')}"></head>
+<body>
+    <!-- Navbar -->
+    <header th:replace="~{layout :: navbar}"></header>
+
+    <!-- Main Content Container -->
+    <main class="container my-5 flex-grow-1">
+        
+        <!-- Header Section -->
+        <div class="row mb-5 text-center text-md-start align-items-center">
+            <div class="col-md-8">
+                <span class="text-gradient fw-bold text-uppercase fs-7 mb-2 d-inline-block">Área de Alumno</span>
+                <h1 class="fw-bold text-white mb-2">Mi Biblioteca</h1>
+                <p class="text-muted-custom fs-5 mb-0">Accede a tus clases virtuales e interactivos de ajedrez adquiridos.</p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <a th:href="@{/catalogo}" class="btn btn-outline-light border-white border-opacity-10 py-2 px-3 rounded-pill fs-7 hover-shadow">
+                    <i class="bi bi-search me-1"></i> Comprar más cursos
+                </a>
+            </div>
+        </div>
+
+        <!-- Grid of Purchased Courses -->
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            
+            <!-- Loop through enrolled courses -->
+            <div class="col" th:each="curso : ${cursos}">
+                <div class="card h-100 glass-card overflow-hidden d-flex flex-column border border-white border-opacity-10">
+                    
+                    <!-- Cover image or placeholder -->
+                    <div class="ratio ratio-16x9 bg-dark bg-opacity-50 border-bottom border-white border-opacity-10 d-flex align-items-center justify-content-center">
+                        <img th:if="${curso.imagenUrl != null && !curso.imagenUrl.isEmpty()}" 
+                             th:src="${curso.imagenUrl}" 
+                             class="img-fluid object-fit-cover" 
+                             th:alt="${curso.titulo}">
+                        <div th:unless="${curso.imagenUrl != null && !curso.imagenUrl.isEmpty()}" 
+                             class="d-flex flex-column align-items-center justify-content-center text-secondary h-100">
+                            <i class="bi bi-mortarboard fs-1 text-gradient"></i>
+                            <span class="fs-7 mt-2">Aula Virtual</span>
+                        </div>
+                    </div>
+
+                    <!-- Card Body -->
+                    <div class="card-body p-4 d-flex flex-column justify-content-between">
+                        <div>
+                            <h4 class="card-title text-white fw-bold mb-2" th:text="${curso.titulo}">Título del Curso</h4>
+                            <p class="card-text text-muted-custom fs-7" th:text="${#strings.abbreviate(curso.descripcion, 120)}">Descripción del curso...</p>
+                        </div>
+                        
+                        <!-- CTA Route Button -->
+                        <div class="mt-4 pt-3 border-top border-white border-opacity-10">
+                            <!-- Direct access if syllabus exists -->
+                            <a th:if="${!#lists.isEmpty(curso.modulos) && !#lists.isEmpty(curso.modulos[0].lecciones)}" 
+                               th:href="@{'/aula/' + ${curso.id} + '/leccion/' + ${curso.modulos[0].lecciones[0].id}}" 
+                               class="btn btn-gradient w-100 d-flex align-items-center justify-content-center py-2 fs-6">
+                                Entrar al Aula <i class="bi bi-play-circle-fill ms-2 fs-5 align-middle"></i>
+                            </a>
+                            
+                            <!-- Alternative message if course is empty -->
+                            <button th:unless="${!#lists.isEmpty(curso.modulos) && !#lists.isEmpty(curso.modulos[0].lecciones)}" 
+                                    class="btn btn-secondary bg-opacity-20 border border-white border-opacity-10 w-100 text-muted-custom" disabled>
+                                Sin lecciones cargadas <i class="bi bi-info-circle ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty library view -->
+            <div class="col-12 w-100 text-center py-5" th:if="${#lists.isEmpty(cursos)}">
+                <div class="py-5 glass-card d-inline-block px-5 rounded-4">
+                    <i class="bi bi-collection-play text-gradient fs-1 d-block mb-3"></i>
+                    <h3 class="text-white fw-bold">Sin cursos</h3>
+                    <p class="text-muted-custom mb-4">Aún no te has matriculado en ningún curso.</p>
+                    <a th:href="@{/catalogo}" class="btn btn-gradient px-4">
+                        Explorar Catálogo <i class="bi bi-arrow-right-short ms-1 fs-5"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer th:replace="~{layout :: footer}"></footer>
+
+    <!-- Bootstrap JS -->
+    <div th:replace="~{layout :: bootstrap-js}"></div>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: common-head('Canjear Token de Acceso')}"></head>
+<body>
+    <header th:replace="~{layout :: navbar}"></header>
+
+    <main class="container my-5 flex-grow-1 d-flex align-items-center">
+        <div class="row w-100 justify-content-center">
+            <div class="col-12 col-md-8 col-lg-5">
+
+                <!-- Header -->
+                <div class="text-center mb-5">
+                    <div class="d-inline-flex bg-primary bg-opacity-10 text-primary p-4 rounded-4 mb-4 border border-primary border-opacity-10">
+                        <i class="bi bi-key fs-1 text-gradient"></i>
+                    </div>
+                    <h1 class="fw-bold text-white mb-2">Canjear Invitación</h1>
+                    <p class="text-muted-custom fs-6">Introduce tu código de acceso privado para activar tu sesión de invitado.</p>
+                </div>
+
+                <!-- Error Alert -->
+                <div th:if="${param.error}" class="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger rounded-3 py-3 px-4 mb-4">
+                    <i class="bi bi-exclamation-circle-fill me-2"></i>
+                    <span th:text="${param.error}">Token inválido.</span>
+                </div>
+
+                <!-- Token Form -->
+                <div class="card glass-card p-5 border border-white border-opacity-10">
+                    <form th:action="@{/canjear-token}" method="POST">
+
+                        <div class="mb-4">
+                            <label for="token" class="form-label fw-semibold text-white">Código del Token</label>
+                            <input type="text" id="token" name="token"
+                                   class="form-control form-control-lg text-center fw-bold"
+                                   placeholder="INV-XXXXXXXX"
+                                   style="text-transform: uppercase; letter-spacing: 0.15em;"
+                                   required autofocus>
+                            <div class="form-text text-muted-custom text-center mt-2 fs-8">
+                                Los tokens de invitado tienen el formato <code>INV-XXXXXXXX</code>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-gradient w-100 py-3 fs-6 fw-semibold">
+                            <i class="bi bi-unlock me-2"></i> Activar Acceso Temporal
+                        </button>
+                    </form>
+
+                    <div class="mt-4 pt-4 border-top border-white border-opacity-10 text-center">
+                        <p class="text-muted-custom fs-8 mb-2">
+                            No es necesario registrarse previamente. El canje creará una sesión de invitado segura.
+                        </p>
+                        <p class="text-muted-custom fs-8 mb-0">
+                            ¿No tienes un token? Visita el
+                            <a th:href="@{/catalogo}" class="text-gradient text-decoration-none fw-semibold">Catálogo de Cursos</a>
+                            para adquirir acceso.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Info cards -->
+                <div class="row g-3 mt-3">
+                    <div class="col-6">
+                        <div class="card glass-card p-3 text-center border border-white border-opacity-5">
+                            <i class="bi bi-shield-check text-gradient fs-4 mb-2"></i>
+                            <p class="text-muted-custom fs-9 mb-0">Acceso seguro y cifrado</p>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="card glass-card p-3 text-center border border-white border-opacity-5">
+                            <i class="bi bi-lightning-charge text-gradient fs-4 mb-2"></i>
+                            <p class="text-muted-custom fs-9 mb-0">Activación instantánea</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <footer th:replace="~{layout :: footer}"></footer>
+    <div th:replace="~{layout :: bootstrap-js}"></div>
+</body>
+</html>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout :: common-head('Zona de Minijuegos')}"></head>
+<body>
+    <!-- Navbar -->
+    <header th:replace="~{layout :: navbar}"></header>
+
+    <!-- Main Content Container -->
+    <main class="container my-5 flex-grow-1">
+        
+        <!-- Header Section -->
+        <div class="row mb-5 text-center text-md-start align-items-center">
+            <div class="col-md-8">
+                <span class="text-gradient fw-bold text-uppercase fs-7 mb-2 d-inline-block">Entretenimiento e Interacción</span>
+                <h1 class="fw-bold text-white mb-2">Zona de Minijuegos</h1>
+                <p class="text-muted-custom fs-5 mb-0">Disfruta de tableros lúdicos interactivos. Desbloquea juegos premium usando tu saldo de créditos.</p>
+            </div>
+            
+            <!-- User credit info -->
+            <div class="col-md-4 text-md-end mt-3 mt-md-0" th:if="${usuario != null}">
+                <div class="d-inline-flex align-items-center gap-3 bg-black bg-opacity-30 border border-white border-opacity-10 rounded-pill px-4 py-2">
+                    <span class="fs-8 text-secondary">Mis Créditos:</span>
+                    <span class="fs-7 fw-bold text-gradient" th:text="${saldoCreditos} + ' 🪙'">100 🪙</span>
+                    <form th:action="@{/minijuegos/recargar}" method="POST" class="m-0">
+                        <button type="submit" class="btn btn-gradient btn-sm rounded-pill py-1 px-3 fs-9">
+                            + Recargar 100
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0" th:unless="${usuario != null}">
+                <a th:href="@{/login(redirect='/minijuegos')}" class="btn btn-outline-light border-white border-opacity-10 py-2 px-4 rounded-pill fs-8">
+                    <i class="bi bi-box-arrow-in-right me-1"></i> Iniciar Sesión para Jugar
+                </a>
+            </div>
+        </div>
+
+        <!-- Success & Error alerts -->
+        <div th:if="${param.success}" class="alert alert-success border-0 bg-success bg-opacity-10 text-success rounded-4 py-3 px-4 mb-4 shadow" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                <div class="fs-7">
+                    <span th:if="${param.success[0] == 'unlocked'}">¡Minijuego desbloqueado con éxito! Ya puedes jugar cuando quieras.</span>
+                    <span th:if="${param.success[0] == 'reloaded'}">¡Tus créditos se han recargado correctamente!</span>
+                </div>
+            </div>
+        </div>
+        <div th:if="${param.error}" class="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger rounded-4 py-3 px-4 mb-4 shadow" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+                <div class="fs-7">
+                    <span th:if="${param.error[0] == 'insufficient_credits'}">No tienes suficientes créditos para desbloquear este minijuego. Por favor, realiza una recarga.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dynamic Minijuegos Grid -->
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            
+            <div class="col" th:each="juego : ${minijuegos}">
+                <div class="card glass-card h-100 border border-white border-opacity-10 overflow-hidden d-flex flex-column justify-content-between">
+                    
+                    <!-- Cover Image -->
+                    <div class="ratio ratio-16x9 bg-black bg-opacity-40 border-bottom border-white border-opacity-10 overflow-hidden position-relative">
+                        <img th:if="${juego.imagenPortadaUrl}" th:src="${juego.imagenPortadaUrl}" class="object-fit-cover w-100 h-100" alt="Portada">
+                        <div th:unless="${juego.imagenPortadaUrl}" class="d-flex align-items-center justify-content-center h-100 w-100 text-secondary fs-1">
+                            <i class="bi bi-controller"></i>
+                        </div>
+                        
+                        <!-- Badge -->
+                        <div class="position-absolute top-0 end-0 m-3">
+                            <span th:if="${juego.esGratis}" class="badge bg-success py-1.5 px-3 rounded-pill fs-9 border border-white border-opacity-10">Gratis</span>
+                            <span th:unless="${juego.esGratis}" 
+                                  th:classappend="${#sets.contains(minijuegosDesbloqueados, juego)} ? 'bg-info' : 'bg-primary'"
+                                  class="badge py-1.5 px-3 rounded-pill fs-9 border border-white border-opacity-10">
+                                <span th:if="${#sets.contains(minijuegosDesbloqueados, juego)}">Desbloqueado 🔓</span>
+                                <span th:unless="${#sets.contains(minijuegosDesbloqueados, juego)}" th:text="${juego.costeCreditos} + ' Créditos'">50 Créditos</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Details -->
+                    <div class="card-body p-4 d-flex flex-column justify-content-between flex-grow-1">
+                        <div>
+                            <h4 class="text-white fw-bold mb-2" th:text="${juego.titulo}">Título del Juego</h4>
+                            <p class="text-muted-custom fs-8 mb-4" th:text="${juego.descripcion}">Descripción</p>
+                        </div>
+                        
+                        <!-- Action Button -->
+                        <div class="pt-3 border-top border-white border-opacity-10 d-flex justify-content-between align-items-center">
+                            <span class="text-secondary fs-9" th:if="${juego.esGratis || #sets.contains(minijuegosDesbloqueados, juego)}">
+                                Acceso disponible
+                            </span>
+                            <span class="text-secondary fs-9" th:unless="${juego.esGratis || #sets.contains(minijuegosDesbloqueados, juego)}">
+                                Requiere saldo
+                            </span>
+                            
+                            <!-- Play Button (Free or Unlocked) -->
+                            <button th:if="${juego.esGratis || #sets.contains(minijuegosDesbloqueados, juego)}"
+                                    type="button" 
+                                    class="btn btn-gradient d-flex align-items-center fs-8 py-2 px-4 rounded-pill btn-jugar"
+                                    th:data-titulo="${juego.titulo}"
+                                    th:data-url="@{'/minijuegos/jugar/' + ${juego.id}}">
+                                Jugar 🎮
+                            </button>
+                            
+                            <!-- Unlock Button (Not logged in) -->
+                            <a th:if="${!juego.esGratis && !#sets.contains(minijuegosDesbloqueados, juego) && usuario == null}"
+                               th:href="@{/login(redirect='/minijuegos')}"
+                               class="btn btn-outline-light border-white border-opacity-10 d-flex align-items-center fs-8 py-2 px-4 rounded-pill">
+                                Desbloquear 🪙
+                            </a>
+                            
+                            <!-- Unlock Button (Logged in - enough credits) -->
+                            <form th:if="${!juego.esGratis && !#sets.contains(minijuegosDesbloqueados, juego) && usuario != null && saldoCreditos >= juego.costeCreditos}"
+                                  th:action="@{'/minijuegos/desbloquear/' + ${juego.id}}"
+                                  method="POST" 
+                                  class="m-0"
+                                  th:onsubmit="'return confirm(\'¿Deseas gastar ' + ${juego.costeCreditos} + ' créditos para desbloquear permanentemente este minijuego?\');'">
+                                <button type="submit" class="btn btn-primary bg-gradient d-flex align-items-center fs-8 py-2 px-4 rounded-pill border-0 shadow-sm">
+                                    Desbloquear 🪙
+                                </button>
+                            </form>
+                            
+                            <!-- Unlock Button (Logged in - insufficient credits) -->
+                            <button th:if="${!juego.esGratis && !#sets.contains(minijuegosDesbloqueados, juego) && usuario != null && saldoCreditos < juego.costeCreditos}"
+                                    type="button"
+                                    class="btn btn-outline-danger d-flex align-items-center fs-8 py-2 px-4 rounded-pill btn-sin-saldo">
+                                Desbloquear 🪙
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Empty Catalog State -->
+            <div class="col-12 text-center py-5 text-secondary" th:if="${#lists.isEmpty(minijuegos)}">
+                <i class="bi bi-controller fs-1 d-block mb-3 opacity-50"></i>
+                <span class="fs-6">No hay minijuegos disponibles en el catálogo en este momento.</span>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Modal Reproductor de Juego -->
+    <div class="modal fade" id="gamePlayerModal" tabindex="-1" aria-labelledby="gamePlayerModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content glass-card border border-white border-opacity-10 text-white shadow-lg overflow-hidden" style="background-color: #0b0f19;">
+                <div class="modal-header border-bottom border-white border-opacity-10 py-3">
+                    <h5 class="modal-title fw-bold" id="gamePlayerModalLabel">🎮 Reproductor de Minijuego</h5>
+                    <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body p-0 bg-black" style="height: 70vh;">
+                    <iframe id="game-iframe" src="" class="w-100 h-100 border-0" allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Saldo Insuficiente -->
+    <div class="modal fade" id="insufficientCreditsModal" tabindex="-1" aria-labelledby="insufficientCreditsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content glass-card border border-white border-opacity-10 text-white shadow-lg" style="background-color: #0b0f19;">
+                <div class="modal-header border-bottom border-white border-opacity-10 py-3">
+                    <h5 class="modal-title fw-bold text-danger" id="insufficientCreditsModalLabel"><i class="bi bi-exclamation-triangle-fill me-2"></i>Saldo Insuficiente</h5>
+                    <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body py-4 text-center">
+                    <i class="bi bi-wallet2 text-gradient fs-1 d-block mb-3"></i>
+                    <h5 class="text-white fw-bold mb-2">No tienes créditos suficientes</h5>
+                    <p class="text-muted-custom fs-7">El minijuego seleccionado requiere créditos adicionales. Realiza una recarga de saldo rápida haciendo clic abajo.</p>
+                </div>
+                <div class="modal-footer border-top border-white border-opacity-10 py-3 d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-light border-white border-opacity-10 py-1.5 px-3.5 fs-8 rounded-pill" data-bs-dismiss="modal">Cancelar</button>
+                    <form th:action="@{/minijuegos/recargar}" method="POST" class="m-0">
+                        <button type="submit" class="btn btn-gradient py-1.5 px-4 fs-8 fw-semibold rounded-pill">
+                            Recargar 100 Créditos <i class="bi bi-plus-lg ms-1"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer th:replace="~{layout :: footer}"></footer>
+
+    <!-- Bootstrap JS -->
+    <div th:replace="~{layout :: bootstrap-js}"></div>
+
+    <!-- JS Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Setup modals
+            const gameModal = new bootstrap.Modal(document.getElementById('gamePlayerModal'));
+            const gameIframe = document.getElementById('game-iframe');
+            const gameTitle = document.getElementById('gamePlayerModalLabel');
+            const insufficientModal = new bootstrap.Modal(document.getElementById('insufficientCreditsModal'));
+
+            // Play button clicks
+            document.querySelectorAll('.btn-jugar').forEach(button => {
+                button.addEventListener('click', function () {
+                    const url = this.getAttribute('data-url');
+                    const titulo = this.getAttribute('data-titulo');
+                    
+                    gameTitle.innerText = '🎮 ' + titulo;
+                    gameIframe.src = url;
+                    gameModal.show();
+                });
+            });
+
+            // Stop iframe on close modal
+            document.getElementById('gamePlayerModal').addEventListener('hidden.bs.modal', function () {
+                gameIframe.src = '';
+            });
+
+            // Insufficient credits clicks
+            document.querySelectorAll('.btn-sin-saldo').forEach(button => {
+                button.addEventListener('click', function () {
+                    insufficientModal.show();
+                });
+            });
+        });
+    </script>
+</body>
+</html>

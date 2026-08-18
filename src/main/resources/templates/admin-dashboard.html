@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: common-head('Panel de Control - Administrador')}"></head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside th:replace="~{layout :: admin-sidebar('dashboard')}"></aside>
+
+        <!-- Main Area -->
+        <div class="admin-main">
+            <!-- Navbar -->
+            <header th:replace="~{layout :: admin-navbar('Backoffice Central')}"></header>
+
+            <!-- Content Body -->
+            <main class="admin-content-body">
+                <!-- Welcome section -->
+                <div class="row mb-5 text-center text-md-start align-items-center">
+                    <div class="col-md-12">
+                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-20 px-3 py-1.5 fs-8 rounded-pill mb-2">
+                            <i class="bi bi-shield-lock-fill me-1"></i> Modo Administrador
+                        </span>
+                        <h2 class="fw-bold text-white mb-2">Resumen del Sistema</h2>
+                        <p class="text-muted-custom fs-5 mb-0">Gestión de contenidos globales, catálogos del e-commerce y control de privilegios.</p>
+                    </div>
+                </div>
+
+                <!-- Dashboard Cards Grid -->
+                <div class="row row-cols-1 row-cols-md-2 g-4">
+                    
+                    <!-- Card 1: Blog management -->
+                    <div class="col">
+                        <div class="card glass-card h-100 p-4 border border-white border-opacity-10 d-flex flex-column justify-content-between">
+                            <div>
+                                <div class="d-inline-flex bg-primary bg-opacity-10 text-primary p-3 rounded-3 mb-3 border border-primary border-opacity-10">
+                                    <i class="bi bi-journal-text fs-3 text-gradient"></i>
+                                </div>
+                                <h4 class="text-white fw-bold mb-2">Gestión del Blog</h4>
+                                <p class="text-muted-custom fs-7 lh-lg">Redacta nuevos artículos o tutoriales SEO interpretando HTML enriquecido para captar estudiantes de manera orgánica.</p>
+                            </div>
+                            <div class="mt-4 pt-3 border-top border-white border-opacity-10 d-flex gap-2">
+                                <a th:href="@{/admin/blog/nuevo}" class="btn btn-gradient flex-grow-1 py-2.5 fs-8">
+                                    Redactar <i class="bi bi-plus-circle ms-1"></i>
+                                </a>
+                                <a th:href="@{/admin/blog/listado}" class="btn btn-outline-light border-white border-opacity-10 py-2.5 fs-8">
+                                    Ver Listado <i class="bi bi-list ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Catalog management -->
+                    <div class="col">
+                        <div class="card glass-card h-100 p-4 border border-white border-opacity-10 d-flex flex-column justify-content-between">
+                            <div>
+                                <div class="d-inline-flex bg-primary bg-opacity-10 text-primary p-3 rounded-3 mb-3 border border-primary border-opacity-10">
+                                    <i class="bi bi-tags fs-3 text-gradient"></i>
+                                </div>
+                                <h4 class="text-white fw-bold mb-2">Gestión de Catálogo</h4>
+                                <p class="text-muted-custom fs-7 lh-lg">Registra ofertas en el catálogo público e-commerce vinculando el curso con su identificador numérico interno del LMS.</p>
+                            </div>
+                            <div class="mt-4 pt-3 border-top border-white border-opacity-10 d-flex gap-2">
+                                <a th:href="@{/admin/cursos/nuevo}" class="btn btn-gradient flex-grow-1 py-2.5 fs-8">
+                                    Crear Curso <i class="bi bi-plus-circle ms-1"></i>
+                                </a>
+                                <a th:href="@{/admin/cursos/listado}" class="btn btn-outline-light border-white border-opacity-10 py-2.5 fs-8">
+                                    Ver Listado <i class="bi bi-list ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Media library -->
+                    <div class="col">
+                        <div class="card glass-card h-100 p-4 border border-white border-opacity-10 d-flex flex-column justify-content-between">
+                            <div>
+                                <div class="d-inline-flex bg-primary bg-opacity-10 text-primary p-3 rounded-3 mb-3 border border-primary border-opacity-10">
+                                    <i class="bi bi-images fs-3 text-gradient"></i>
+                                </div>
+                                <h4 class="text-white fw-bold mb-2">Biblioteca de Medios</h4>
+                                <p class="text-muted-custom fs-7 lh-lg">Sube imágenes para tus artículos y portadas de cursos, y copia las URLs resultantes directamente para usarlas.</p>
+                            </div>
+                            <div class="mt-4 pt-3 border-top border-white border-opacity-10">
+                                <a th:href="@{/admin/media}" class="btn btn-outline-light border-white border-opacity-10 w-100 py-2.5 fs-8">
+                                    Abrir Gestor de Archivos <i class="bi bi-folder2-open ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 4: User management -->
+                    <div class="col">
+                        <div class="card glass-card h-100 p-4 border border-white border-opacity-10 d-flex flex-column justify-content-between">
+                            <div>
+                                <div class="d-inline-flex bg-primary bg-opacity-10 text-primary p-3 rounded-3 mb-3 border border-primary border-opacity-10">
+                                    <i class="bi bi-people fs-3 text-gradient"></i>
+                                </div>
+                                <h4 class="text-white fw-bold mb-2">Gestión de Usuarios</h4>
+                                <p class="text-muted-custom fs-7 lh-lg">Administra el listado de usuarios de la plataforma y actualiza sus roles (VISITOR, STUDENT, TEACHER, ADMIN) dinámicamente.</p>
+                            </div>
+                            <div class="mt-4 pt-3 border-top border-white border-opacity-10">
+                                <a th:href="@{/admin/usuarios}" class="btn btn-outline-light border-white border-opacity-10 w-100 py-2.5 fs-8">
+                                    Administrar Usuarios <i class="bi bi-gear ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 5: Promociones -->
+                    <div class="col">
+                        <div class="card glass-card h-100 p-4 border border-white border-opacity-10 d-flex flex-column justify-content-between">
+                            <div>
+                                <div class="d-inline-flex bg-primary bg-opacity-10 text-primary p-3 rounded-3 mb-3 border border-primary border-opacity-10">
+                                    <i class="bi bi-ticket-perforated fs-3 text-gradient"></i>
+                                </div>
+                                <h4 class="text-white fw-bold mb-2">Gestor de Promociones</h4>
+                                <p class="text-muted-custom fs-7 lh-lg">Crea cupones de descuento porcentual para el catálogo e-commerce o cupones de acceso temporal para el aula virtual.</p>
+                            </div>
+                            <div class="mt-4 pt-3 border-top border-white border-opacity-10">
+                                <a th:href="@{/admin/promociones}" class="btn btn-outline-light border-white border-opacity-10 w-100 py-2.5 fs-8">
+                                    Administrar Promociones <i class="bi bi-ticket-perforated ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Quick navigation helpers -->
+                <div class="row mt-5">
+                    <div class="col text-center">
+                        <div class="glass-card d-inline-block px-4 py-3 rounded-pill border border-white border-opacity-10">
+                            <span class="text-muted-custom me-3 fs-8">Navegación Rápida:</span>
+                            <a th:href="@{/catalogo}" class="text-gradient fw-semibold text-decoration-none me-3 fs-8"><i class="bi bi-cart me-1"></i>Catálogo Público</a>
+                            <span class="text-secondary opacity-25">|</span>
+                            <a th:href="@{/mis-cursos}" class="text-gradient fw-semibold text-decoration-none ms-3 fs-8"><i class="bi bi-book me-1"></i>Mi Aula Virtual</a>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <div th:replace="~{layout :: bootstrap-js}"></div>
+</body>
+</html>

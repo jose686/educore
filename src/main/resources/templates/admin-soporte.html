@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: common-head('Panel de Soporte - Administrador')}"></head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside th:replace="~{layout :: admin-sidebar('soporte')}"></aside>
+
+        <!-- Main Area -->
+        <div class="admin-main">
+            <!-- Navbar -->
+            <header th:replace="~{layout :: admin-navbar('Incidencias y Tickets de Soporte')}"></header>
+
+            <!-- Content Body -->
+            <main class="admin-content-body">
+                
+                <!-- Welcome section -->
+                <div class="row mb-4">
+                    <div class="col-12 d-flex align-items-center justify-content-between flex-wrap gap-3">
+                        <div>
+                            <h2 class="fw-bold text-white mb-1">
+                                <i class="bi bi-chat-right-text me-2 text-gradient"></i>Tickets de Soporte
+                            </h2>
+                            <p class="text-muted-custom fs-6 mb-0">Atiende las consultas, incidencias de pago o peticiones de los alumnos.</p>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="badge bg-white bg-opacity-10 text-white border border-white border-opacity-10 px-3 py-2 fs-8 rounded-pill">
+                                <i class="bi bi-list-ul me-1"></i>
+                                <span th:text="${#lists.size(tickets)} + ' tickets cargados'">0 tickets</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Flash Messages -->
+                <div th:if="${successMsg}" class="alert border-0 bg-success bg-opacity-10 text-success rounded-4 py-3 px-4 mb-4" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i><span th:text="${successMsg}"></span>
+                </div>
+
+                <!-- Filters -->
+                <div class="card glass-card border border-white border-opacity-10 rounded-4 p-3 mb-4">
+                    <form method="GET" th:action="@{/admin/soporte}" class="row g-3 align-items-center">
+                        <div class="col-md-4">
+                            <label class="form-label text-secondary fw-semibold fs-9 mb-1">Filtrar por Estado</label>
+                            <select name="estado" class="form-select bg-dark text-white border-white border-opacity-10 fs-8 py-2" style="color: #ffffff;">
+                                <option value="TODOS" th:selected="${estadoFilter == 'TODOS'}">Todos los tickets</option>
+                                <option value="PENDIENTE" th:selected="${estadoFilter == 'PENDIENTE'}">Pendientes</option>
+                                <option value="RESUELTO" th:selected="${estadoFilter == 'RESUELTO'}">Resueltos</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end" style="height: 100%;">
+                            <button type="submit" class="btn btn-gradient btn-sm w-100 py-2.5 rounded-pill fs-8">
+                                <i class="bi bi-filter me-1"></i> Filtrar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tickets Card -->
+                <div class="card glass-card border border-white border-opacity-10 rounded-4 overflow-hidden shadow-lg">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead class="bg-black bg-opacity-40 text-secondary fs-8 border-bottom border-white border-opacity-10">
+                                <tr>
+                                    <th class="ps-4 py-3" style="width: 10%;">ID</th>
+                                    <th class="py-3" style="width: 15%;">Fecha</th>
+                                    <th class="py-3" style="width: 20%;">Usuario</th>
+                                    <th class="py-3" style="width: 15%;">Motivo</th>
+                                    <th class="py-3" style="width: 25%;">Mensaje</th>
+                                    <th class="py-3 text-center" style="width: 15%;">Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody class="fs-7 border-0">
+                                <tr class="border-bottom border-white border-opacity-5" th:each="ticket : ${tickets}">
+                                    <td class="ps-4 py-3 fw-bold text-white">#<span th:text="${ticket.id}">1</span></td>
+                                    <td class="py-3 text-muted-custom">
+                                        <div th:text="${#temporals.format(ticket.fechaCreacion, 'dd/MM/yyyy')}">01/01/2024</div>
+                                        <div class="fs-9 opacity-70" th:text="${#temporals.format(ticket.fechaCreacion, 'HH:mm')}">12:00</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="text-white fw-semibold" th:text="${ticket.nombre}">Nombre</div>
+                                        <div class="fs-8 text-muted-custom" th:text="${ticket.email}">email@email.com</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-indigo bg-opacity-25 text-indigo-300 border border-indigo px-2.5 py-1 rounded-pill fs-9" th:text="${ticket.motivo}">Soporte Técnico</span>
+                                        <!-- Enlace a pedido si existe -->
+                                        <div th:if="${ticket.pedidoId != null}" class="mt-1">
+                                            <a th:href="@{'/admin/pedidos/' + ${ticket.pedidoId}}" class="text-warning text-decoration-none fs-9 fw-semibold">
+                                                <i class="bi bi-link-45deg me-1"></i>Ver Pedido #<span th:text="${ticket.pedidoId}">123</span>
+                                            </a>
+                                        </div>
+                                    </td>
+                                    <td class="py-3 text-muted-custom fs-8 lh-base text-wrap" style="max-width: 300px;" th:text="${ticket.mensaje}">
+                                        Texto del mensaje largo
+                                    </td>
+                                    <td class="py-3 text-center">
+                                        <div class="d-flex align-items-center justify-content-center flex-column gap-2">
+                                            <span th:if="${ticket.estado == 'PENDIENTE'}" class="badge bg-warning bg-opacity-15 text-warning border border-warning border-opacity-20 px-2.5 py-1 rounded-pill fs-9">
+                                                <i class="bi bi-clock-fill me-1"></i>PENDIENTE
+                                            </span>
+                                            <span th:if="${ticket.estado == 'RESUELTO'}" class="badge bg-success bg-opacity-15 text-success border border-success border-opacity-20 px-2.5 py-1 rounded-pill fs-9">
+                                                <i class="bi bi-check-circle-fill me-1"></i>RESUELTO
+                                            </span>
+                                            
+                                            <!-- Botón Resolver -->
+                                            <form th:if="${ticket.estado == 'PENDIENTE'}" method="POST" th:action="@{'/admin/soporte/' + ${ticket.id} + '/resolver'}">
+                                                <button type="submit" class="btn btn-sm btn-outline-success rounded-pill px-3 py-1 fs-9">
+                                                    <i class="bi bi-check-lg me-1"></i>Resolver
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(tickets)}">
+                                    <td colspan="6" class="text-center py-6">
+                                        <i class="bi bi-chat-right-text fs-1 d-block mb-3 text-secondary opacity-40"></i>
+                                        <p class="text-secondary fs-7 mb-0">No hay tickets registrados con estos filtros.</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <div th:replace="~{layout :: bootstrap-js}"></div>
+</body>
+</html>

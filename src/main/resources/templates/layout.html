@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="common-head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} + ' - EduCore'"></title>
+    
+    <!-- CSRF Meta Tags -->
+    <meta name="_csrf" th:content="${_csrf != null ? _csrf.token : ''}"/>
+    <meta name="_csrf_header" th:content="${_csrf != null ? _csrf.headerName : ''}"/>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0f1d 0%, #111827 40%, #1e1b4b 100%);
+            min-height: 100vh;
+            color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphic Container Card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.45);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* Forms design */
+        .form-control {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #f8fafc;
+            border-radius: 10px;
+            padding: 12px 16px;
+            transition: all 0.25s ease;
+        }
+
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: #6366f1;
+            color: #f8fafc;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Validation classes mapping */
+        .form-control.is-invalid {
+            border-color: #f87171 !important;
+            background-image: none !important; /* Quitar icono bootstrap para control de diseño */
+        }
+
+        .form-control.is-invalid:focus {
+            box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.2) !important;
+        }
+
+        .invalid-feedback {
+            color: #f87171;
+            font-weight: 500;
+            font-size: 0.875rem;
+            margin-top: 6px;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        /* Dynamic buttons */
+        .btn-gradient {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            border: none;
+            color: #ffffff;
+            font-weight: 600;
+            padding: 13px 24px;
+            border-radius: 10px;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.45);
+            color: #ffffff;
+            opacity: 0.95;
+        }
+
+        .btn-gradient:active {
+            transform: translateY(0);
+        }
+
+        /* Utilities */
+        .text-gradient {
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        .text-muted-custom {
+            color: #94a3b8;
+        }
+
+        .logo-text {
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        /* Navbar & Footer spacing */
+        .navbar-custom {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(10, 15, 29, 0.3);
+            backdrop-filter: blur(8px);
+        }
+
+        .footer-custom {
+            margin-top: auto;
+            background: rgba(5, 8, 16, 0.5);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Admin Layout Structuring */
+        .admin-wrapper {
+            display: flex;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #090d16 0%, #0f172a 40%, #1e1b4b 100%);
+            color: #f8fafc;
+        }
+
+        .admin-sidebar {
+            width: 280px;
+            min-width: 280px;
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .admin-sidebar-header {
+            padding: 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .admin-sidebar-menu {
+            flex-grow: 1;
+            padding: 24px 16px;
+            list-style: none;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow-y: auto;
+        }
+
+        .admin-menu-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: #94a3b8;
+            text-decoration: none;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .admin-menu-link i {
+            font-size: 1.15rem;
+            margin-right: 12px;
+            transition: color 0.25s ease;
+        }
+
+        /* Hover state */
+        .admin-menu-link:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.03);
+            transform: translateX(4px);
+        }
+        
+        .admin-menu-link:hover i {
+            color: #a78bfa;
+        }
+
+        /* Active state */
+        .admin-menu-link.active {
+            color: #ffffff;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.15) 0%, rgba(124, 58, 237, 0.15) 100%);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            box-shadow: 0 4px 20px rgba(124, 58, 237, 0.1);
+        }
+
+        .admin-menu-link.active i {
+            color: #c084fc;
+        }
+
+        .admin-sidebar-footer {
+            padding: 20px 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(5, 8, 16, 0.2);
+        }
+
+        .admin-main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .admin-navbar {
+            height: 70px;
+            background: rgba(10, 15, 29, 0.3);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .admin-content-body {
+            padding: 40px;
+            flex-grow: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar Fragment -->
+    <header th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark navbar-custom py-3">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center fs-4 logo-text" href="/">
+                <i class="bi bi-rocket-takeoff-fill text-gradient me-2 fs-3"></i>
+                <span class="text-white">Edu</span><span class="text-gradient">Core</span>
+            </a>
+            
+            <!-- Mobile Toggler -->
+            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <!-- Nav Links & Auth Buttons -->
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ps-lg-3 gap-2">
+                    <li class="nav-item">
+                        <a class="nav-link fs-8 fw-medium" th:href="@{/}">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link fs-8 fw-medium" th:href="@{/cursos}">Cursos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link fs-8 fw-medium" th:href="@{/blog}">Blog</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link fs-8 fw-medium" th:href="@{/minijuegos}">Minijuegos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link fs-8 fw-medium" th:href="@{/contacto}">Soporte</a>
+                    </li>
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <a class="nav-link fs-8 fw-medium" th:href="@{/mis-cursos}">Mi Aula Virtual</a>
+                    </li>
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <a class="nav-link fs-8 fw-medium" th:href="@{/perfil/compras}">Mis Compras</a>
+                    </li>
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <a class="nav-link fs-8 fw-medium position-relative" th:href="@{/carrito}">
+                            <i class="bi bi-cart3"></i> Carrito
+                            <span th:if="${session.carrito != null && !session.carrito.isEmpty()}" 
+                                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
+                                  th:text="${session.carrito.size()}" 
+                                  style="font-size: 0.65rem; padding: 0.25em 0.45em;">
+                                0
+                            </span>
+                        </a>
+                    </li>
+                    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                        <a class="nav-link fs-8 fw-bold text-warning" th:href="@{/admin}">
+                            <i class="bi bi-shield-lock-fill me-1"></i> Admin Panel
+                        </a>
+                    </li>
+                </ul>
+                
+                <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
+                    <!-- Guest Options -->
+                    <div sec:authorize="!isAuthenticated()" class="d-flex gap-2">
+                        <a th:href="@{/login}" class="btn btn-outline-light btn-sm px-3.5 rounded-pill fs-8">Iniciar Sesión</a>
+                        <a th:href="@{/register}" class="btn btn-gradient btn-sm px-3.5 rounded-pill text-white border-0 fs-8">Registrarse</a>
+                    </div>
+                    
+                    <!-- Authenticated Options -->
+                    <div sec:authorize="isAuthenticated()" class="dropdown">
+                        <button class="btn btn-outline-light btn-sm dropdown-toggle px-3.5 rounded-pill fs-8 d-flex align-items-center gap-2" type="button" id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle text-gradient fs-7"></i>
+                            <span sec:authentication="name" class="text-white fw-medium">Usuario</span>
+                            <i class="bi bi-chevron-down fs-9 ms-1 opacity-70"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end bg-dark border border-white border-opacity-10 rounded-3 shadow-lg" aria-labelledby="userMenuDropdown">
+                            <li>
+                                <a class="dropdown-item text-white fs-8 py-2" th:href="@{/perfil}">
+                                    <i class="bi bi-person me-2 text-gradient"></i> Mi Perfil
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item text-white fs-8 py-2" th:href="@{/mis-cursos}">
+                                    <i class="bi bi-mortarboard me-2 text-gradient"></i> Mi Aula Virtual
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item text-white fs-8 py-2" th:href="@{/perfil/compras}">
+                                    <i class="bi bi-receipt me-2 text-gradient"></i> Mis Compras
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider border-white border-opacity-10"></li>
+                            <li>
+                                <form th:action="@{/logout}" method="POST" class="px-3 py-1 mb-0">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger w-100 rounded-pill fs-8">
+                                        <i class="bi bi-box-arrow-right me-1"></i> Salir
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Footer Fragment -->
+    <footer th:fragment="footer" class="footer-custom py-4 text-center text-muted-custom mt-auto">
+        <div class="container">
+            <p class="mb-0 fs-7">&copy; 2026 EduCore Monolith. Integrando LMS y E-Commerce.</p>
+            <div class="mt-2">
+                <a th:href="@{/canjear-token}" class="text-decoration-none text-muted-custom hover-white fs-8">
+                    <i class="bi bi-key-fill me-1"></i> Canjear Token de Invitado
+                </a>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Admin Sidebar Fragment -->
+    <aside th:fragment="admin-sidebar(activeSection)" class="admin-sidebar">
+        <!-- Sidebar Header -->
+        <div class="admin-sidebar-header">
+            <a class="d-flex align-items-center fs-4 logo-text text-decoration-none" href="/">
+                <i class="bi bi-rocket-takeoff-fill text-gradient me-2 fs-3"></i>
+                <span class="text-white">Edu</span><span class="text-gradient">Core</span>
+            </a>
+            <div class="fs-9 text-muted-custom mt-1 fw-bold tracking-wider text-uppercase" style="letter-spacing: 1px;">Backoffice Panel</div>
+        </div>
+
+        <!-- Sidebar Menu Links -->
+        <ul class="admin-sidebar-menu">
+            <li>
+                <a th:href="@{/admin}" class="admin-menu-link" th:classappend="${activeSection == 'dashboard'} ? 'active' : ''">
+                    <i class="bi bi-speedometer2"></i> Inicio Backoffice
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/blog/listado}" class="admin-menu-link" th:classappend="${activeSection == 'blog'} ? 'active' : ''">
+                    <i class="bi bi-journal-text"></i> Gestión del Blog
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/cursos/listado}" class="admin-menu-link" th:classappend="${activeSection == 'cursos'} ? 'active' : ''">
+                    <i class="bi bi-tags"></i> Catálogo de Cursos
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/media}" class="admin-menu-link" th:classappend="${activeSection == 'media'} ? 'active' : ''">
+                    <i class="bi bi-images"></i> Biblioteca de Medios
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/biblioteca-interactivos}" class="admin-menu-link" th:classappend="${activeSection == 'biblioteca'} ? 'active' : ''">
+                    <i class="bi bi-folder2-open"></i> Biblioteca Interactiva
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/usuarios}" class="admin-menu-link" th:classappend="${activeSection == 'usuarios'} ? 'active' : ''">
+                    <i class="bi bi-people"></i> Gestión de Usuarios
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/promociones}" class="admin-menu-link" th:classappend="${activeSection == 'promociones'} ? 'active' : ''">
+                    <i class="bi bi-ticket-perforated"></i> Gestor de Promociones
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/pedidos}" class="admin-menu-link" th:classappend="${activeSection == 'pedidos'} ? 'active' : ''">
+                    <i class="bi bi-receipt-cutoff"></i> Pedidos y Reembolsos
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/soporte}" class="admin-menu-link" th:classappend="${activeSection == 'soporte'} ? 'active' : ''">
+                    <i class="bi bi-chat-right-text"></i> Tickets de Soporte
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/ajustes}" class="admin-menu-link" th:classappend="${activeSection == 'ajustes'} ? 'active' : ''">
+                    <i class="bi bi-gear"></i> Ajustes Empresa
+                </a>
+            </li>
+        </ul>
+
+        <!-- Sidebar Footer -->
+        <div class="admin-sidebar-footer">
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <i class="bi bi-person-circle fs-4 text-gradient"></i>
+                <div class="overflow-hidden">
+                    <div class="fs-8 fw-semibold text-white text-truncate" sec:authentication="name">Administrador</div>
+                    <div class="fs-9 text-muted-custom text-truncate">Panel de Control</div>
+                </div>
+            </div>
+            <a href="/" class="btn btn-outline-light border-white border-opacity-10 btn-sm w-100 rounded-pill py-1.5 fs-9 mb-2">
+                <i class="bi bi-arrow-left me-1"></i> Volver al Sitio
+            </a>
+            <form th:action="@{/logout}" method="POST" class="m-0">
+                <button type="submit" class="btn btn-outline-danger btn-sm w-100 rounded-pill py-1.5 fs-9">
+                    <i class="bi bi-box-arrow-right me-1"></i> Cerrar Sesión
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- Admin Navbar Fragment -->
+    <header th:fragment="admin-navbar(pageTitle)" class="admin-navbar">
+        <h3 class="fw-bold text-white mb-0" th:text="${pageTitle}">Título de Página</h3>
+        <div class="d-flex align-items-center gap-3">
+            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-20 px-3 py-1.5 fs-8 rounded-pill">
+                <i class="bi bi-shield-lock-fill me-1"></i> ADMIN
+            </span>
+        </div>
+    </header>
+
+    <!-- Bootstrap JS Bundle -->
+    <script th:fragment="bootstrap-js" src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

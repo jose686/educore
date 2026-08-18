@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <div th:replace="~{layout :: common-head('Gestor de Medios')}"></div>
+    <style>
+        .nav-pills .nav-link.active {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+            color: white !important;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+        }
+        .hover-bg-white-10:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .media-fallback-icon {
+            font-size: 3.5rem;
+            color: #818cf8;
+            filter: drop-shadow(0 0 10px rgba(129, 140, 248, 0.3));
+            transition: transform 0.2s ease;
+        }
+        .media-fallback-icon:hover {
+            transform: scale(1.1);
+        }
+    </style>
+
+    <style th:if="${selectMode}">
+        .admin-sidebar, .admin-navbar, .admin-sidebar-footer, header {
+            display: none !important;
+        }
+        .admin-wrapper {
+            background: #0f172a !important;
+            min-height: auto !important;
+        }
+        .admin-main {
+            padding: 0 !important;
+        }
+        .admin-content-body {
+            padding: 20px !important;
+        }
+        .col-xl-4 {
+            display: none !important;
+        }
+        .col-xl-8 {
+            width: 100% !important;
+            flex: 0 0 100% !important;
+            max-width: 100% !important;
+        }
+        .row.mb-4 {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside th:replace="~{layout :: admin-sidebar('media')}"></aside>
+
+        <!-- Main Area -->
+        <div class="admin-main">
+            <!-- Navbar -->
+            <header th:replace="~{layout :: admin-navbar('Biblioteca de Medios')}"></header>
+
+            <!-- Content Body -->
+            <main class="admin-content-body">
+                
+                <!-- Welcome section (can be simplified since we have the navbar) -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h2 class="fw-bold text-white mb-2">Gestor de Archivos Multimedia</h2>
+                        <p class="text-muted-custom fs-5 mb-0">Sube imágenes o archivos y obtén sus URLs de acceso para utilizarlas en la plataforma.</p>
+                    </div>
+                </div>
+
+                <!-- Success Alert with Copy Field -->
+                <div th:if="${param.uploaded_url}" class="alert alert-success border-0 bg-success bg-opacity-10 text-success rounded-4 p-4 mb-4" role="alert">
+                    <h6 class="fw-bold mb-1"><i class="bi bi-check-circle-fill me-2 fs-5 align-middle"></i>¡Archivo Subido con Éxito!</h6>
+                    <p class="fs-7 mb-3 text-muted-custom">Puedes copiar la siguiente URL para usarla en tus portadas de curso o artículos de blog:</p>
+                    <div class="input-group" style="max-width: 500px;">
+                        <input type="text" id="copyUrlInput" th:value="${param.uploaded_url}" class="form-control bg-dark bg-opacity-50 border border-white border-opacity-10 text-white fs-7 px-3" readonly>
+                        <button class="btn btn-gradient px-4 fs-8 fw-bold" onclick="copyToClipboard()">Copiar URL <i class="bi bi-clipboard ms-1"></i></button>
+                    </div>
+                </div>
+
+                <!-- Error Alert -->
+                <div th:if="${param.error}" class="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger rounded-4 p-4 mb-4" role="alert">
+                    <h6 class="fw-bold mb-1"><i class="bi bi-exclamation-triangle-fill me-2 fs-5 align-middle"></i>Error al subir archivo</h6>
+                    <p th:if="${param.error[0] == 'empty'}" class="fs-7 mb-0 text-muted-custom">Por favor, selecciona un archivo válido para subir.</p>
+                    <p th:if="${param.error[0] == 'invalid_type'}" class="fs-7 mb-0 text-muted-custom">Formato no permitido. Solo se aceptan imágenes (PNG, JPG, WEBP, etc.) o vídeos MP4 (video/mp4).</p>
+                </div>
+
+                <div class="row g-4">
+                    
+                    <div class="col-12 col-xl-4">
+                        <div class="card glass-card border border-white border-opacity-10 p-4 rounded-4 shadow-lg sticky-xl-top" style="top: 24px; z-index: 10;">
+                            <h4 class="text-white fw-bold mb-4 pb-2 border-bottom border-white border-opacity-10">Subir Archivo</h4>
+                            
+                            <form th:action="@{/admin/media/upload}" method="POST" enctype="multipart/form-data">
+                                <div class="mb-3">
+                                    <label for="fileInput" class="form-label text-muted-custom fs-8 fw-semibold">Selecciona Archivo (Imagen, Vídeo o PDF/HTML)</label>
+                                    <input type="file" id="fileInput" name="file" accept=".png,.jpg,.jpeg,.gif,.webp,.mp4,.html,.htm,.pdf" class="form-control" required>
+                                    <small class="text-muted-custom fs-9 mt-1.5 d-block">Límite máximo por archivo: 1024MB. Se aceptan imágenes, vídeos MP4, documentos PDF o archivos HTML.</small>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="aliasInput" class="form-label text-muted-custom fs-8 fw-semibold">Identificador / Alias Único (Opcional)</label>
+                                    <input type="text" id="aliasInput" name="alias" class="form-control" placeholder="ej: img-portada-ajedrez o pdf-manual-ajedrez">
+                                    <small class="text-muted-custom fs-9 mt-1.5 d-block">Se utilizará para referenciar el archivo de forma fácil y persistente.</small>
+                                </div>
+
+                                <div class="mb-4 d-none" id="categoriaContainer">
+                                    <label for="categoriaMediaInput" class="form-label text-muted-custom fs-8 fw-semibold">Categoría del Archivo</label>
+                                    <select id="categoriaMediaInput" name="categoriaMedia" class="form-select" disabled>
+                                        <option value="GENERAL">GENERAL</option>
+                                    </select>
+                                    <small class="text-muted-custom fs-9 mt-1.5 d-block">Elige el destino/uso del archivo en la plataforma.</small>
+                                </div>
+
+                                <!-- Submit Upload -->
+                                <button type="submit" class="btn btn-gradient w-100 py-2.5">
+                                    Subir al Servidor <i class="bi bi-cloud-arrow-up ms-1"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Right Side: Grid of Uploaded Assets (col-xl-8) -->
+                    <div class="col-12 col-xl-8">
+                        
+                        <!-- Buscador por alias / texto -->
+                        <div class="mb-4">
+                            <form th:action="@{/admin/media}" method="GET" class="d-flex gap-2">
+                                <input type="hidden" name="tipo" th:value="${currentTipo}">
+                                <input type="hidden" name="categoria" th:value="${currentCategoria}">
+                                <input type="hidden" name="selectMode" th:value="${selectMode}">
+                                <input type="hidden" name="hideFilters" th:value="${hideFilters}">
+                                <input type="text" name="search" th:value="${search}" class="form-control form-control-sm rounded-pill px-3" placeholder="Buscar por alias o nombre de archivo...">
+                                <button type="submit" class="btn btn-outline-light border-white border-opacity-10 btn-sm rounded-pill px-4">
+                                    Buscar <i class="bi bi-search ms-1"></i>
+                                </button>
+                                <a th:if="${search != null && !search.isEmpty()}" th:href="@{/admin/media(tipo=${currentTipo}, categoria=${currentCategoria}, selectMode=${selectMode}, hideFilters=${hideFilters})}" class="btn btn-outline-danger btn-sm rounded-pill px-3 d-flex align-items-center">
+                                    <i class="bi bi-x-lg"></i>
+                                </a>
+                            </form>
+                        </div>
+
+                        <!-- Navigation Tabs for Filtering -->
+                        <ul th:if="${!hideFilters}" class="nav nav-pills mb-4 gap-2 bg-dark bg-opacity-20 p-2 rounded-4 border border-white border-opacity-5" id="mediaTabs">
+                             <li class="nav-item">
+                                 <a class="nav-link px-4 py-2 rounded-pill fs-8 fw-semibold text-white" 
+                                    th:classappend="${currentTipo == null || currentTipo == ''} ? 'bg-indigo active' : 'hover-bg-white-10 text-muted-custom'"
+                                    th:href="@{/admin/media(selectMode=${selectMode}, search=${search}, categoria=${currentCategoria}, hideFilters=${hideFilters})}">Todas</a>
+                             </li>
+                             <li class="nav-item">
+                                 <a class="nav-link px-4 py-2 rounded-pill fs-8 fw-semibold text-white" 
+                                    th:classappend="${currentTipo == 'IMAGEN'} ? 'bg-indigo active' : 'hover-bg-white-10 text-muted-custom'"
+                                    th:href="@{/admin/media(tipo='IMAGEN', selectMode=${selectMode}, search=${search}, categoria=${currentCategoria}, hideFilters=${hideFilters})}">Imágenes 🖼️</a>
+                             </li>
+                             <li class="nav-item">
+                                 <a class="nav-link px-4 py-2 rounded-pill fs-8 fw-semibold text-white" 
+                                    th:classappend="${currentTipo == 'VIDEO'} ? 'bg-indigo active' : 'hover-bg-white-10 text-muted-custom'"
+                                    th:href="@{/admin/media(tipo='VIDEO', selectMode=${selectMode}, search=${search}, categoria=${currentCategoria}, hideFilters=${hideFilters})}">Vídeos 🎥</a>
+                             </li>
+                             <li class="nav-item">
+                                 <a class="nav-link px-4 py-2 rounded-pill fs-8 fw-semibold text-white" 
+                                    th:classappend="${currentTipo == 'DOCUMENTO_PDF'} ? 'bg-indigo active' : 'hover-bg-white-10 text-muted-custom'"
+                                    th:href="@{/admin/media(tipo='DOCUMENTO_PDF', selectMode=${selectMode}, search=${search}, categoria=${currentCategoria}, hideFilters=${hideFilters})}">Documentos 📄</a>
+                             </li>
+                             <li class="nav-item">
+                                 <a class="nav-link px-4 py-2 rounded-pill fs-8 fw-semibold text-white" 
+                                    th:classappend="${currentTipo == 'HTML_INTERACTIVO'} ? 'bg-indigo active' : 'hover-bg-white-10 text-muted-custom'"
+                                    th:href="@{/admin/media(tipo='HTML_INTERACTIVO', selectMode=${selectMode}, search=${search}, categoria=${currentCategoria}, hideFilters=${hideFilters})}">Interactivos 🎮</a>
+                             </li>
+                         </ul>
+
+                         <!-- Navigation Tabs for Filtering by Category -->
+                         <ul th:if="${!hideFilters}" class="nav nav-pills mb-4 gap-2 bg-dark bg-opacity-20 p-2 rounded-4 border border-white border-opacity-5" id="categoriaTabs">
+                             <li class="nav-item">
+                                 <a class="nav-link px-4 py-2 rounded-pill fs-8 fw-semibold text-white" 
+                                    th:classappend="${currentCategoria == null} ? 'bg-indigo active' : 'hover-bg-white-10 text-muted-custom'"
+                                    th:href="@{/admin/media(tipo=${currentTipo}, selectMode=${selectMode}, search=${search}, hideFilters=${hideFilters})}">Todas las Categorías</a>
+                             </li>
+                             <li class="nav-item" th:each="cat : ${T(com.educore.platform.media.model.CategoriaMedia).values()}">
+                                 <a class="nav-link px-4 py-2 rounded-pill fs-8 fw-semibold text-white" 
+                                    th:classappend="${currentCategoria == cat} ? 'bg-indigo active' : 'hover-bg-white-10 text-muted-custom'"
+                                    th:href="@{/admin/media(categoria=${cat}, tipo=${currentTipo}, selectMode=${selectMode}, search=${search}, hideFilters=${hideFilters})}">
+                                     <span th:text="${cat}">GENERAL</span>
+                                 </a>
+                             </li>
+                         </ul>
+
+                        <!-- Empty Library Placeholder -->
+                        <div id="emptyLibraryPlaceholder" th:class="${#lists.isEmpty(files)} ? 'glass-card text-center py-5 border border-white border-opacity-10 rounded-4' : 'glass-card text-center py-5 border border-white border-opacity-10 rounded-4 d-none'">
+                            <i class="bi bi-images text-gradient fs-1 d-block mb-3"></i>
+                            <h4 class="text-white fw-bold">Biblioteca Vacía</h4>
+                            <p class="text-muted-custom mb-0">Comienza subiendo archivos desde el formulario lateral o filtra por otra pestaña.</p>
+                        </div>
+
+                        <div id="mediaGrid" class="row row-cols-2 row-cols-md-3 g-3" th:style="${#lists.isEmpty(files)} ? 'display: none;' : ''">
+                            <div class="col" th:each="file : ${files}">
+                                <div class="card glass-card border border-white border-opacity-10 p-3 h-100 d-flex flex-column justify-content-between rounded-4"
+                                     th:data-url="${file.alias != null && !file.alias.isEmpty() ? file.alias : file.url}">
+
+                                      <!-- Preview Box -->
+                                     <div class="ratio ratio-4x3 bg-black bg-opacity-40 rounded-3 overflow-hidden mb-3 d-flex align-items-center justify-content-center border border-white border-opacity-5" 
+                                          th:switch="${file.getTipo().name()}">
+                                         <!-- Case Document/PDF -->
+                                         <div th:case="'DOCUMENTO_PDF'" class="d-flex align-items-center justify-content-center w-100 h-100">
+                                             <i class="bi bi-file-earmark-pdf media-fallback-icon" th:if="${file.filename.toLowerCase().endsWith('.pdf')}"></i>
+                                             <i class="bi bi-filetype-html media-fallback-icon" th:unless="${file.filename.toLowerCase().endsWith('.pdf')}"></i>
+                                         </div>
+                                         <!-- Case HTML Interactivo -->
+                                         <div th:case="'HTML_INTERACTIVO'" class="d-flex align-items-center justify-content-center w-100 h-100">
+                                             <i class="bi bi-filetype-html media-fallback-icon"></i>
+                                         </div>
+                                         <!-- Case Video (Play) -->
+                                         <div th:case="'VIDEO'" class="d-flex align-items-center justify-content-center w-100 h-100">
+                                             <i class="bi bi-play-circle-fill media-fallback-icon"></i>
+                                         </div>
+                                         <!-- Case Image (Default) -->
+                                         <img th:case="*" 
+                                              th:src="${file.url}" alt="Archivo Multimedia" class="img-fluid object-fit-cover w-100 h-100">
+                                     </div>
+
+                                      <!-- Action box -->
+                                      <div>
+                                         <span class="fs-8 text-white fw-semibold d-block mb-1 text-truncate" th:text="${file.nombreOriginal != null ? file.nombreOriginal : file.filename}">nombreOriginal</span>
+                                         
+                                         <!-- Badges de Tipo y Categoría -->
+                                         <div class="d-flex flex-wrap gap-1 mb-2">
+                                             <!-- Badge Tipo -->
+                                             <span class="badge fs-9 py-0.5 px-2 border" 
+                                                   th:classappend="${file.tipo.name() == 'DOCUMENTO_PDF'} ? 'bg-danger bg-opacity-10 text-danger border-danger border-opacity-25' : 
+                                                                  (${file.tipo.name() == 'HTML_INTERACTIVO'} ? 'bg-info bg-opacity-10 text-info border-info border-opacity-25' : 
+                                                                  (${file.tipo.name() == 'VIDEO'} ? 'bg-warning bg-opacity-10 text-warning border-warning border-opacity-25' : 
+                                                                  'bg-secondary bg-opacity-10 text-white-50 border-white border-opacity-10'))"
+                                                   th:text="${file.tipo}">IMAGEN</span>
+                                             
+                                             <!-- Badge Categoría -->
+                                             <span th:if="${file.tipo.name() == 'HTML_INTERACTIVO'}" 
+                                                   class="badge bg-purple bg-opacity-10 text-purple-custom border border-purple border-opacity-25 fs-9 py-0.5 px-2"
+                                                   th:text="${file.categoriaMedia}">MINIJUEGO</span>
+                                         </div>
+
+                                         <code class="fs-9 text-muted-custom d-block mb-2 text-truncate" th:text="${file.url}">/media/uuid.png</code>
+
+                                         <!-- Alias editing field -->
+                                         <div th:if="${!selectMode}" class="mb-3">
+                                             <form th:action="@{/admin/media/alias/{filename}(filename=${file.filename})}" method="POST" class="input-group input-group-sm">
+                                                 <input type="text" name="alias" th:value="${file.alias}" class="form-control bg-dark bg-opacity-40 text-white border-white border-opacity-10 fs-9" placeholder="Alias del archivo...">
+                                                 <button type="submit" class="btn btn-outline-light border-white border-opacity-10 px-2 py-0 fs-9" title="Guardar alias">
+                                                     <i class="bi bi-save"></i>
+                                                 </button>
+                                             </form>
+                                         </div>
+                                         <div th:if="${selectMode && file.alias != null}" class="mb-2">
+                                             <span class="badge bg-purple bg-opacity-20 text-purple-custom border border-purple border-opacity-10 fs-9 py-0.5 px-2">Alias: <span th:text="${file.alias}">alias</span></span>
+                                         </div>
+
+                                         <!-- Direct Resource Creation for HTML documents only -->
+                                         <div th:if="${!selectMode && (file.tipo.name() == 'HTML_INTERACTIVO' || (file.tipo.name() == 'DOCUMENTO_PDF' && !file.filename.toLowerCase().endsWith('.pdf')))}" class="mb-3">
+                                             <a th:href="@{/admin/biblioteca-interactivos/nuevo(htmlUrl=${file.alias != null && !file.alias.isEmpty() ? file.alias : file.url})}" class="btn btn-sm btn-gradient w-100 py-2 fs-8 rounded-pill d-flex align-items-center justify-content-center">
+                                                 <span th:text="${file.categoriaMedia.name() == 'MINIJUEGO'} ? 'Registrar como Minijuego' : 'Crear Recurso Interactivo'">Crear Recurso Interactivo</span> <i class="bi bi-controller ms-1.5"></i>
+                                             </a>
+                                         </div>
+
+                                         <!-- PDF View/Download Button -->
+                                         <div th:if="${!selectMode && file.filename.toLowerCase().endsWith('.pdf')}" class="mb-3">
+                                             <a th:href="${file.url}" target="_blank" class="btn btn-sm btn-outline-primary w-100 py-2 fs-8 rounded-pill d-flex align-items-center justify-content-center">
+                                                 Abrir / Descargar PDF <i class="bi bi-file-earmark-pdf-fill ms-1.5"></i>
+                                             </a>
+                                         </div>
+
+                                         <!-- Normal Mode Buttons -->
+                                         <div th:if="${!selectMode}" class="d-flex gap-2">
+                                             <button class="btn btn-outline-light border-white border-opacity-10 flex-grow-1 py-1.5 fs-8 rounded-pill" 
+                                                     th:data-url="${file.url}" 
+                                                     onclick="copyUrl(this)">
+                                                 Copiar <i class="bi bi-clipboard ms-1"></i>
+                                             </button>
+                                             <button class="btn btn-outline-danger border-danger border-opacity-20 py-1.5 px-3 fs-8 rounded-pill" 
+                                                     th:data-url="${file.url}" 
+                                                     onclick="confirmDelete(this)"
+                                                     title="Eliminar archivo">
+                                                 <i class="bi bi-trash"></i>
+                                             </button>
+                                         </div>
+
+                                         <!-- Select Mode Button -->
+                                         <div th:if="${selectMode}">
+                                             <button class="btn btn-gradient w-100 py-1.5 fs-8 rounded-pill" 
+                                                     th:data-url="${file.alias != null && !file.alias.isEmpty() ? file.alias : file.url}" 
+                                                     onclick="selectAsset(this)">
+                                                 Seleccionar <i class="bi bi-check-lg ms-1"></i>
+                                             </button>
+                                         </div>
+                                     </div>
+                                 </div>
+                             </div>
+                        </div></div>
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación de Eliminación -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content glass-card border border-white border-opacity-10 text-white shadow-lg">
+                <div class="modal-header border-bottom border-white border-opacity-10 py-3">
+                    <h5 class="modal-title fw-bold" id="deleteConfirmModalLabel">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body py-4">
+                    <p class="fs-7 text-muted-custom mb-3">¿Estás seguro de que deseas eliminar este archivo? Esta acción no se puede deshacer y podría romper imágenes en cursos activos.</p>
+                    <div class="text-center my-3 bg-black bg-opacity-30 p-3 rounded-4 border border-white border-opacity-5">
+                        <img id="modalPreviewImg" src="" alt="Vista previa" class="img-fluid rounded-3" style="max-height: 180px; object-fit: contain;">
+                    </div>
+                </div>
+                <div class="modal-footer border-top border-white border-opacity-10 py-3">
+                    <button type="button" class="btn btn-outline-light border-white border-opacity-10 py-1.5 px-3 fs-8 rounded-pill" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" id="confirmDeleteBtn" class="btn btn-danger py-1.5 px-4 fs-8 rounded-pill">Eliminar <i class="bi bi-trash ms-1"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <div th:replace="~{layout :: bootstrap-js}"></div>
+
+    <!-- Script to manage clipboard and deletion interactions -->
+    <script>
+        function copyToClipboard() {
+            var copyText = document.getElementById("copyUrlInput");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(copyText.value);
+            alert("URL copiada: " + copyText.value);
+        }
+        function copyUrl(btn) {
+            var url = btn.getAttribute("data-url");
+            navigator.clipboard.writeText(url);
+            alert("URL copiada: " + url);
+        }
+        function selectAsset(btn) {
+            const card = btn.closest(".card");
+            const url = card ? card.getAttribute("data-url") : btn.getAttribute("data-url");
+            if (window.parent && window.parent.onMinijuegoSelected) {
+                window.parent.onMinijuegoSelected(url);
+            }
+        }
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            var fileName = e.target.value.toLowerCase();
+            var container = document.getElementById('categoriaContainer');
+            var select = document.getElementById('categoriaMediaInput');
+            
+            select.innerHTML = '';
+            
+            if (fileName.endsWith('.html') || fileName.endsWith('.htm')) {
+                container.classList.remove('d-none');
+                select.disabled = false;
+                
+                var optMinijuego = document.createElement('option');
+                optMinijuego.value = 'MINIJUEGO';
+                optMinijuego.text = 'MINIJUEGO';
+                select.appendChild(optMinijuego);
+                
+                var optRecurso = document.createElement('option');
+                optRecurso.value = 'RECURSO_CURSO';
+                optRecurso.text = 'RECURSO_CURSO';
+                select.appendChild(optRecurso);
+                
+                select.value = 'MINIJUEGO';
+            } else {
+                container.classList.add('d-none');
+                select.disabled = true;
+                
+                var optGeneral = document.createElement('option');
+                optGeneral.value = 'GENERAL';
+                optGeneral.text = 'GENERAL';
+                select.appendChild(optGeneral);
+                
+                select.value = 'GENERAL';
+            }
+        });
+
+
+        let urlToDelete = null;
+        let cardElementToDelete = null;
+        let deleteModal = null;
+
+        function confirmDelete(btn) {
+            urlToDelete = btn.getAttribute("data-url");
+            cardElementToDelete = btn.closest(".col");
+            
+            // Cargar preview en el modal si no es un interactivo o video
+            const modalPreviewImg = document.getElementById("modalPreviewImg");
+            if (urlToDelete.endsWith(".html") || urlToDelete.endsWith(".htm") || urlToDelete.endsWith(".mp4")) {
+                modalPreviewImg.style.display = 'none';
+            } else {
+                modalPreviewImg.style.display = 'inline-block';
+                modalPreviewImg.src = urlToDelete;
+            }
+            
+            // Mostrar modal usando Bootstrap JS API
+            if (!deleteModal) {
+                deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+            }
+            deleteModal.show();
+        }
+
+
+        document.getElementById("confirmDeleteBtn").addEventListener("click", function() {
+            if (!urlToDelete || !cardElementToDelete) return;
+
+            // Extraer el nombre del archivo de la URL
+            const filename = urlToDelete.substring(urlToDelete.lastIndexOf('/') + 1);
+            
+            // Obtener el token CSRF de las etiquetas meta
+            const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+            // Cambiar el estado del botón a cargando
+            const btn = this;
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Eliminando...`;
+
+            fetch('/admin/media/' + filename, {
+                method: 'DELETE',
+                headers: {
+                    [csrfHeader]: csrfToken
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error("No se pudo eliminar el archivo en el servidor.");
+            })
+            .then(data => {
+                if (data.success) {
+                    // Cerrar el modal
+                    deleteModal.hide();
+                    
+                    // Animación suave de desvanecimiento
+                    cardElementToDelete.style.transition = 'all 0.5s ease';
+                    cardElementToDelete.style.opacity = '0';
+                    cardElementToDelete.style.transform = 'scale(0.8)';
+                    
+                    setTimeout(() => {
+                        cardElementToDelete.remove();
+                        
+                        // Si ya no quedan tarjetas en el listado, mostrar el mensaje de biblioteca vacía
+                        const grid = document.getElementById('mediaGrid');
+                        if (grid && grid.querySelectorAll('.col').length === 0) {
+                            grid.style.display = 'none';
+                            document.getElementById('emptyLibraryPlaceholder').classList.remove('d-none');
+                        }
+                    }, 500);
+                } else {
+                    alert("Error: " + (data.error || "No se pudo eliminar el archivo."));
+                }
+            })
+            .catch(error => {
+                alert("Error al eliminar el archivo: " + error.message);
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            });
+        });
+    </script>
+</body>
+</html>

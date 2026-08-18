@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: common-head('Gestor de Promociones - Administrador')}"></head>
+<body>
+<div class="admin-wrapper">
+    <aside th:replace="~{layout :: admin-sidebar('promociones')}"></aside>
+    <div class="admin-main">
+        <header th:replace="~{layout :: admin-navbar('Gestor de Promociones')}"></header>
+        <main class="admin-content-body">
+
+            <!-- Page header -->
+            <div class="row mb-4 align-items-center">
+                <div class="col">
+                    <h2 class="fw-bold text-white mb-1">Promociones y Acceso</h2>
+                    <p class="text-muted-custom fs-7 mb-0">Gestiona cupones, tokens de invitado, packs de cursos y descuentos automáticos.</p>
+                </div>
+            </div>
+
+            <!-- Success Alert -->
+            <div th:if="${param.success}" class="alert alert-success border-0 bg-success bg-opacity-10 text-success rounded-3 py-3 px-4 mb-4">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <span th:if="${param.success[0] == 'create'}">¡Elemento creado con éxito!</span>
+                <span th:if="${param.success[0] == 'delete'}">Elemento eliminado correctamente.</span>
+            </div>
+
+            <!-- Tab Navigation -->
+            <ul class="nav nav-pills mb-4 gap-2" id="promoTabs" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" id="tab-cupones" data-bs-toggle="pill" data-bs-target="#panel-cupones" type="button">
+                        <i class="bi bi-ticket-perforated me-1"></i> Cupones
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="tab-tokens" data-bs-toggle="pill" data-bs-target="#panel-tokens" type="button">
+                        <i class="bi bi-key me-1"></i> Tokens de Invitado
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="tab-paquetes" data-bs-toggle="pill" data-bs-target="#panel-paquetes" type="button">
+                        <i class="bi bi-box-seam me-1"></i> Paquetes (Bundles)
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="tab-descuentos" data-bs-toggle="pill" data-bs-target="#panel-descuentos" type="button">
+                        <i class="bi bi-percent me-1"></i> Descuentos de Curso
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+
+                <!-- ===================== CUPONES ===================== -->
+                <div class="tab-pane fade show active" id="panel-cupones">
+                    <div class="row g-4">
+                        <div class="col-12 col-lg-4">
+                            <div class="card glass-card p-4">
+                                <h5 class="text-white fw-bold mb-4">Nuevo Cupón</h5>
+                                <form th:action="@{/admin/promociones/nuevo}" method="POST" id="form-cupon">
+                                    <div class="mb-3">
+                                        <label class="form-label">Código</label>
+                                        <input type="text" name="codigo" class="form-control" placeholder="EJ: SUMMER20" required style="text-transform:uppercase;">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Tipo</label>
+                                        <select name="tipo" class="form-select" onchange="toggleCuponFields(this)">
+                                            <option value="DESCUENTO" selected>Descuento Porcentual</option>
+                                            <option value="ACCESO_TEMPORAL">Acceso Temporal</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3" id="div-descuento">
+                                        <label class="form-label">Descuento (%)</label>
+                                        <input type="number" name="descuentoPorcentaje" class="form-control" min="1" max="100" placeholder="15">
+                                    </div>
+                                    <div class="mb-3 d-none" id="div-dias-cupon">
+                                        <label class="form-label">Días de Acceso</label>
+                                        <input type="number" name="diasAcceso" class="form-control" min="1" placeholder="30">
+                                    </div>
+                                    <div class="mb-4 d-none" id="div-curso-cupon">
+                                        <label class="form-label">Curso Destino</label>
+                                        <select name="cursoId" class="form-select">
+                                            <option value="">Selecciona un curso...</option>
+                                            <option th:each="c : ${cursos}" th:value="${c.id}" th:text="${c.titulo}"></option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-gradient w-100">Guardar Cupón <i class="bi bi-save ms-1"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-8">
+                            <div class="card glass-card p-4">
+                                <h5 class="text-white fw-bold mb-4">Cupones Registrados</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-dark table-hover align-middle m-0">
+                                        <thead><tr>
+                                            <th class="fs-8 text-secondary">Código</th>
+                                            <th class="fs-8 text-secondary">Tipo</th>
+                                            <th class="fs-8 text-secondary">Detalle</th>
+                                            <th class="fs-8 text-secondary">Estado</th>
+                                            <th class="fs-8 text-secondary text-end">Acción</th>
+                                        </tr></thead>
+                                        <tbody>
+                                        <tr th:each="c : ${cupones}">
+                                            <td><code class="text-gradient fw-bold" th:text="${c.codigo}"></code></td>
+                                            <td>
+                                                <span th:if="${c.tipo.name() == 'DESCUENTO'}" class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-15 fs-9">DESCUENTO</span>
+                                                <span th:if="${c.tipo.name() == 'ACCESO_TEMPORAL'}" class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-15 fs-9">ACCESO TEMP.</span>
+                                            </td>
+                                            <td class="fs-8">
+                                                <span th:if="${c.tipo.name() == 'DESCUENTO'}" th:text="${c.descuentoPorcentaje} + '%'"></span>
+                                                <span th:if="${c.tipo.name() == 'ACCESO_TEMPORAL'}" th:text="${c.diasAcceso} + ' días'"></span>
+                                            </td>
+                                            <td>
+                                                <span th:if="${c.activo}" class="badge bg-success bg-opacity-10 text-success fs-9">Activo</span>
+                                                <span th:unless="${c.activo}" class="badge bg-secondary bg-opacity-10 text-secondary fs-9">Inactivo</span>
+                                            </td>
+                                            <td class="text-end">
+                                                <form th:action="@{'/admin/promociones/eliminar/' + ${c.id}}" method="POST" class="d-inline">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger border-0 rounded-circle p-2" onclick="return confirm('¿Eliminar cupón?')">
+                                                        <i class="bi bi-trash fs-8"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        <tr th:if="${#lists.isEmpty(cupones)}">
+                                            <td colspan="5" class="text-center py-4 text-muted-custom fs-8"><i class="bi bi-ticket-perforated d-block fs-2 mb-2"></i>No hay cupones registrados.</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===================== TOKENS DE INVITADO ===================== -->
+                <div class="tab-pane fade" id="panel-tokens">
+                    <div class="row g-4">
+                        <div class="col-12 col-lg-4">
+                            <div class="card glass-card p-4">
+                                <h5 class="text-white fw-bold mb-4">Generar Token de Invitado</h5>
+                                <p class="text-muted-custom fs-8 mb-4">El código se genera automáticamente. Selecciona los cursos y la duración del acceso.</p>
+                                <form th:action="@{/admin/tokens/nuevo}" method="POST">
+                                    <div class="mb-3">
+                                        <label class="form-label">Cursos (IDs separados por coma)</label>
+                                        <div th:each="c : ${cursos}" class="form-check mb-1">
+                                            <input class="form-check-input token-curso-check" type="checkbox" th:value="${c.id}" th:id="'tok-c-' + ${c.id}" onchange="updateTokenCursoIds()">
+                                            <label class="form-check-label fs-8" th:for="'tok-c-' + ${c.id}" th:text="${c.titulo}"></label>
+                                        </div>
+                                        <input type="hidden" name="cursoIds" id="tokenCursoIds" required>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="form-label">Días de Acceso</label>
+                                        <input type="number" name="diasAcceso" class="form-control" min="1" placeholder="30" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-gradient w-100">Generar Token <i class="bi bi-key ms-1"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-8">
+                            <div class="card glass-card p-4">
+                                <h5 class="text-white fw-bold mb-4">Tokens Emitidos</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-dark table-hover align-middle m-0">
+                                        <thead><tr>
+                                            <th class="fs-8 text-secondary">Token</th>
+                                            <th class="fs-8 text-secondary">Cursos IDs</th>
+                                            <th class="fs-8 text-secondary">Días</th>
+                                            <th class="fs-8 text-secondary">Estado</th>
+                                            <th class="fs-8 text-secondary">Canjeado por</th>
+                                            <th class="fs-8 text-secondary text-end">Acción</th>
+                                        </tr></thead>
+                                        <tbody>
+                                        <tr th:each="t : ${tokens}">
+                                            <td><code class="text-gradient fw-bold fs-8" th:text="${t.token}"></code></td>
+                                            <td class="fs-8" th:text="${#strings.listJoin(t.cursoIds, ', ')}"></td>
+                                            <td class="fs-8" th:text="${t.diasAcceso} + ' días'"></td>
+                                            <td>
+                                                <span th:if="${t.activo}" class="badge bg-success bg-opacity-10 text-success fs-9">Disponible</span>
+                                                <span th:unless="${t.activo}" class="badge bg-secondary bg-opacity-10 text-secondary fs-9">Canjeado</span>
+                                            </td>
+                                            <td class="fs-8">
+                                                <span th:if="${t.usuarioId != null}" th:text="'Usuario #' + ${t.usuarioId}"></span>
+                                                <span th:unless="${t.usuarioId != null}" class="text-muted-custom">—</span>
+                                            </td>
+                                            <td class="text-end">
+                                                <form th:action="@{'/admin/tokens/eliminar/' + ${t.id}}" method="POST" class="d-inline">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger border-0 rounded-circle p-2" onclick="return confirm('¿Eliminar token?')">
+                                                        <i class="bi bi-trash fs-8"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        <tr th:if="${#lists.isEmpty(tokens)}">
+                                            <td colspan="6" class="text-center py-4 text-muted-custom fs-8"><i class="bi bi-key d-block fs-2 mb-2"></i>No hay tokens de invitado registrados.</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===================== PAQUETES / BUNDLES ===================== -->
+                <div class="tab-pane fade" id="panel-paquetes">
+                    <div class="row g-4">
+                        <div class="col-12 col-lg-4">
+                            <div class="card glass-card p-4">
+                                <h5 class="text-white fw-bold mb-4">Crear Paquete de Cursos</h5>
+                                <form th:action="@{/admin/paquetes/nuevo}" method="POST">
+                                    <div class="mb-3">
+                                        <label class="form-label">Nombre del Paquete</label>
+                                        <input type="text" name="titulo" class="form-control" placeholder="Pack Completo de Ajedrez" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Descripción</label>
+                                        <textarea name="descripcion" class="form-control" rows="2" placeholder="Acceso completo a todos los módulos..."></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Precio Total (€)</label>
+                                        <input type="number" name="precio" class="form-control" step="0.01" min="0" placeholder="49.99" required>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="form-label">Cursos incluidos</label>
+                                        <div th:each="c : ${cursos}" class="form-check mb-1">
+                                            <input class="form-check-input paq-curso-check" type="checkbox" th:value="${c.id}" th:id="'paq-c-' + ${c.id}" onchange="updatePaqCursoIds()">
+                                            <label class="form-check-label fs-8" th:for="'paq-c-' + ${c.id}" th:text="${c.titulo}"></label>
+                                        </div>
+                                        <input type="hidden" name="cursoIds" id="paqCursoIds" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-gradient w-100">Guardar Paquete <i class="bi bi-box-seam ms-1"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-8">
+                            <div class="card glass-card p-4">
+                                <h5 class="text-white fw-bold mb-4">Paquetes Registrados</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-dark table-hover align-middle m-0">
+                                        <thead><tr>
+                                            <th class="fs-8 text-secondary">Nombre</th>
+                                            <th class="fs-8 text-secondary">Precio</th>
+                                            <th class="fs-8 text-secondary">Cursos IDs</th>
+                                            <th class="fs-8 text-secondary">Estado</th>
+                                            <th class="fs-8 text-secondary text-end">Acción</th>
+                                        </tr></thead>
+                                        <tbody>
+                                        <tr th:each="p : ${paquetes}">
+                                            <td class="fw-semibold text-white fs-8" th:text="${p.titulo}"></td>
+                                            <td class="fs-8 text-gradient fw-bold" th:text="${#numbers.formatDecimal(p.precio,1,'POINT',2,'COMMA')} + ' €'"></td>
+                                            <td class="fs-8 text-muted-custom" th:text="${#strings.listJoin(p.cursoIds, ', ')}"></td>
+                                            <td>
+                                                <span th:if="${p.activo}" class="badge bg-success bg-opacity-10 text-success fs-9">Activo</span>
+                                                <span th:unless="${p.activo}" class="badge bg-secondary bg-opacity-10 text-secondary fs-9">Inactivo</span>
+                                            </td>
+                                            <td class="text-end">
+                                                <form th:action="@{'/admin/paquetes/eliminar/' + ${p.id}}" method="POST" class="d-inline">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger border-0 rounded-circle p-2" onclick="return confirm('¿Eliminar paquete?')">
+                                                        <i class="bi bi-trash fs-8"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        <tr th:if="${#lists.isEmpty(paquetes)}">
+                                            <td colspan="5" class="text-center py-4 text-muted-custom fs-8"><i class="bi bi-box-seam d-block fs-2 mb-2"></i>No hay paquetes registrados.</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===================== DESCUENTOS AUTOMÁTICOS DE CURSO ===================== -->
+                <div class="tab-pane fade" id="panel-descuentos">
+                    <div class="row g-4">
+                        <div class="col-12 col-lg-4">
+                            <div class="card glass-card p-4">
+                                <h5 class="text-white fw-bold mb-4">Nueva Promoción Automática</h5>
+                                <p class="text-muted-custom fs-8 mb-4">Se aplica automáticamente en el carrito.<br>
+                                    <strong class="text-white">Jerarquía:</strong> PrecioFinal = Base - Auto - Cupón</p>
+                                <form th:action="@{/admin/promociones-curso/nuevo}" method="POST">
+                                    <div class="mb-3">
+                                        <label class="form-label">Curso</label>
+                                        <select name="cursoId" class="form-select" required>
+                                            <option value="">Selecciona un curso...</option>
+                                            <option th:each="c : ${cursos}" th:value="${c.id}" th:text="${c.titulo}"></option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Tipo de Oferta</label>
+                                        <select name="tipo" class="form-select" required>
+                                            <option value="Lanzamiento">🚀 Lanzamiento</option>
+                                            <option value="OfertaTemporal">⏱ Oferta Temporal</option>
+                                            <option value="Permanente">♾ Permanente</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Descuento (%)</label>
+                                        <input type="number" name="porcentajeDescuento" class="form-control" min="1" max="100" placeholder="20" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Fecha Inicio</label>
+                                        <input type="date" name="fechaInicio" class="form-control" required>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="form-label">Fecha Fin</label>
+                                        <input type="date" name="fechaFin" class="form-control" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-gradient w-100">Crear Promoción <i class="bi bi-percent ms-1"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-8">
+                            <div class="card glass-card p-4">
+                                <h5 class="text-white fw-bold mb-4">Promociones de Curso Activas</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-dark table-hover align-middle m-0">
+                                        <thead><tr>
+                                            <th class="fs-8 text-secondary">Curso ID</th>
+                                            <th class="fs-8 text-secondary">Tipo</th>
+                                            <th class="fs-8 text-secondary">Descuento</th>
+                                            <th class="fs-8 text-secondary">Vigencia</th>
+                                            <th class="fs-8 text-secondary text-end">Acción</th>
+                                        </tr></thead>
+                                        <tbody>
+                                        <tr th:each="promo : ${promocionesCurso}">
+                                            <td class="fs-8">#<span th:text="${promo.cursoId}"></span></td>
+                                            <td>
+                                                <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-15 fs-9" th:text="${promo.tipo}"></span>
+                                            </td>
+                                            <td class="fs-8 fw-bold text-success" th:text="${promo.porcentajeDescuento} + '%'"></td>
+                                            <td class="fs-9 text-muted-custom">
+                                                <span th:text="${#temporals.format(promo.fechaInicio, 'dd/MM/yy')}"></span>
+                                                → <span th:text="${#temporals.format(promo.fechaFin, 'dd/MM/yy')}"></span>
+                                            </td>
+                                            <td class="text-end">
+                                                <form th:action="@{'/admin/promociones-curso/eliminar/' + ${promo.id}}" method="POST" class="d-inline">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger border-0 rounded-circle p-2" onclick="return confirm('¿Eliminar esta promoción?')">
+                                                        <i class="bi bi-trash fs-8"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        <tr th:if="${#lists.isEmpty(promocionesCurso)}">
+                                            <td colspan="5" class="text-center py-4 text-muted-custom fs-8"><i class="bi bi-percent d-block fs-2 mb-2"></i>No hay promociones automáticas registradas.</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /tab-content -->
+        </main>
+    </div>
+</div>
+
+<script>
+    // Active tab from URL param
+    (function() {
+        const tab = new URLSearchParams(window.location.search).get('tab');
+        if (tab) {
+            const btn = document.getElementById('tab-' + tab);
+            if (btn) { bootstrap.Tab.getOrCreateInstance(btn).show(); }
+        }
+    })();
+
+    function toggleCuponFields(sel) {
+        const desc = document.getElementById('div-descuento');
+        const dias = document.getElementById('div-dias-cupon');
+        const curso = document.getElementById('div-curso-cupon');
+        if (sel.value === 'ACCESO_TEMPORAL') {
+            desc.classList.add('d-none');
+            dias.classList.remove('d-none');
+            curso.classList.remove('d-none');
+        } else {
+            desc.classList.remove('d-none');
+            dias.classList.add('d-none');
+            curso.classList.add('d-none');
+        }
+    }
+
+    function updateTokenCursoIds() {
+        const checks = document.querySelectorAll('.token-curso-check:checked');
+        document.getElementById('tokenCursoIds').value = Array.from(checks).map(c => c.value).join(',');
+    }
+
+    function updatePaqCursoIds() {
+        const checks = document.querySelectorAll('.paq-curso-check:checked');
+        document.getElementById('paqCursoIds').value = Array.from(checks).map(c => c.value).join(',');
+    }
+</script>
+
+<div th:replace="~{layout :: bootstrap-js}"></div>
+</body>
+</html>

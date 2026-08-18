@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout :: common-head('Mis Compras')}"></head>
+<body>
+    <!-- Navbar -->
+    <header th:replace="~{layout :: navbar}"></header>
+
+    <main class="container my-5 flex-grow-1">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+
+                <!-- Breadcrumb / Nav -->
+                <div class="d-flex align-items-center gap-3 mb-4 flex-wrap">
+                    <a href="/perfil" class="text-muted-custom fs-8 text-decoration-none hover-text-white">
+                        <i class="bi bi-person-circle me-1"></i>Mi Perfil
+                    </a>
+                    <i class="bi bi-chevron-right text-secondary fs-9"></i>
+                    <span class="text-gradient fw-semibold fs-8">Historial de Compras</span>
+                </div>
+
+                <!-- Header -->
+                <div class="mb-5">
+                    <span class="text-gradient fw-bold text-uppercase fs-8 mb-2 d-inline-block">
+                        <i class="bi bi-receipt-cutoff me-1"></i>Mis Transacciones
+                    </span>
+                    <h1 class="fw-bold text-white mb-2">Historial de Compras</h1>
+                    <p class="text-muted-custom fs-6">Consulta todas tus transacciones y el estado de tus pedidos.</p>
+                </div>
+
+                <!-- Sin pedidos -->
+                <div th:if="${#lists.isEmpty(pedidos)}" class="card glass-card border border-white border-opacity-10 rounded-4 p-5 text-center">
+                    <i class="bi bi-bag-x fs-1 text-secondary opacity-50 d-block mb-3"></i>
+                    <h5 class="text-white fw-semibold mb-2">Todavía no has realizado ninguna compra</h5>
+                    <p class="text-muted-custom fs-7 mb-4">Explora nuestro catálogo de cursos y comienza tu aprendizaje hoy.</p>
+                    <a href="/catalogo" class="btn btn-gradient rounded-pill px-4 py-2 fs-8 d-inline-block mx-auto" style="width: fit-content;">
+                        <i class="bi bi-grid me-1"></i>Ver Catálogo
+                    </a>
+                </div>
+
+                <!-- Lista de pedidos -->
+                <div th:unless="${#lists.isEmpty(pedidos)}" class="card glass-card border border-white border-opacity-10 rounded-4 overflow-hidden p-4">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0" style="--bs-table-bg: transparent; color: #f8fafc; border-color: rgba(255,255,255,0.08);">
+                            <thead>
+                                <tr style="border-bottom: 2px solid rgba(255,255,255,0.15);">
+                                    <th class="text-secondary fs-8 fw-semibold py-3" style="width: 20%;">Fecha</th>
+                                    <th class="text-secondary fs-8 fw-semibold py-3" style="width: 45%;">Productos incluidos</th>
+                                    <th class="text-secondary fs-8 fw-semibold py-3" style="width: 15%;">Total pagado</th>
+                                    <th class="text-secondary fs-8 fw-semibold py-3" style="width: 10%;">Estado</th>
+                                    <th class="text-secondary fs-8 fw-semibold py-3 text-end" style="width: 10%;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="pedido : ${pedidos}" style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                    <!-- Fecha -->
+                                    <td class="py-3 fs-8">
+                                        <div class="fw-semibold text-white">Pedido #<span th:text="${pedido.id}">1</span></div>
+                                        <span class="text-muted-custom fs-9" th:text="${#temporals.format(pedido.fechaCompra, 'dd/MM/yyyy HH:mm')}">01/01/2024</span>
+                                    </td>
+                                    <!-- Productos -->
+                                    <td class="py-3 fs-8 text-white">
+                                        <div th:each="detalle : ${pedido.detalles}" class="d-flex align-items-center gap-2 mb-1">
+                                            <i th:if="${detalle.tipo == 'curso'}" class="bi bi-mortarboard text-indigo-300"></i>
+                                            <i th:if="${detalle.tipo == 'paquete'}" class="bi bi-collection-fill text-warning"></i>
+                                            <i th:if="${detalle.tipo != 'curso' and detalle.tipo != 'paquete'}" class="bi bi-controller text-info"></i>
+                                            <span th:text="${detalle.titulo}">Curso Ajedrez</span>
+                                        </div>
+                                    </td>
+                                    <!-- Total -->
+                                    <td class="py-3 fs-8 fw-bold text-white" th:text="${#numbers.formatDecimal(pedido.totalEuros, 1, 2)} + ' €'">
+                                        0,00 €
+                                    </td>
+                                    <!-- Estado -->
+                                    <td class="py-3 fs-9">
+                                        <span th:if="${pedido.estado.name() == 'COMPLETADO'}"
+                                              class="badge bg-success bg-opacity-15 text-success border border-success border-opacity-20 px-2.5 py-1 rounded-pill">
+                                            Completado
+                                        </span>
+                                        <span th:if="${pedido.estado.name() == 'REEMBOLSADO'}"
+                                              class="badge bg-danger bg-opacity-15 text-danger border border-danger border-opacity-20 px-2.5 py-1 rounded-pill">
+                                            Reembolsado
+                                        </span>
+                                        <span th:if="${pedido.estado.name() == 'PENDIENTE'}"
+                                              class="badge bg-warning bg-opacity-15 text-warning border border-warning border-opacity-20 px-2.5 py-1 rounded-pill">
+                                            Pendiente
+                                        </span>
+                                    </td>
+                                    <!-- Acciones -->
+                                    <td class="py-3 text-end">
+                                        <div class="d-flex align-items-center justify-content-end gap-2">
+                                            <a th:href="@{'/perfil/compras/' + ${pedido.id} + '/factura'}" class="btn btn-sm btn-outline-info rounded-pill px-3 py-1 fs-9" target="_blank">
+                                                <i class="bi bi-file-earmark-pdf me-1"></i>Factura
+                                            </a>
+                                            <a th:href="@{/contacto(pedidoId=${pedido.id})}" class="btn btn-sm btn-outline-warning rounded-pill px-3 py-1 fs-9">
+                                                <i class="bi bi-exclamation-octagon me-1"></i>Reportar
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Volver al perfil -->
+                <div class="mt-5 text-center">
+                    <a href="/perfil" class="btn btn-outline-secondary rounded-pill px-4 py-2 fs-8 border-white border-opacity-20 text-muted-custom">
+                        <i class="bi bi-arrow-left me-1"></i>Volver al Perfil
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer th:replace="~{layout :: footer}"></footer>
+
+    <!-- Bootstrap JS -->
+    <div th:replace="~{layout :: bootstrap-js}"></div>
+</body>
+</html>
