@@ -17,11 +17,6 @@ public interface CatalogoService {
     List<ProductoCurso> obtenerCatalogoPublico();
 
     /**
-     * Obtiene todos los productos de curso catalogados comercialmente.
-     */
-    List<ProductoCurso> obtenerTodos();
-
-    /**
      * Obtiene un producto de curso por su ID.
      *
      * @param id Identificador único del producto.
@@ -39,4 +34,9 @@ public interface CatalogoService {
      * Elimina un producto de curso del catálogo por su ID.
      */
     void eliminarProducto(java.util.UUID id);
+
+    /**
+     * Obtiene todos los productos de curso del catálogo, sin importar su estado.
+     */
+    List<ProductoCurso> obtenerTodos();
 }
