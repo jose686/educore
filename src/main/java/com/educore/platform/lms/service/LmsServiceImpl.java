@@ -212,7 +212,7 @@ public class LmsServiceImpl implements LmsService {
 
     @Override
     @Transactional
-    public Curso crearCurso(Curso curso) {
+    public Curso guardarCurso(Curso curso) {
         return cursoRepository.save(curso);
     }
 }

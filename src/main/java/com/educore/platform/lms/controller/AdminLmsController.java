@@ -12,7 +12,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * Controlador administrativo de Backoffice para gestionar el temario del LMS (Módulos y Lecciones).
+ * Controlador administrativo de Backoffice para gestionar el temario del LMS
+ * (Módulos y Lecciones).
  * Protegido estrictamente con el rol ADMIN.
  */
 @Controller
@@ -28,23 +29,25 @@ public class AdminLmsController {
      * Muestra el temario completo de un curso específico (módulos y lecciones).
      */
     @GetMapping("/admin/lms/cursos/{cursoId}/temario")
-    public String showSyllabus(@PathVariable("cursoId") String cursoIdStr, Model model, org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
+    public String showSyllabus(@PathVariable("cursoId") Long cursoId, Model model) {
+        Curso curso;
         try {
-            if (cursoIdStr == null || cursoIdStr.trim().isEmpty() || "null".equalsIgnoreCase(cursoIdStr)) {
-                ra.addFlashAttribute("errorMessage", "El curso no tiene un ID de LMS asociado.");
-                return "redirect:/admin/cursos/listado";
-            }
-            Long cursoId = Long.parseLong(cursoIdStr);
-            Curso curso = lmsService.obtenerCursoPorId(cursoId);
-            model.addAttribute("curso", curso);
-            ModuloDTO moduloDto = new ModuloDTO();
-            moduloDto.setOrden(0);
-            model.addAttribute("moduloDto", moduloDto);
-            return "admin-temario";
-        } catch (Exception e) {
-            ra.addFlashAttribute("errorMessage", "No se pudo cargar el temario: " + e.getMessage());
-            return "redirect:/admin/cursos/listado";
+            curso = lmsService.obtenerCursoPorId(cursoId);
+        } catch (IllegalArgumentException e) {
+            // El curso no existe en el LMS. Lo creamos de forma segura para evitar el error 500.
+            curso = Curso.builder()
+                    .titulo("Curso Base LMS " + cursoId)
+                    .descripcion("Curso base creado automáticamente para la gestión del temario.")
+                    .precio(0.0)
+                    .teacherId(1L)
+                    .build();
+            curso = lmsService.guardarCurso(curso);
         }
+        model.addAttribute("curso", curso);
+        ModuloDTO moduloDto = new ModuloDTO();
+        moduloDto.setOrden(0);
+        model.addAttribute("moduloDto", moduloDto);
+        return "admin-temario";
     }
 
     /**
@@ -52,7 +55,7 @@ public class AdminLmsController {
      */
     @PostMapping("/admin/lms/cursos/{cursoId}/modulos/nuevo")
     public String saveModule(@PathVariable("cursoId") Long cursoId,
-                             @ModelAttribute("moduloDto") ModuloDTO moduloDto) {
+            @ModelAttribute("moduloDto") ModuloDTO moduloDto) {
         lmsService.crearModulo(cursoId, moduloDto);
         return "redirect:/admin/lms/cursos/" + cursoId + "/temario";
     }
@@ -75,10 +78,10 @@ public class AdminLmsController {
      */
     @PostMapping("/admin/lms/modulos/{moduloId}/lecciones/nuevo")
     public String saveLesson(@PathVariable("moduloId") Long moduloId,
-                             @ModelAttribute("leccionDto") LeccionDTO leccionDto) {
+            @ModelAttribute("leccionDto") LeccionDTO leccionDto) {
         Modulo modulo = lmsService.obtenerModuloPorId(moduloId);
         lmsService.crearLeccion(moduloId, leccionDto);
-        
+
         // Redirigir de vuelta al temario del curso principal
         return "redirect:/admin/lms/cursos/" + modulo.getCurso().getId() + "/temario";
     }
@@ -89,7 +92,7 @@ public class AdminLmsController {
     @PutMapping("/admin/lms/modulos/{moduloId}")
     @ResponseBody
     public ResponseEntity<Void> updateModule(@PathVariable("moduloId") Long moduloId,
-                                             @RequestBody ModuloDTO moduloDto) {
+            @RequestBody ModuloDTO moduloDto) {
         lmsService.actualizarModulo(moduloId, moduloDto);
         return ResponseEntity.ok().build();
     }
@@ -105,7 +108,8 @@ public class AdminLmsController {
     }
 
     /**
-     * Obtiene una lección específica en formato JSON para rellenar la modal de edición.
+     * Obtiene una lección específica en formato JSON para rellenar la modal de
+     * edición.
      */
     @GetMapping("/admin/lms/lecciones/{leccionId}")
     @ResponseBody
@@ -129,7 +133,7 @@ public class AdminLmsController {
     @PutMapping("/admin/lms/lecciones/{leccionId}")
     @ResponseBody
     public ResponseEntity<Void> updateLesson(@PathVariable("leccionId") Long leccionId,
-                                             @RequestBody LeccionDTO leccionDto) {
+            @RequestBody LeccionDTO leccionDto) {
         lmsService.actualizarLeccion(leccionId, leccionDto);
         return ResponseEntity.ok().build();
     }
@@ -144,4 +148,3 @@ public class AdminLmsController {
         return ResponseEntity.ok().build();
     }
 }
-
