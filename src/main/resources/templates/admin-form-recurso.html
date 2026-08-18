@@ -46,7 +46,7 @@
                         <div class="card glass-card p-4 p-md-5 border border-white border-opacity-10 shadow-lg">
                             <h2 class="fw-bold text-white mb-4" th:text="${isEdit} ? 'Editar Configuración de Recurso' : 'Registrar Minijuego'">Registrar Minijuego</h2>
                             
-                            <form th:action="${isEdit} ? @{'/admin/biblioteca-interactivos/editar/' + ${recurso.id}} : @{/admin/biblioteca-interactivos/nuevo}" th:object="${recurso}" method="POST">
+                            <form id="recursoForm" th:action="${isEdit} ? @{'/admin/biblioteca-interactivos/editar/' + ${recurso.id}} : @{/admin/biblioteca-interactivos/nuevo}" th:object="${recurso}" method="POST">
                                 
                                 <div class="row">
                                     <!-- Identificador -->
@@ -98,11 +98,11 @@
                                     <label for="htmlUrl" class="form-label">Ruta HTML del Recurso o Enlace Iframe</label>
                                     <div class="input-group">
                                         <input type="text" id="htmlUrl" th:field="*{htmlUrl}" class="form-control" placeholder="ej: /media/uuid.html o alias del archivo" required>
-                                        <div class="invalid-feedback">Debes indicar la ruta HTML del minijuego o seleccionarla desde la galería.</div>
                                         <button type="button" class="btn btn-outline-light border-white border-opacity-10 fs-8 px-3" id="btn-select-html-resource">
                                             Seleccionar Minijuego <i class="bi bi-folder2-open ms-1"></i>
                                         </button>
                                     </div>
+                                    <div class="invalid-feedback" id="htmlUrl-feedback" style="display:none;">Debes indicar la ruta HTML del minijuego o seleccionarla desde la galería.</div>
                                     <small class="text-muted-custom fs-9 mt-1.5 d-block">Selecciona un archivo HTML o PDF desde la Biblioteca de Medios o escribe una URL externa.</small>
                                 </div>
 
@@ -279,8 +279,8 @@
             }
 
             // --- Validación manual del formulario con feedback visual ---
-            var form = document.querySelector('form');
-            form.setAttribute('novalidate', 'true'); // desactivar tooltips nativos HTML5
+            var form = document.getElementById('recursoForm');
+            form.setAttribute('novalidate', ''); // desactivar tooltips nativos HTML5
 
             form.addEventListener('submit', function (e) {
                 // Limpiar estado previo
@@ -299,6 +299,14 @@
 
                 if (!isValid) {
                     e.preventDefault();
+                    // Mostrar feedback especial para htmlUrl (fuera del input-group)
+                    var htmlUrlField = document.getElementById('htmlUrl');
+                    var htmlUrlFeedback = document.getElementById('htmlUrl-feedback');
+                    if (htmlUrlField.classList.contains('is-invalid')) {
+                        htmlUrlFeedback.style.display = 'block';
+                    } else {
+                        htmlUrlFeedback.style.display = 'none';
+                    }
                     // Hacer scroll al primer campo inválido
                     var firstInvalid = form.querySelector('.is-invalid');
                     if (firstInvalid) {
@@ -313,6 +321,9 @@
                 field.addEventListener('input', function () {
                     if (this.value && this.value.trim() !== '') {
                         this.classList.remove('is-invalid');
+                        if (this.id === 'htmlUrl') {
+                            document.getElementById('htmlUrl-feedback').style.display = 'none';
+                        }
                     }
                 });
             });
