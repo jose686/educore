@@ -26,8 +26,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Pruebas de integración para AdminLmsController.
  * Valida la seguridad y los flujos de creación del temario del aula virtual (LMS).
  */
+import org.springframework.transaction.annotation.Transactional;
+
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 class AdminLmsControllerTest {
 
     @Autowired

@@ -30,8 +30,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Pruebas de integración para la lógica pública de canje de tokens de invitado.
  */
+import org.springframework.transaction.annotation.Transactional;
+
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 class PromocionControllerTest {
 
     @Autowired

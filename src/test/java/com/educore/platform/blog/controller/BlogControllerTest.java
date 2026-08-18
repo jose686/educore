@@ -20,8 +20,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Pruebas de integración para BlogController.
  * Valida la correcta exposición y renderización pública del blog.
  */
+import org.springframework.transaction.annotation.Transactional;
+
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 class BlogControllerTest {
 
     @Autowired

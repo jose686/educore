@@ -31,8 +31,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Pruebas de integración actualizadas para AdminController.
  * Valida la seguridad y el correcto funcionamiento del CRUD, la carga de medios y la gestión de usuarios.
  */
+import org.springframework.transaction.annotation.Transactional;
+
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 class AdminControllerTest {
 
     @Autowired

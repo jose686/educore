@@ -14,8 +14,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Pruebas de integración para validar que la configuración de seguridad bloquea y permite
  * las rutas correspondientes.
  */
+import org.springframework.transaction.annotation.Transactional;
+
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 class SecurityConfigTest {
 
     @Autowired

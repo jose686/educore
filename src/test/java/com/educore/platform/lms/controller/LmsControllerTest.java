@@ -22,8 +22,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Pruebas de integración para LmsController.
  * Verifica la protección de rutas del aula virtual según el rol y la comprobación de matrícula.
  */
+import org.springframework.transaction.annotation.Transactional;
+
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 class LmsControllerTest {
 
     @Autowired

@@ -23,8 +23,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Pruebas de integración para MediaController.
  * Valida la seguridad pública de lectura de recursos y la restricción de subidas POST.
  */
+import org.springframework.transaction.annotation.Transactional;
+
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 class MediaControllerTest {
 
     @Autowired

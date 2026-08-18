@@ -22,8 +22,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Pruebas de integración para el controlador CatalogoController.
  * Valida la accesibilidad de la ruta de catálogo y el comportamiento del endpoint de compra.
  */
+import org.springframework.transaction.annotation.Transactional;
+
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 class CatalogoControllerTest {
 
     @Autowired

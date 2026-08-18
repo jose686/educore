@@ -23,8 +23,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Pruebas de integración actualizadas para validar la seguridad en la Biblioteca de Recursos Interactivos.
  * Comprueba que solo ROLE_ADMIN pueda gestionar (CRUD) la biblioteca.
  */
+import org.springframework.transaction.annotation.Transactional;
+
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 class MinijuegoSecurityIntegrationTest {
 
     @Autowired

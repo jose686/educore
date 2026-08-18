@@ -19,7 +19,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Comprueba que al publicarse un CursoCompradoEvent se actualiza el rol en 'users'
  * y se registra la inscripción en 'lms' de forma reactiva.
  */
+import org.springframework.transaction.annotation.Transactional;
+
 @SpringBootTest
+@Transactional
 class EventListenerIntegrationTest {
 
     @Autowired
