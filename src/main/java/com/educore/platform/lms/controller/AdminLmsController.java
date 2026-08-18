@@ -28,13 +28,23 @@ public class AdminLmsController {
      * Muestra el temario completo de un curso específico (módulos y lecciones).
      */
     @GetMapping("/admin/lms/cursos/{cursoId}/temario")
-    public String showSyllabus(@PathVariable("cursoId") Long cursoId, Model model) {
-        Curso curso = lmsService.obtenerCursoPorId(cursoId);
-        model.addAttribute("curso", curso);
-        ModuloDTO moduloDto = new ModuloDTO();
-        moduloDto.setOrden(0);
-        model.addAttribute("moduloDto", moduloDto);
-        return "admin-temario";
+    public String showSyllabus(@PathVariable("cursoId") String cursoIdStr, Model model, org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
+        try {
+            if (cursoIdStr == null || cursoIdStr.trim().isEmpty() || "null".equalsIgnoreCase(cursoIdStr)) {
+                ra.addFlashAttribute("errorMessage", "El curso no tiene un ID de LMS asociado.");
+                return "redirect:/admin/cursos/listado";
+            }
+            Long cursoId = Long.parseLong(cursoIdStr);
+            Curso curso = lmsService.obtenerCursoPorId(cursoId);
+            model.addAttribute("curso", curso);
+            ModuloDTO moduloDto = new ModuloDTO();
+            moduloDto.setOrden(0);
+            model.addAttribute("moduloDto", moduloDto);
+            return "admin-temario";
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", "No se pudo cargar el temario: " + e.getMessage());
+            return "redirect:/admin/cursos/listado";
+        }
     }
 
     /**
