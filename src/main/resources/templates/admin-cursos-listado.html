@@ -45,16 +45,6 @@
                     </div>
                 </div>
 
-                <!-- Error notification -->
-                <div th:if="${errorMessage}"
-                    class="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger rounded-4 py-3 px-4 mb-4"
-                    role="alert">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
-                        <span th:text="${errorMessage}">Error al realizar la operación.</span>
-                    </div>
-                </div>
-
                 <!-- Courses Table Card -->
                 <div class="card glass-card border border-white border-opacity-10 rounded-4 overflow-hidden shadow-lg">
 
@@ -92,7 +82,7 @@
                                     <td class="text-end pe-4 py-3">
                                         <div class="d-inline-flex gap-2">
                                             <!-- Manage Syllabus (LMS Temario) -->
-                                            <a th:href="@{'/admin/cursos/' + ${curso.id} + '/temario'}"
+                                            <a th:href="@{'/admin/lms/cursos/' + ${curso.lmsCursoId} + '/temario'}"
                                                 class="btn btn-gradient btn-sm rounded-pill py-1 px-3 fs-8">
                                                 <i class="bi bi-diagram-3 me-1"></i> Temario
                                             </a>

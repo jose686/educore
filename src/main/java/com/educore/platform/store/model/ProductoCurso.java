@@ -47,6 +47,6 @@ public class ProductoCurso {
      * ID del curso en el módulo 'lms' (aula virtual).
      * Mapeado como un valor numérico para mantener el aislamiento del módulo.
      */
-    @Column(name = "lms_curso_id", nullable = true)
+    @Column(name = "lms_curso_id", nullable = false)
     private Long lmsCursoId;
 }
