@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <div th:replace="~{layout :: common-head('Catalogar Curso')}"></div>
     <style>
@@ -7,11 +8,13 @@
             background: rgba(255, 255, 255, 0.05) !important;
             border-color: rgba(139, 92, 246, 0.4) !important;
         }
+
         .cursor-pointer {
             cursor: pointer;
         }
     </style>
 </head>
+
 <body>
     <div class="admin-wrapper">
         <!-- Sidebar -->
@@ -20,44 +23,56 @@
         <!-- Main Area -->
         <div class="admin-main">
             <!-- Navbar -->
-            <header th:replace="~{layout :: admin-navbar(${isEdit} ? 'Editar Oferta de Curso' : 'Catalogar Curso')}"></header>
+            <header th:replace="~{layout :: admin-navbar(${isEdit} ? 'Editar Oferta de Curso' : 'Catalogar Curso')}">
+            </header>
 
             <!-- Content Body -->
             <main class="admin-content-body">
                 <div class="row justify-content-center">
                     <div class="col-12 col-xl-10">
-                        
+
                         <!-- Back Link -->
                         <div class="mb-4">
-                            <a th:href="@{/admin/cursos/listado}" class="text-secondary text-decoration-none fs-7 hover-white">
+                            <a th:href="@{/admin/cursos/listado}"
+                                class="text-secondary text-decoration-none fs-7 hover-white">
                                 <i class="bi bi-arrow-left me-1"></i> Volver al catálogo
                             </a>
                         </div>
 
                         <!-- Glassmorphic Form Card -->
                         <div class="card glass-card p-4 p-md-5 border border-white border-opacity-10 shadow-lg">
-                            <h2 class="fw-bold text-white mb-4" th:text="${isEdit} ? 'Editar Información Comercial' : 'Vender Nuevo Curso en Catálogo'">Registrar Curso en Catálogo</h2>
-                            
-                            <form th:action="${isEdit} ? @{'/admin/cursos/editar/' + ${producto.id}} : @{/admin/cursos/nuevo}" th:object="${producto}" method="POST">
-                                
+                            <h2 class="fw-bold text-white mb-4"
+                                th:text="${isEdit} ? 'Editar Información Comercial' : 'Vender Nuevo Curso en Catálogo'">
+                                Registrar Curso en Catálogo</h2>
+
+                            <form
+                                th:action="${isEdit} ? @{'/admin/cursos/editar/' + ${producto.id}} : @{/admin/cursos/nuevo}"
+                                th:object="${producto}" method="POST">
+
                                 <!-- Title -->
                                 <div class="mb-4">
                                     <label for="titulo" class="form-label">Título del Producto</label>
-                                    <input type="text" id="titulo" th:field="*{titulo}" class="form-control" placeholder="ej: Curso de Táctica de Ajedrez Medio" required>
+                                    <input type="text" id="titulo" th:field="*{titulo}" class="form-control"
+                                        placeholder="ej: Curso de Táctica de Ajedrez Medio" required>
                                 </div>
 
                                 <!-- Short Description -->
                                 <div class="mb-4">
                                     <label for="descripcionCorta" class="form-label">Resumen Corto (Catálogo)</label>
-                                    <textarea id="descripcionCorta" th:field="*{descripcionCorta}" rows="3" class="form-control" placeholder="Escribe un breve resumen de la oferta comercial del curso..." required></textarea>
+                                    <textarea id="descripcionCorta" th:field="*{descripcionCorta}" rows="3"
+                                        class="form-control"
+                                        placeholder="Escribe un breve resumen de la oferta comercial del curso..."
+                                        required></textarea>
                                 </div>
 
                                 <!-- Price -->
                                 <div class="mb-4">
                                     <label for="precio" class="form-label">Precio Ofertado (€)</label>
                                     <div class="input-group">
-                                        <span class="input-group-text bg-transparent border-end-0 border-white border-opacity-10 text-secondary">€</span>
-                                        <input type="number" id="precio" th:field="*{precio}" step="0.01" min="0" class="form-control border-start-0" placeholder="49.99" required>
+                                        <span
+                                            class="input-group-text bg-transparent border-end-0 border-white border-opacity-10 text-secondary">€</span>
+                                        <input type="number" id="precio" th:field="*{precio}" step="0.01" min="0"
+                                            class="form-control border-start-0" placeholder="49.99" required>
                                     </div>
                                 </div>
 
@@ -66,17 +81,28 @@
                                     <label class="form-label">Imagen de Portada (Thumbnail)</label>
                                     <div class="d-flex align-items-center gap-3">
                                         <!-- Preview Thumbnail -->
-                                        <div id="thumbnail-preview-container" class="ratio ratio-16x9 bg-black bg-opacity-40 rounded-3 border border-white border-opacity-10 d-flex align-items-center justify-content-center overflow-hidden" style="width: 160px; height: 90px; min-width: 160px;">
-                                            <img id="thumbnail-preview-img" th:src="*{imagenPortadaUrl}" th:class="*{imagenPortadaUrl != null && !imagenPortadaUrl.isEmpty()} ? 'w-100 h-100 object-fit-cover' : 'd-none'" alt="Vista previa">
-                                            <span id="thumbnail-preview-placeholder" th:class="*{imagenPortadaUrl != null && !imagenPortadaUrl.isEmpty()} ? 'd-none text-muted-custom fs-9' : 'text-muted-custom fs-9'"><i class="bi bi-image me-1"></i> Sin imagen</span>
+                                        <div id="thumbnail-preview-container"
+                                            class="ratio ratio-16x9 bg-black bg-opacity-40 rounded-3 border border-white border-opacity-10 d-flex align-items-center justify-content-center overflow-hidden"
+                                            style="width: 160px; height: 90px; min-width: 160px;">
+                                            <img id="thumbnail-preview-img" th:src="*{imagenPortadaUrl}"
+                                                th:class="*{imagenPortadaUrl != null && !imagenPortadaUrl.isEmpty()} ? 'w-100 h-100 object-fit-cover' : 'd-none'"
+                                                alt="Vista previa">
+                                            <span id="thumbnail-preview-placeholder"
+                                                th:class="*{imagenPortadaUrl != null && !imagenPortadaUrl.isEmpty()} ? 'd-none text-muted-custom fs-9' : 'text-muted-custom fs-9'"><i
+                                                    class="bi bi-image me-1"></i> Sin imagen</span>
                                         </div>
                                         <!-- Button and Clear -->
                                         <div>
-                                            <button type="button" class="btn btn-outline-light border-white border-opacity-10 btn-sm rounded-pill px-3 py-1.5 fs-8 mb-2" id="btn-select-featured-image">
+                                            <button type="button"
+                                                class="btn btn-outline-light border-white border-opacity-10 btn-sm rounded-pill px-3 py-1.5 fs-8 mb-2"
+                                                id="btn-select-featured-image">
                                                 <i class="bi bi-images me-1"></i> Seleccionar de Galería
                                             </button>
                                             <br>
-                                            <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1.5 fs-8" th:classappend="*{imagenPortadaUrl != null && !imagenPortadaUrl.isEmpty()} ? '' : 'd-none'" id="btn-clear-featured-image">
+                                            <button type="button"
+                                                class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1.5 fs-8"
+                                                th:classappend="*{imagenPortadaUrl != null && !imagenPortadaUrl.isEmpty()} ? '' : 'd-none'"
+                                                id="btn-clear-featured-image">
                                                 <i class="bi bi-x-circle me-1"></i> Quitar
                                             </button>
                                         </div>
@@ -86,13 +112,17 @@
 
                                 <!-- LMS Course ID -->
                                 <div class="mb-4">
-                                    <label for="lmsCursoId" class="form-label">ID del Curso del Aula Virtual (LMS)</label>
-                                    <input type="number" id="lmsCursoId" th:field="*{lmsCursoId}" class="form-control" placeholder="ej: 1">
-                                    <small class="text-muted-custom fs-9 mt-1 d-block">Referencia numérica del curso en la base de datos para habilitar el acceso al alumno tras la compra.</small>
+                                    <label for="lmsCursoId" class="form-label">ID del Curso del Aula Virtual
+                                        (LMS)</label>
+                                    <input type="number" id="lmsCursoId" th:field="*{lmsCursoId}" class="form-control"
+                                        placeholder="ej: 1">
+                                    <small class="text-muted-custom fs-9 mt-1 d-block">Referencia numérica del curso en
+                                        la base de datos para habilitar el acceso al alumno tras la compra.</small>
                                 </div>
 
                                 <!-- Submit Button -->
-                                <button type="submit" class="btn btn-gradient w-100 py-3 mt-3" th:text="${isEdit} ? 'Guardar Cambios' : 'Registrar Oferta'">
+                                <button type="submit" class="btn btn-gradient w-100 py-3 mt-3"
+                                    th:text="${isEdit} ? 'Guardar Cambios' : 'Registrar Oferta'">
                                     Registrar Oferta <i class="bi bi-cart-check-fill ms-2 align-middle fs-7"></i>
                                 </button>
                             </form>
@@ -105,12 +135,14 @@
     </div>
 
     <!-- Modal de Galería de Medios -->
-    <div class="modal fade" id="mediaGalleryModal" tabindex="-1" aria-labelledby="mediaGalleryModalLabel" aria-hidden="true">
+    <div class="modal fade" id="mediaGalleryModal" tabindex="-1" aria-labelledby="mediaGalleryModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content glass-card border border-white border-opacity-10 text-white shadow-lg">
                 <div class="modal-header border-bottom border-white border-opacity-10 py-3">
                     <h5 class="modal-title fw-bold" id="mediaGalleryModalLabel">Seleccionar de Biblioteca de Medios</h5>
-                    <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal"
+                        aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body py-4">
                     <!-- Loader spinner -->
@@ -132,7 +164,9 @@
                     </div>
                 </div>
                 <div class="modal-footer border-top border-white border-opacity-10 py-3">
-                    <button type="button" class="btn btn-outline-light border-white border-opacity-10 py-1.5 px-3 fs-8 rounded-pill" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button"
+                        class="btn btn-outline-light border-white border-opacity-10 py-1.5 px-3 fs-8 rounded-pill"
+                        data-bs-dismiss="modal">Cerrar</button>
                 </div>
             </div>
         </div>
@@ -147,15 +181,15 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             // Controladores para Selección de Portada
-            document.getElementById('btn-select-featured-image').addEventListener('click', function() {
+            document.getElementById('btn-select-featured-image').addEventListener('click', function () {
                 openMediaGalleryModal();
             });
 
-            document.getElementById('btn-clear-featured-image').addEventListener('click', function() {
+            document.getElementById('btn-clear-featured-image').addEventListener('click', function () {
                 document.getElementById('imagenPortadaUrl').value = '';
                 var previewImg = document.getElementById('thumbnail-preview-img');
                 var previewPlaceholder = document.getElementById('thumbnail-preview-placeholder');
-                
+
                 previewImg.src = '';
                 previewImg.classList.add('d-none');
                 previewPlaceholder.classList.remove('d-none');
@@ -175,27 +209,27 @@
             var loader = document.getElementById('modal-media-loader');
             var grid = document.getElementById('modal-media-grid');
             var empty = document.getElementById('modal-media-empty');
-            
+
             loader.classList.remove('d-none');
             grid.classList.add('d-none');
             empty.classList.add('d-none');
-            
+
             fetch('/admin/media')
-                .then(function(response) {
+                .then(function (response) {
                     if (!response.ok) throw new Error('Error al cargar medios');
                     return response.text();
                 })
-                .then(function(html) {
+                .then(function (html) {
                     var parser = new DOMParser();
                     var doc = parser.parseFromString(html, 'text/html');
                     var imgElements = doc.querySelectorAll('#mediaGrid img');
-                    
+
                     grid.innerHTML = '';
-                    
+
                     if (imgElements.length === 0) {
                         empty.classList.remove('d-none');
                     } else {
-                        imgElements.forEach(function(img) {
+                        imgElements.forEach(function (img) {
                             var src = img.getAttribute('src');
                             var col = document.createElement('div');
                             col.className = 'col-md-4 col-6';
@@ -212,12 +246,12 @@
                         grid.classList.remove('d-none');
                     }
                 })
-                .catch(function(err) {
+                .catch(function (err) {
                     console.error(err);
                     empty.innerHTML = `<i class="bi bi-exclamation-triangle-fill text-danger fs-1 d-block mb-3"></i><h5 class="text-white fw-bold">Error de carga</h5><p class="text-muted-custom mb-0">${err.message}</p>`;
                     empty.classList.remove('d-none');
                 })
-                .finally(function() {
+                .finally(function () {
                     loader.classList.add('d-none');
                 });
         }
@@ -227,15 +261,16 @@
             var previewImg = document.getElementById('thumbnail-preview-img');
             var previewPlaceholder = document.getElementById('thumbnail-preview-placeholder');
             var btnClear = document.getElementById('btn-clear-featured-image');
-            
+
             previewImg.src = url;
             previewImg.classList.remove('d-none');
             previewImg.classList.add('w-100', 'h-100', 'object-fit-cover');
             previewPlaceholder.classList.add('d-none');
             btnClear.classList.remove('d-none');
-            
+
             mediaGalleryModal.hide();
         }
     </script>
 </body>
+
 </html>

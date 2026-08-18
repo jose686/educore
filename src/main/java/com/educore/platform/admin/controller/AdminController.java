@@ -24,7 +24,8 @@ import java.util.UUID;
 import java.util.List;
 
 /**
- * Controlador de Backoffice unificado para la gestión administrativa de la plataforma.
+ * Controlador de Backoffice unificado para la gestión administrativa de la
+ * plataforma.
  * Protegido estrictamente con el rol ADMIN.
  */
 @Controller
@@ -40,13 +41,13 @@ public class AdminController {
     private final TicketSoporteRepository ticketSoporteRepository;
 
     public AdminController(BlogService blogService,
-                           CatalogoService catalogoService,
-                           MediaService mediaService,
-                           UsuarioService usuarioService,
-                           PromocionService promocionService,
-                           LmsService lmsService,
-                           PedidoService pedidoService,
-                           TicketSoporteRepository ticketSoporteRepository) {
+            CatalogoService catalogoService,
+            MediaService mediaService,
+            UsuarioService usuarioService,
+            PromocionService promocionService,
+            LmsService lmsService,
+            PedidoService pedidoService,
+            TicketSoporteRepository ticketSoporteRepository) {
         this.blogService = blogService;
         this.catalogoService = catalogoService;
         this.mediaService = mediaService;
@@ -74,11 +75,11 @@ public class AdminController {
      */
     @GetMapping("/admin/media")
     public String listMedia(@RequestParam(value = "tipo", required = false) String tipo,
-                            @RequestParam(value = "categoria", required = false) com.educore.platform.media.model.CategoriaMedia categoria,
-                            @RequestParam(value = "search", required = false) String search,
-                            @RequestParam(value = "selectMode", required = false, defaultValue = "false") boolean selectMode,
-                            @RequestParam(value = "hideFilters", required = false, defaultValue = "false") boolean hideFilters,
-                            Model model) {
+            @RequestParam(value = "categoria", required = false) com.educore.platform.media.model.CategoriaMedia categoria,
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "selectMode", required = false, defaultValue = "false") boolean selectMode,
+            @RequestParam(value = "hideFilters", required = false, defaultValue = "false") boolean hideFilters,
+            Model model) {
         java.util.List<com.educore.platform.media.model.MediaFile> files;
         boolean actualHideFilters = hideFilters;
 
@@ -132,18 +133,18 @@ public class AdminController {
 
         boolean isValid = false;
         if (contentType != null) {
-            if (contentType.startsWith("image/") || 
-                contentType.equals("video/mp4") || 
-                contentType.equals("text/html") || 
-                contentType.equals("application/pdf")) {
+            if (contentType.startsWith("image/") ||
+                    contentType.equals("video/mp4") ||
+                    contentType.equals("text/html") ||
+                    contentType.equals("application/pdf")) {
                 isValid = true;
             }
         }
         if (originalFilename != null) {
             String lower = originalFilename.toLowerCase();
-            if (lower.endsWith(".png") || lower.endsWith(".jpg") || lower.endsWith(".jpeg") || 
-                lower.endsWith(".gif") || lower.endsWith(".webp") || lower.endsWith(".mp4") || 
-                lower.endsWith(".html") || lower.endsWith(".htm") || lower.endsWith(".pdf")) {
+            if (lower.endsWith(".png") || lower.endsWith(".jpg") || lower.endsWith(".jpeg") ||
+                    lower.endsWith(".gif") || lower.endsWith(".webp") || lower.endsWith(".mp4") ||
+                    lower.endsWith(".html") || lower.endsWith(".htm") || lower.endsWith(".pdf")) {
                 isValid = true;
             }
         }
@@ -174,10 +175,10 @@ public class AdminController {
         return "redirect:/admin/media";
     }
 
-
     /**
      * Elimina un archivo de la biblioteca de medios.
-     * Recibe el nombre del archivo y lo elimina del almacenamiento y la base de datos de manera transaccional.
+     * Recibe el nombre del archivo y lo elimina del almacenamiento y la base de
+     * datos de manera transaccional.
      */
     @DeleteMapping("/admin/media/{filename:.+}")
     @ResponseBody
@@ -188,7 +189,8 @@ public class AdminController {
                     .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                     .body(java.util.Map.of("success", true));
         } catch (Exception e) {
-            return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
+            return org.springframework.http.ResponseEntity
+                    .status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
                     .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                     .body(java.util.Map.of("success", false, "error", e.getMessage()));
         }
@@ -205,7 +207,7 @@ public class AdminController {
     public String listArticles(Model model) {
         List<Articulo> articulos = blogService.obtenerTodosLosArticulos();
         model.addAttribute("articulos", articulos);
-        
+
         // Cargar nombres de autores (Usuarios)
         java.util.Map<Long, String> autoresMap = new java.util.HashMap<>();
         for (Articulo art : articulos) {
@@ -273,7 +275,7 @@ public class AdminController {
         dbArticulo.setContenido(formArticulo.getContenido());
         dbArticulo.setUsuarioId(formArticulo.getUsuarioId());
         dbArticulo.setFeaturedImageUrl(formArticulo.getFeaturedImageUrl());
-        
+
         blogService.guardarArticulo(dbArticulo);
         return "redirect:/admin/blog/listado?success=update";
     }
@@ -296,7 +298,7 @@ public class AdminController {
      */
     @GetMapping("/admin/cursos/listado")
     public String listCourses(Model model) {
-        model.addAttribute("cursos", catalogoService.obtenerTodos());
+        model.addAttribute("cursos", catalogoService.obtenerCatalogoPublico());
         return "admin-cursos-listado";
     }
 
@@ -390,7 +392,7 @@ public class AdminController {
         dbProducto.setPrecio(formProducto.getPrecio());
         dbProducto.setImagenPortadaUrl(formProducto.getImagenPortadaUrl());
         dbProducto.setLmsCursoId(formProducto.getLmsCursoId());
-        
+
         catalogoService.guardarProducto(dbProducto);
         return "redirect:/admin/cursos/listado?success=update";
     }
@@ -432,7 +434,8 @@ public class AdminController {
     // ==========================================
 
     /**
-     * Muestra la vista del gestor de promociones con cupones, tokens, packs y promociones de curso.
+     * Muestra la vista del gestor de promociones con cupones, tokens, packs y
+     * promociones de curso.
      */
     @GetMapping("/admin/promociones")
     public String listPromociones(Model model) {
@@ -450,10 +453,10 @@ public class AdminController {
      */
     @PostMapping("/admin/promociones/nuevo")
     public String savePromocion(@RequestParam("codigo") String codigo,
-                                @RequestParam("tipo") String tipo,
-                                @RequestParam(value = "descuentoPorcentaje", required = false) Integer descuentoPorcentaje,
-                                @RequestParam(value = "diasAcceso", required = false) Integer diasAcceso,
-                                @RequestParam(value = "cursoId", required = false) Long cursoId) {
+            @RequestParam("tipo") String tipo,
+            @RequestParam(value = "descuentoPorcentaje", required = false) Integer descuentoPorcentaje,
+            @RequestParam(value = "diasAcceso", required = false) Integer diasAcceso,
+            @RequestParam(value = "cursoId", required = false) Long cursoId) {
         promocionService.crearCupon(codigo, tipo, descuentoPorcentaje, diasAcceso, cursoId);
         return "redirect:/admin/promociones?tab=cupones&success=create";
     }
@@ -472,11 +475,12 @@ public class AdminController {
     // ==========================================
 
     /**
-     * Genera un nuevo token de acceso para invitados con cursos y duración configurados.
+     * Genera un nuevo token de acceso para invitados con cursos y duración
+     * configurados.
      */
     @PostMapping("/admin/tokens/nuevo")
     public String crearToken(@RequestParam("cursoIds") String cursoIds,
-                             @RequestParam("diasAcceso") Integer diasAcceso) {
+            @RequestParam("diasAcceso") Integer diasAcceso) {
         java.util.Set<Long> setIds = new java.util.HashSet<>();
         if (cursoIds != null && !cursoIds.isBlank()) {
             for (String s : cursoIds.split(",")) {
@@ -507,9 +511,9 @@ public class AdminController {
      */
     @PostMapping("/admin/paquetes/nuevo")
     public String crearPaquete(@RequestParam("titulo") String titulo,
-                               @RequestParam("descripcion") String descripcion,
-                               @RequestParam("precio") java.math.BigDecimal precio,
-                               @RequestParam("cursoIds") String cursoIds) {
+            @RequestParam("descripcion") String descripcion,
+            @RequestParam("precio") java.math.BigDecimal precio,
+            @RequestParam("cursoIds") String cursoIds) {
         java.util.Set<Long> setIds = new java.util.HashSet<>();
         if (cursoIds != null && !cursoIds.isBlank()) {
             for (String s : cursoIds.split(",")) {
@@ -540,10 +544,10 @@ public class AdminController {
      */
     @PostMapping("/admin/promociones-curso/nuevo")
     public String crearPromocionCurso(@RequestParam("cursoId") Long cursoId,
-                                      @RequestParam("tipo") String tipo,
-                                      @RequestParam("porcentajeDescuento") Integer porcentajeDescuento,
-                                      @RequestParam("fechaInicio") String fechaInicio,
-                                      @RequestParam("fechaFin") String fechaFin) {
+            @RequestParam("tipo") String tipo,
+            @RequestParam("porcentajeDescuento") Integer porcentajeDescuento,
+            @RequestParam("fechaInicio") String fechaInicio,
+            @RequestParam("fechaFin") String fechaFin) {
         java.time.LocalDateTime inicio = java.time.LocalDateTime.parse(fechaInicio + "T00:00:00");
         java.time.LocalDateTime fin = java.time.LocalDateTime.parse(fechaFin + "T23:59:59");
         promocionService.crearPromocionCurso(cursoId, tipo, porcentajeDescuento, inicio, fin);
@@ -574,49 +578,49 @@ public class AdminController {
             @RequestParam(value = "fechaInicio", required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate fechaInicio,
             @RequestParam(value = "fechaFin", required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate fechaFin,
             Model model) {
-        
+
         List<Pedido> pedidos = pedidoService.obtenerTodosLosPedidos();
-        
+
         if (email != null && !email.trim().isEmpty()) {
             String lowerEmail = email.toLowerCase().trim();
             pedidos = pedidos.stream()
                     .filter(p -> p.getEmailUsuario() != null && p.getEmailUsuario().toLowerCase().contains(lowerEmail))
                     .collect(java.util.stream.Collectors.toList());
         }
-        
+
         if (pedidoId != null) {
             pedidos = pedidos.stream()
                     .filter(p -> p.getId().equals(pedidoId))
                     .collect(java.util.stream.Collectors.toList());
         }
-        
+
         if (estado != null && !estado.trim().isEmpty() && !"TODOS".equalsIgnoreCase(estado)) {
             pedidos = pedidos.stream()
                     .filter(p -> p.getEstado() != null && p.getEstado().name().equalsIgnoreCase(estado.trim()))
                     .collect(java.util.stream.Collectors.toList());
         }
-        
+
         if (fechaInicio != null) {
             java.time.LocalDateTime start = fechaInicio.atStartOfDay();
             pedidos = pedidos.stream()
                     .filter(p -> p.getFechaCompra() != null && !p.getFechaCompra().isBefore(start))
                     .collect(java.util.stream.Collectors.toList());
         }
-        
+
         if (fechaFin != null) {
             java.time.LocalDateTime end = fechaFin.atTime(23, 59, 59);
             pedidos = pedidos.stream()
                     .filter(p -> p.getFechaCompra() != null && !p.getFechaCompra().isAfter(end))
                     .collect(java.util.stream.Collectors.toList());
         }
-        
+
         model.addAttribute("pedidos", pedidos);
         model.addAttribute("emailFilter", email);
         model.addAttribute("pedidoIdFilter", pedidoId);
         model.addAttribute("estadoFilter", estado);
         model.addAttribute("fechaInicioFilter", fechaInicio);
         model.addAttribute("fechaFinFilter", fechaFin);
-        
+
         return "admin-pedidos";
     }
 
@@ -637,14 +641,60 @@ public class AdminController {
     public String matricularManualPedido(@PathVariable("id") Long id, RedirectAttributes redirectAttrs) {
         try {
             pedidoService.forzarMatriculacionManual(id);
-            
+
             // Resolving support tickets associated with this pedidoId
             List<TicketSoporte> tickets = ticketSoporteRepository.findByPedidoId(id);
             for (TicketSoporte ticket : tickets) {
                 ticket.setEstado("RESUELTO");
                 ticketSoporteRepository.save(ticket);
             }
-            
+
+            redirectAttrs.addFlashAttribute("successMsg",
+                    "Matriculación forzada manualmente y ticket de soporte resuelto para el pedido #" + id + ".");
+        } catch (Exception e) {
+            redirectAttrs.addFlashAttribute("errorMsg",
+                    "Error al forzar la matriculación manual: " + e.getMessage());
+        }
+        return "redirect:/admin/pedidos/" + id;
+    }
+
+    /**
+     * Procesa un reembolso de pedido desde el backoffice.
+     * Ejecuta la devolución en Stripe, cambia el estado del pedido a REEMBOLSADO
+     * y revoca automáticamente el acceso del alumno al Aula Virtual.
+     */
+    @PostMapping("/admin/pedidos/{id}/reembolsar")
+    public String reembolsarPedido(@PathVariable("id") Long id, RedirectAttributes redirectAttrs) {
+        try {
+            pedidoService.reembolsarPedido(id);
+            redirectAttrs.addFlashAttribute("successMsg",
+                    "Reembolso ejecutado correctamente para el pedido #" + id + ".");
+        } catch (IllegalStateException e) {
+            redirectAttrs.addFlashAttribute("errorMsg", e.getMessage());
+        } catch (Exception e) {
+            redirectAttrs.addFlashAttribute("errorMsg",
+                    "Error al procesar el reembolso con Stripe: " + e.getMessage());
+        }
+        return "redirect:/admin/pedidos";
+    }
+
+}}
+
+    /**
+     * Fuerza la matriculación manual y limpia/resuelve la incidencia asociada.
+     */
+    @PostMapping("/admin/pedidos/{id}/matricular-manual")
+    public String matricularManualPedido(@PathVariable("id") Long id, RedirectAttributes redirectAttrs) {
+        try {
+            pedidoService.forzarMatriculacionManual(id);
+
+            // Resolving support tickets associated with this pedidoId
+            List<TicketSoporte> tickets = ticketSoporteRepository.findByPedidoId(id);
+            for (TicketSoporte ticket : tickets) {
+                ticket.setEstado("RESUELTO");
+                ticketSoporteRepository.save(ticket);
+            }
+
             redirectAttrs.addFlashAttribute("successMsg",
                     "Matriculación forzada manualmente y ticket de soporte resuelto para el pedido #" + id + ".");
         } catch (Exception e) {

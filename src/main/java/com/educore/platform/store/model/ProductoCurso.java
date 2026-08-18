@@ -6,7 +6,8 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 /**
- * Entidad que representa un curso ofertado como producto en el catálogo del e-commerce.
+ * Entidad que representa un curso ofertado como producto en el catálogo del
+ * e-commerce.
  * Utiliza UUID como identificador principal.
  */
 @Entity

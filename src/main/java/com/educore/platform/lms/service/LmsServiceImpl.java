@@ -34,11 +34,11 @@ public class LmsServiceImpl implements LmsService {
     private final AccesoService accesoService;
 
     public LmsServiceImpl(InscripcionRepository inscripcionRepository,
-                          CursoRepository cursoRepository,
-                          ModuloRepository moduloRepository,
-                          LeccionRepository leccionRepository,
-                          UserPublicService userPublicService,
-                          AccesoService accesoService) {
+            CursoRepository cursoRepository,
+            ModuloRepository moduloRepository,
+            LeccionRepository leccionRepository,
+            UserPublicService userPublicService,
+            AccesoService accesoService) {
         this.inscripcionRepository = inscripcionRepository;
         this.cursoRepository = cursoRepository;
         this.moduloRepository = moduloRepository;
