@@ -209,4 +209,10 @@ public class LmsServiceImpl implements LmsService {
     public List<Curso> obtenerTodosLosCursos() {
         return cursoRepository.findAll();
     }
+
+    @Override
+    @Transactional
+    public Curso crearCurso(Curso curso) {
+        return cursoRepository.save(curso);
+    }
 }

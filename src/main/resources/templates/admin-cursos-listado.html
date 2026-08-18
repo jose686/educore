@@ -77,12 +77,9 @@
                                     <td class="text-end pe-4 py-3">
                                         <div class="d-inline-flex gap-2">
                                             <!-- Manage Syllabus (LMS Temario) -->
-                                            <a th:if="${curso.lmsCursoId != null}" th:href="@{'/admin/lms/cursos/' + ${curso.lmsCursoId} + '/temario'}" class="btn btn-gradient btn-sm rounded-pill py-1 px-3 fs-8">
+                                            <a th:href="@{'/admin/cursos/' + ${curso.id} + '/temario'}" class="btn btn-gradient btn-sm rounded-pill py-1 px-3 fs-8">
                                                 <i class="bi bi-diagram-3 me-1"></i> Temario
                                             </a>
-                                            <button th:unless="${curso.lmsCursoId != null}" class="btn btn-outline-secondary btn-sm rounded-pill py-1.5 px-3 fs-8 border-white border-opacity-10 opacity-50" disabled title="No asociado a un curso LMS">
-                                                <i class="bi bi-diagram-3 me-1"></i> Temario
-                                            </button>
                                             <!-- Edit Link -->
                                             <a th:href="@{'/admin/cursos/editar/' + ${curso.id}}" class="btn btn-outline-light border-white border-opacity-10 btn-sm rounded-pill py-1 px-3 fs-8">
                                                 <i class="bi bi-pencil-square me-1"></i> Editar

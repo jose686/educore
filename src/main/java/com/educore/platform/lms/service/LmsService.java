@@ -85,5 +85,10 @@ public interface LmsService {
      * Recupera todos los cursos registrados del sistema.
      */
     List<Curso> obtenerTodosLosCursos();
+
+    /**
+     * Crea y guarda un nuevo curso en el LMS.
+     */
+    Curso crearCurso(Curso curso);
 }
 

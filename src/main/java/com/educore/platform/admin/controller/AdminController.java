@@ -301,6 +301,52 @@ public class AdminController {
     }
 
     /**
+     * Muestra el temario del curso. Si el curso en el LMS no existe, lo inicializa automáticamente.
+     */
+    @GetMapping("/admin/cursos/{ofertaId}/temario")
+    public String showOrCreateSyllabus(
+            @PathVariable("ofertaId") UUID ofertaId,
+            Model model,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
+        try {
+            ProductoCurso producto = catalogoService.obtenerPorId(ofertaId);
+            Curso curso = null;
+            if (producto.getLmsCursoId() != null) {
+                try {
+                    curso = lmsService.obtenerCursoPorId(producto.getLmsCursoId());
+                } catch (IllegalArgumentException e) {
+                    // El curso no existe en LMS o ID huérfano
+                }
+            }
+
+            if (curso == null) {
+                // Inicialización perezosa (lazy)
+                curso = Curso.builder()
+                        .titulo(producto.getTitulo())
+                        .descripcion(producto.getDescripcionCorta())
+                        .precio(producto.getPrecio().doubleValue())
+                        .teacherId(1L) // ID del profesor por defecto
+                        .modulos(new java.util.ArrayList<>())
+                        .build();
+                curso = lmsService.crearCurso(curso);
+                
+                // Vinculamos y guardamos la oferta comercial actualizada
+                producto.setLmsCursoId(curso.getId());
+                catalogoService.guardarProducto(producto);
+            }
+
+            model.addAttribute("curso", curso);
+            com.educore.platform.lms.dto.ModuloDTO moduloDto = new com.educore.platform.lms.dto.ModuloDTO();
+            moduloDto.setOrden(0);
+            model.addAttribute("moduloDto", moduloDto);
+            return "admin-temario";
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", "No se pudo gestionar el temario: " + e.getMessage());
+            return "redirect:/admin/cursos/listado";
+        }
+    }
+
+    /**
      * Muestra el formulario para registrar un nuevo curso.
      */
     @GetMapping("/admin/cursos/nuevo")
