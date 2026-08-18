@@ -449,7 +449,7 @@
                 .then(function(html) {
                     var parser = new DOMParser();
                     var doc = parser.parseFromString(html, 'text/html');
-                    var cards = doc.querySelectorAll('#mediaGrid [data-url]');
+                    var cards = doc.querySelectorAll('#mediaGrid > .col > .card[data-url]');
                     
                     grid.innerHTML = '';
                     
