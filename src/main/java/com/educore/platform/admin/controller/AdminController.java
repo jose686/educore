@@ -296,7 +296,7 @@ public class AdminController {
      */
     @GetMapping("/admin/cursos/listado")
     public String listCourses(Model model) {
-        model.addAttribute("cursos", catalogoService.obtenerCatalogoPublico());
+        model.addAttribute("cursos", catalogoService.obtenerTodos());
         return "admin-cursos-listado";
     }
 

@@ -26,6 +26,11 @@ public class CatalogoServiceImpl implements CatalogoService {
     }
 
     @Override
+    public List<ProductoCurso> obtenerTodos() {
+        return productoCursoRepository.findAll();
+    }
+
+    @Override
     public ProductoCurso obtenerPorId(UUID id) {
         return productoCursoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("No se encontró ningún producto de curso con ID: " + id));

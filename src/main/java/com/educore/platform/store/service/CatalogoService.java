@@ -17,6 +17,11 @@ public interface CatalogoService {
     List<ProductoCurso> obtenerCatalogoPublico();
 
     /**
+     * Obtiene todos los productos de curso catalogados comercialmente.
+     */
+    List<ProductoCurso> obtenerTodos();
+
+    /**
      * Obtiene un producto de curso por su ID.
      *
      * @param id Identificador único del producto.
