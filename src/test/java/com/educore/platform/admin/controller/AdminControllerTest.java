@@ -17,6 +17,9 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import java.util.Collections;
 import java.util.UUID;
+import org.mockito.ArgumentCaptor;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -171,5 +174,101 @@ class AdminControllerTest {
                 .andExpect(redirectedUrl("/admin/usuarios?success=role"));
 
         verify(usuarioService, times(1)).actualizarRol(123L, Role.TEACHER);
+    }
+
+    @Test
+    @WithMockUser(username = "admin@educore.com", roles = "ADMIN")
+    void adminUser_ShouldAccessNewArticleForm() throws Exception {
+        mockMvc.perform(get("/admin/blog/nuevo"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin-form-articulo"))
+                .andExpect(model().attributeExists("articulo"))
+                .andExpect(model().attribute("isEdit", false));
+    }
+
+    @Test
+    @WithMockUser(username = "admin@educore.com", roles = "ADMIN")
+    void adminUser_ShouldAccessEditArticleForm() throws Exception {
+        UUID articleId = UUID.randomUUID();
+        Articulo mockArticle = Articulo.builder().id(articleId).titulo("Edit Title").build();
+        when(blogService.obtenerPorId(articleId)).thenReturn(mockArticle);
+
+        mockMvc.perform(get("/admin/blog/editar/" + articleId))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin-form-articulo"))
+                .andExpect(model().attributeExists("articulo"))
+                .andExpect(model().attribute("isEdit", true));
+    }
+
+    @Test
+    @WithMockUser(username = "admin@educore.com", roles = "ADMIN")
+    void adminUser_ShouldCreateArticle_AndTruncateResumenCortoIfTooLong() throws Exception {
+        String longSummary = "A".repeat(320); // 320 characters
+        Articulo mockArticle = Articulo.builder()
+                .titulo("New Article")
+                .resumenCorto(longSummary)
+                .contenido("<p>Content</p>")
+                .slug("new-article")
+                .build();
+
+        mockMvc.perform(post("/admin/blog/nuevo")
+                        .flashAttr("articulo", mockArticle)
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/blog/listado?success=create"));
+
+        ArgumentCaptor<Articulo> captor = ArgumentCaptor.forClass(Articulo.class);
+        verify(blogService, times(1)).guardarArticulo(captor.capture());
+        
+        Articulo saved = captor.getValue();
+        assertNotNull(saved.getResumenCorto());
+        assertEquals(300, saved.getResumenCorto().length());
+        assertEquals("A".repeat(300), saved.getResumenCorto());
+    }
+
+    @Test
+    @WithMockUser(username = "admin@educore.com", roles = "ADMIN")
+    void adminUser_ShouldUpdateArticle_AndTruncateResumenCortoIfTooLong() throws Exception {
+        UUID articleId = UUID.randomUUID();
+        String longSummary = "B".repeat(320); // 320 characters
+        
+        Articulo existing = Articulo.builder()
+                .id(articleId)
+                .titulo("Old Title")
+                .resumenCorto("Old Summary")
+                .build();
+        
+        Articulo formArticle = Articulo.builder()
+                .titulo("Updated Title")
+                .resumenCorto(longSummary)
+                .contenido("<p>Updated Content</p>")
+                .slug("updated-title")
+                .build();
+
+        when(blogService.obtenerPorId(articleId)).thenReturn(existing);
+
+        mockMvc.perform(post("/admin/blog/editar/" + articleId)
+                        .flashAttr("articulo", formArticle)
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/blog/listado?success=update"));
+
+        ArgumentCaptor<Articulo> captor = ArgumentCaptor.forClass(Articulo.class);
+        verify(blogService, times(1)).guardarArticulo(captor.capture());
+        
+        Articulo saved = captor.getValue();
+        assertNotNull(saved.getResumenCorto());
+        assertEquals(300, saved.getResumenCorto().length());
+        assertEquals("B".repeat(300), saved.getResumenCorto());
+    }
+
+    @Test
+    @WithMockUser(username = "alumno@educore.com", roles = "STUDENT")
+    void studentUser_ShouldBeForbidden_WhenAccessingBlogAdminRoutes() throws Exception {
+        mockMvc.perform(get("/admin/blog/nuevo"))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(post("/admin/blog/nuevo").with(csrf()))
+                .andExpect(status().isForbidden());
     }
 }

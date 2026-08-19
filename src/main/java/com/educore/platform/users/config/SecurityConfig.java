@@ -65,7 +65,7 @@ public class SecurityConfig {
                 .requestMatchers(
                     new AntPathRequestMatcher("/mis-cursos"),
                     new AntPathRequestMatcher("/aula/**")
-                ).hasAnyRole("VISITOR", "STUDENT", "ADMIN", "GUEST")
+                ).hasAnyRole("STUDENT", "ADMIN", "GUEST")
                 .anyRequest().authenticated()
             )
             // Configuración del login basado en formulario tradicional y Thymeleaf
