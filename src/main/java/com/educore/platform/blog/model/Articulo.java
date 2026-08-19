@@ -31,7 +31,7 @@ public class Articulo {
     @Column(nullable = false)
     private String titulo;
 
-    @Column(name = "resumen_corto", length = 500)
+    @Column(name = "resumen_corto", length = 300)
     private String resumenCorto;
 
     /**

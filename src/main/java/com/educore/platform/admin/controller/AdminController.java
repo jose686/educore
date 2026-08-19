@@ -239,6 +239,9 @@ public class AdminController {
      */
     @PostMapping("/admin/blog/nuevo")
     public String saveNewArticle(@ModelAttribute("articulo") Articulo articulo, java.security.Principal principal) {
+        if (articulo.getResumenCorto() != null && articulo.getResumenCorto().length() > 300) {
+            articulo.setResumenCorto(articulo.getResumenCorto().substring(0, 300));
+        }
         articulo.setFechaPublicacion(LocalDateTime.now());
         Long authorId = 1L; // Fallback
         if (principal != null) {
@@ -271,7 +274,11 @@ public class AdminController {
         Articulo dbArticulo = blogService.obtenerPorId(id);
         dbArticulo.setTitulo(formArticulo.getTitulo());
         dbArticulo.setSlug(formArticulo.getSlug());
-        dbArticulo.setResumenCorto(formArticulo.getResumenCorto());
+        String resumen = formArticulo.getResumenCorto();
+        if (resumen != null && resumen.length() > 300) {
+            resumen = resumen.substring(0, 300);
+        }
+        dbArticulo.setResumenCorto(resumen);
         dbArticulo.setContenido(formArticulo.getContenido());
         dbArticulo.setUsuarioId(formArticulo.getUsuarioId());
         dbArticulo.setFeaturedImageUrl(formArticulo.getFeaturedImageUrl());
@@ -629,5 +636,6 @@ public class AdminController {
             redirectAttrs.addFlashAttribute("errorMsg",
                     "Error al procesar el reembolso con Stripe: " + e.getMessage());
         }
+        return "redirect:/admin/pedidos/" + id;
     }
 }

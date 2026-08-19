@@ -94,7 +94,11 @@
                                 <!-- Summary -->
                                 <div class="mb-4">
                                     <label for="resumenCorto" class="form-label">Resumen Corto (SEO)</label>
-                                    <textarea id="resumenCorto" th:field="*{resumenCorto}" rows="3" class="form-control" placeholder="Introduce un extracto para buscadores (Google)..." required></textarea>
+                                    <textarea id="resumenCorto" th:field="*{resumenCorto}" rows="3" class="form-control" placeholder="Introduce un extracto para buscadores (Google)..." maxlength="300" required></textarea>
+                                    <div class="d-flex justify-content-between align-items-center mt-1">
+                                        <small class="text-muted-custom fs-9">Resumen o extracto del artículo para motores de búsqueda (Google).</small>
+                                        <small id="resumen-char-count" class="text-muted-custom fs-9">0 / 300</small>
+                                    </div>
                                 </div>
 
                                 <!-- Imagen Destacada -->
@@ -208,6 +212,29 @@
                          .replace(/-+/g, '-');
                 slugInput.value = val;
             });
+
+            // Contador de caracteres para Resumen Corto (SEO)
+            var resumenInput = document.getElementById('resumenCorto');
+            var resumenCharCount = document.getElementById('resumen-char-count');
+            
+            function updateResumenCharCount() {
+                if (resumenInput && resumenCharCount) {
+                    var currentLength = resumenInput.value.length;
+                    resumenCharCount.textContent = currentLength + ' / 300';
+                    if (currentLength >= 300) {
+                        resumenCharCount.classList.remove('text-muted-custom');
+                        resumenCharCount.classList.add('text-danger');
+                    } else {
+                        resumenCharCount.classList.add('text-muted-custom');
+                        resumenCharCount.classList.remove('text-danger');
+                    }
+                }
+            }
+            
+            if (resumenInput) {
+                resumenInput.addEventListener('input', updateResumenCharCount);
+                updateResumenCharCount();
+            }
 
             // Configurar barra de herramientas extendida
             var toolbarOptions = [
