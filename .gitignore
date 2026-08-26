@@ -20,3 +20,16 @@ target/
 .env.local
 *.env
 uploads/
+
+# Agentes y asistentes IA
+.agent/
+.agent-skills/
+.skills/
+agent_skills/
+.agents/
+.claude/
+.cursor/
+
+# Carpetas de build y dependencias adicionales
+dist/
+node_modules/
