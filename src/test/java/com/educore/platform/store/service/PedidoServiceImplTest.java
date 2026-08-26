@@ -217,6 +217,16 @@ class PedidoServiceImplTest {
     }
 
     @Test
+    void obtenerTodosLosPedidosConDetalles_ShouldUseFetchMethod() {
+        when(pedidoRepository.findAllWithDetallesOrderByFechaCompraDesc()).thenReturn(Collections.emptyList());
+
+        List<Pedido> result = pedidoService.obtenerTodosLosPedidosConDetalles();
+
+        assertNotNull(result);
+        verify(pedidoRepository).findAllWithDetallesOrderByFechaCompraDesc();
+    }
+
+    @Test
     void obtenerPedidoPorId_WhenExists_ShouldReturn() {
         when(pedidoRepository.findById(pedidoId)).thenReturn(Optional.of(pedido));
         Pedido result = pedidoService.obtenerPedidoPorId(pedidoId);

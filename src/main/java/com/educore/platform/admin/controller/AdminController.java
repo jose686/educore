@@ -540,7 +540,7 @@ public class AdminController {
             @RequestParam(value = "fechaFin", required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate fechaFin,
             Model model) {
 
-        List<Pedido> pedidos = pedidoService.obtenerTodosLosPedidos();
+        List<Pedido> pedidos = pedidoService.obtenerTodosLosPedidosConDetalles();
 
         if (email != null && !email.trim().isEmpty()) {
             String lowerEmail = email.toLowerCase().trim();

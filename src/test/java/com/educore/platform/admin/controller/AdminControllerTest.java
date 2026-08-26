@@ -478,7 +478,7 @@ class AdminControllerTest {
     @Test
     @WithMockUser(username = "admin@educore.com", roles = "ADMIN")
     void adminUser_ShouldAccessPedidos() throws Exception {
-        when(pedidoService.obtenerTodosLosPedidos()).thenReturn(Collections.emptyList());
+        when(pedidoService.obtenerTodosLosPedidosConDetalles()).thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/admin/pedidos"))
                 .andExpect(status().isOk())

@@ -364,6 +364,12 @@ public class PedidoServiceImpl implements PedidoService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<Pedido> obtenerTodosLosPedidosConDetalles() {
+        return pedidoRepository.findAllWithDetallesOrderByFechaCompraDesc();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public Pedido obtenerPedidoPorId(Long id) {
         return pedidoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Pedido no encontrado con ID: " + id));

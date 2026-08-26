@@ -1,6 +1,7 @@
 package com.educore.platform.store.repository;
 
 import com.educore.platform.store.model.Pedido;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -33,4 +34,12 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
      */
     @Query("SELECT p FROM Pedido p ORDER BY p.fechaCompra DESC")
     List<Pedido> findAllOrderByFechaCompraDesc();
+
+    /**
+     * Listado administrativo con sus líneas ya inicializadas para evitar una
+     * consulta adicional por pedido al renderizar la vista.
+     */
+    @EntityGraph(attributePaths = "detalles")
+    @Query("SELECT p FROM Pedido p ORDER BY p.fechaCompra DESC")
+    List<Pedido> findAllWithDetallesOrderByFechaCompraDesc();
 }

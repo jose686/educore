@@ -40,6 +40,12 @@ public interface PedidoService {
      * Obtiene todos los pedidos del sistema (para el panel de administración).
      */
     List<Pedido> obtenerTodosLosPedidos();
+
+    /**
+     * Obtiene los pedidos del panel administrativo con sus detalles cargados.
+     */
+    List<Pedido> obtenerTodosLosPedidosConDetalles();
+
     /**
      * Procesa la sesión completada de Stripe (checkout.session.completed) de forma transactional.
      * Resuelve los accesos e inscribe/suscribe al usuario, y crea el pedido correspondiente.
