@@ -35,7 +35,15 @@ public class PaqueteCreditos {
     @Builder.Default
     private boolean activo = true;
 
-    @Column(name = "orden_visualizacion", nullable = false)
+    @Column(name = "orden_visualizacion")
     @Builder.Default
     private Integer ordenVisualizacion = 0;
+
+    @PrePersist
+    @PreUpdate
+    public void prePersist() {
+        if (ordenVisualizacion == null) {
+            ordenVisualizacion = 0;
+        }
+    }
 }

@@ -6,6 +6,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import jakarta.validation.Valid;
+import org.springframework.validation.BindingResult;
 
 /**
  * Controlador administrativo para realizar el CRUD de paquetes de créditos.
@@ -24,7 +26,7 @@ public class AdminPaqueteCreditosController {
      * Lista todos los paquetes de créditos registrados.
      */
     @GetMapping
-    public String listado(Model model) {
+    public String listarPaquetes(Model model) {
         model.addAttribute("paquetes", service.obtenerTodos());
         model.addAttribute("activeSection", "paquetes-creditos");
         return "admin-paquetes-creditos";
@@ -60,9 +62,14 @@ public class AdminPaqueteCreditosController {
      * Guarda o actualiza un paquete de créditos.
      */
     @PostMapping("/guardar")
-    public String guardar(@ModelAttribute("paquete") PaqueteCreditos paquete, RedirectAttributes ra) {
+    public String guardar(@Valid @ModelAttribute("paquete") PaqueteCreditos paquete, BindingResult result, Model model, RedirectAttributes ra) {
+        if (result.hasErrors()) {
+            model.addAttribute("isEdit", paquete.getId() != null);
+            model.addAttribute("activeSection", "paquetes-creditos");
+            return "admin-paquetes-creditos-form";
+        }
         service.guardar(paquete);
-        ra.addAttribute("success", "save");
+        ra.addFlashAttribute("mensajeExito", "Paquete guardado con éxito.");
         return "redirect:/admin/paquetes-creditos";
     }
 
@@ -75,7 +82,7 @@ public class AdminPaqueteCreditosController {
         if (pc != null) {
             pc.setActivo(!pc.isActivo());
             service.guardar(pc);
-            ra.addAttribute("success", "save");
+            ra.addFlashAttribute("mensajeExito", "Estado del paquete actualizado.");
         }
         return "redirect:/admin/paquetes-creditos";
     }
@@ -84,9 +91,9 @@ public class AdminPaqueteCreditosController {
      * Elimina físicamente un paquete.
      */
     @PostMapping("/eliminar/{id}")
-    public String eliminar(@PathVariable("id") Long id, RedirectAttributes ra) {
+    public String eliminarPaquete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         service.eliminar(id);
-        ra.addAttribute("success", "delete");
+        redirectAttributes.addFlashAttribute("mensajeExito", "Paquete de créditos eliminado correctamente.");
         return "redirect:/admin/paquetes-creditos";
     }
 }
