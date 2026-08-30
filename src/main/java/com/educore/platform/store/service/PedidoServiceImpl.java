@@ -219,7 +219,7 @@ public class PedidoServiceImpl implements PedidoService {
             if (item.isEmpty()) continue;
 
             try {
-                int underscoreIdx = item.indexOf('_');
+                int underscoreIdx = item.lastIndexOf('_');
                 if (underscoreIdx <= 0) {
                     log.warn("[PEDIDO-WEBHOOK] Formato de ítem de carrito inválido (sin '_'): '{}'. Se omite.", item);
                     continue;
@@ -249,10 +249,12 @@ public class PedidoServiceImpl implements PedidoService {
                     if (pc != null) {
                         Usuario usuario = usuarioService.obtenerPorEmail(email);
                         if (usuario != null) {
-                            usuario.setSaldoCreditos(usuario.getSaldoCreditos() + pc.getCreditos());
+                            int saldoActual = usuario.getSaldoCreditos() != null ? usuario.getSaldoCreditos() : 0;
+                            int creditosComprados = pc.getCreditos() != null ? pc.getCreditos() : 0;
+                            usuario.setSaldoCreditos(saldoActual + creditosComprados);
                             usuarioService.guardar(usuario);
                             log.info("[PEDIDO-WEBHOOK] ✅ Añadidos {} créditos al usuario {} por paquete de créditos id {}", 
-                                     pc.getCreditos(), email, paqueteCreditosId);
+                                     creditosComprados, email, paqueteCreditosId);
                         }
                     }
                 } else {
@@ -283,10 +285,12 @@ public class PedidoServiceImpl implements PedidoService {
                 if (pc != null) {
                     Usuario usuario = usuarioService.obtenerPorEmail(email);
                     if (usuario != null) {
-                        usuario.setSaldoCreditos(usuario.getSaldoCreditos() + pc.getCreditos());
+                        int saldoActual = usuario.getSaldoCreditos() != null ? usuario.getSaldoCreditos() : 0;
+                        int creditosComprados = pc.getCreditos() != null ? pc.getCreditos() : 0;
+                        usuario.setSaldoCreditos(saldoActual + creditosComprados);
                         usuarioService.guardar(usuario);
                         log.info("[PEDIDO-WEBHOOK] ✅ Añadidos {} créditos al usuario {} (individual) por paquete de créditos id {}", 
-                                 pc.getCreditos(), email, paqueteCreditosId);
+                                 creditosComprados, email, paqueteCreditosId);
                     }
                 }
             } else {

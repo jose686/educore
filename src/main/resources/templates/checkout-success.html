@@ -20,7 +20,17 @@
                         <p class="text-muted-custom fs-6">Agradecemos tu confianza en EduCore.</p>
                     </div>
 
-                    <div class="alert alert-info border-0 bg-info bg-opacity-5 text-info rounded-4 py-3 px-4 mb-4 text-start">
+                    <div th:if="${mensajeExito}" class="alert alert-success border-0 bg-success bg-opacity-5 text-success rounded-4 py-3 px-4 mb-4 text-start">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-check-circle-fill me-3 fs-4 text-success mt-1"></i>
+                            <div>
+                                <span class="d-block fw-semibold mb-1 text-white">¡Créditos acreditados!</span>
+                                <span class="d-block fs-8 text-muted-custom" th:text="${mensajeExito}">El pago fue procesado correctamente.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div th:unless="${esSoloCreditos}" class="alert alert-info border-0 bg-info bg-opacity-5 text-info rounded-4 py-3 px-4 mb-4 text-start">
                         <div class="d-flex align-items-start">
                             <i class="bi bi-info-circle-fill me-3 fs-4 text-info mt-1"></i>
                             <div>
@@ -31,10 +41,17 @@
                     </div>
 
                     <div class="d-flex flex-column gap-3">
-                        <a th:href="@{/mis-cursos}" class="btn btn-gradient py-3">
+                        <a th:if="${esSoloCreditos}" th:href="@{/juegos}" class="btn btn-gradient py-3">
+                            <i class="bi bi-controller me-2"></i> Ir a la Zona de Minijuegos
+                        </a>
+                        <a th:if="${esSoloCreditos}" th:href="@{/creditos/recargar}" class="btn btn-outline-light border-white border-opacity-10 py-3 hover-white">
+                            <i class="bi bi-coin me-2"></i> Ver mi Saldo de Créditos
+                        </a>
+
+                        <a th:unless="${esSoloCreditos}" th:href="@{/mis-cursos}" class="btn btn-gradient py-3">
                             <i class="bi bi-journal-play me-2"></i> Ir a Mis Cursos
                         </a>
-                        <a th:href="@{/catalogo}" class="btn btn-outline-light border-white border-opacity-10 py-3 hover-white">
+                        <a th:unless="${esSoloCreditos}" th:href="@{/catalogo}" class="btn btn-outline-light border-white border-opacity-10 py-3 hover-white">
                             <i class="bi bi-cart me-2"></i> Seguir Comprando
                         </a>
                     </div>

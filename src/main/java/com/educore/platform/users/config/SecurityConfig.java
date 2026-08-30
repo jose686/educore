@@ -66,9 +66,19 @@ public class SecurityConfig {
                     new AntPathRequestMatcher("/admin/**"),
                     new AntPathRequestMatcher("/api/v1/admin/**")
                 ).hasRole("ADMIN")
+                // Rutas de compra, créditos y pedidos para cualquier usuario autenticado
+                .requestMatchers(
+                    new AntPathRequestMatcher("/carrito/**"),
+                    new AntPathRequestMatcher("/checkout/**"),
+                    new AntPathRequestMatcher("/creditos/**"),
+                    new AntPathRequestMatcher("/pedidos/**"),
+                    new AntPathRequestMatcher("/api/v1/checkout/**")
+                ).authenticated()
                 // Rutas privadas del aula virtual (LMS)
                 .requestMatchers(
                     new AntPathRequestMatcher("/mis-cursos"),
+                    new AntPathRequestMatcher("/mis-cursos/**"),
+                    new AntPathRequestMatcher("/cursos/mis-cursos/**"),
                     new AntPathRequestMatcher("/aula/**")
                 ).hasAnyRole("STUDENT", "ADMIN", "GUEST")
                 .anyRequest().authenticated()

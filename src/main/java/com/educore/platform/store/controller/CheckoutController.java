@@ -304,6 +304,47 @@ public class CheckoutController {
             String email = auth.getName();
             refreshSecurityContextIfRoleChanged(auth, email);
         }
+
+        boolean esSoloCreditos = false;
+        if (sessionId != null && !sessionId.isBlank()) {
+            try {
+                com.stripe.model.checkout.Session session = com.stripe.model.checkout.Session.retrieve(sessionId);
+                java.util.Map<String, String> metadata = session.getMetadata();
+                if (metadata != null) {
+                    String tipoProducto = metadata.get("tipo_producto");
+                    String idProductoStr = metadata.get("producto_id");
+
+                    if ("carrito".equalsIgnoreCase(tipoProducto) && idProductoStr != null) {
+                        String[] items = idProductoStr.split(",");
+                        boolean tieneCursos = false;
+                        boolean tieneCreditos = false;
+                        for (String item : items) {
+                            if (item.contains("curso") || item.contains("paquete")) {
+                                if (!item.contains("paquete_creditos") && !item.contains("paquetecreditos")) {
+                                    tieneCursos = true;
+                                }
+                            }
+                            if (item.contains("paquete_creditos") || item.contains("paquetecreditos")) {
+                                tieneCreditos = true;
+                            }
+                        }
+                        if (tieneCreditos && !tieneCursos) {
+                            esSoloCreditos = true;
+                        }
+                    } else if (tipoProducto != null && (tipoProducto.contains("paquete_creditos") || tipoProducto.contains("paquetecreditos"))) {
+                        esSoloCreditos = true;
+                    }
+                }
+            } catch (Exception e) {
+                // Ignore retrieval error in local environment
+            }
+        }
+
+        model.addAttribute("esSoloCreditos", esSoloCreditos);
+        if (esSoloCreditos) {
+            model.addAttribute("mensajeExito", "¡Compra de créditos procesada con éxito! Tu saldo ha sido actualizado.");
+        }
+
         return "checkout-success";
     }
 
