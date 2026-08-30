@@ -75,4 +75,26 @@ public class UsuarioServiceImpl implements UsuarioService {
     public Usuario guardar(Usuario usuario) {
         return usuarioRepository.save(usuario);
     }
+
+    @Override
+    @Transactional
+    public Usuario actualizarPerfil(Long id, String nombre, String email, String password) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("No se encontró ningún usuario con ID: " + id));
+
+        if (!usuario.getEmail().equalsIgnoreCase(email)) {
+            if (usuarioRepository.findByEmail(email).isPresent()) {
+                throw new EmailAlreadyExistsException("El correo electrónico ya está registrado: " + email);
+            }
+            usuario.setEmail(email);
+        }
+
+        usuario.setNombre(nombre);
+
+        if (password != null && !password.trim().isEmpty()) {
+            usuario.setPassword(passwordEncoder.encode(password));
+        }
+
+        return usuarioRepository.save(usuario);
+    }
 }

@@ -18,4 +18,12 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
      * @return Un Optional que contiene el usuario si se encuentra, o vacío en caso contrario.
      */
     Optional<Usuario> findByEmail(String email);
+
+    /**
+     * Comprueba si existe algún usuario con el rol especificado.
+     *
+     * @param role Rol a verificar.
+     * @return true si existe al menos un usuario con ese rol, false en caso contrario.
+     */
+    boolean existsByRole(com.educore.platform.users.model.Role role);
 }

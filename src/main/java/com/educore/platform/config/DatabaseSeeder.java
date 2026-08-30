@@ -25,6 +25,7 @@ import com.educore.platform.users.repository.UsuarioRepository;
 import com.educore.platform.store.model.RecursoInteractivo;
 import com.educore.platform.store.repository.RecursoInteractivoRepository;
 import java.util.Set;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -41,6 +42,15 @@ import java.time.LocalDateTime;
 
 @Component
 public class DatabaseSeeder implements CommandLineRunner {
+
+    @Value("${app.admin.default-email}")
+    private String adminDefaultEmail;
+
+    @Value("${app.admin.default-password}")
+    private String adminDefaultPassword;
+
+    @Value("${app.admin.default-name}")
+    private String adminDefaultName;
 
     private final UsuarioRepository usuarioRepository;
     private final CursoRepository cursoRepository;
@@ -108,16 +118,16 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     private void seedUsuarios() {
         // Registrar Administrador
-        if (usuarioRepository.findByEmail("admin@educore.com").isEmpty()) {
+        if (!usuarioRepository.existsByRole(Role.ADMIN)) {
             Usuario admin = Usuario.builder()
-                    .nombre("Administrador del Sitio")
-                    .email("admin@educore.com")
-                    .password(passwordEncoder.encode("password123"))
+                    .nombre(adminDefaultName)
+                    .email(adminDefaultEmail)
+                    .password(passwordEncoder.encode(adminDefaultPassword))
                     .role(Role.ADMIN)
                     .activo(true)
                     .build();
             usuarioRepository.save(admin);
-            System.out.println("[DatabaseSeeder] Usuario ADMINISTRADOR creado: admin@educore.com");
+            System.out.println("[DatabaseSeeder] Usuario ADMINISTRADOR creado: " + adminDefaultEmail);
         }
 
         // Registrar Alumno

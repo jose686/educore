@@ -24,6 +24,10 @@ logging:
 app:
   media:
     upload-dir: ./uploads
+  admin:
+    default-email: ${ADMIN_EMAIL:admin@educore.com}
+    default-password: ${ADMIN_PASSWORD:Admin1234!}
+    default-name: ${ADMIN_NAME:Administrador}
 
 stripe:
   api:

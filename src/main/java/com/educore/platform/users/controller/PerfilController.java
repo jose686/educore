@@ -132,6 +132,40 @@ public class PerfilController {
         }
     }
 
+    /**
+     * Procesa la actualización del perfil del usuario actual desde la vista Thymeleaf.
+     */
+    @PostMapping("/perfil/actualizar")
+    public String actualizarPerfil(@RequestParam("nombre") String nombre,
+                                   @RequestParam("email") String email,
+                                   @RequestParam(value = "password", required = false) String password) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getName())) {
+            return "redirect:/login";
+        }
+
+        String emailActual = auth.getName();
+        Usuario usuario = usuarioService.obtenerPorEmail(emailActual);
+
+        try {
+            Usuario actualizado = usuarioService.actualizarPerfil(usuario.getId(), nombre, email, password);
+            
+            // Si el correo cambió, actualizar la sesión de autenticación en Spring Security
+            if (!emailActual.equalsIgnoreCase(email)) {
+                org.springframework.security.authentication.UsernamePasswordAuthenticationToken newAuth = 
+                        new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+                                actualizado.getEmail(),
+                                auth.getCredentials(),
+                                auth.getAuthorities()
+                        );
+                SecurityContextHolder.getContext().setAuthentication(newAuth);
+            }
+            return "redirect:/perfil?perfil_exito=" + enc("Perfil actualizado correctamente.");
+        } catch (Exception e) {
+            return "redirect:/perfil?perfil_error=" + enc(e.getMessage());
+        }
+    }
+
     private String enc(String s) {
         try {
             return URLEncoder.encode(s, StandardCharsets.UTF_8.toString());

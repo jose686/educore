@@ -41,4 +41,15 @@ public interface UsuarioService {
      * Guarda o actualiza un usuario en la base de datos.
      */
     Usuario guardar(Usuario usuario);
+
+    /**
+     * Actualiza el perfil de un usuario existente.
+     *
+     * @param id ID del usuario.
+     * @param nombre Nuevo nombre del usuario.
+     * @param email Nuevo correo electrónico.
+     * @param password Nueva contraseña (opcional).
+     * @return El usuario actualizado.
+     */
+    Usuario actualizarPerfil(Long id, String nombre, String email, String password);
 }
