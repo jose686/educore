@@ -419,6 +419,11 @@
                 </a>
             </li>
             <li>
+                <a th:href="@{/admin/paquetes-creditos}" class="admin-menu-link" th:classappend="${activeSection == 'paquetes-creditos'} ? 'active' : ''">
+                    <i class="bi bi-coin"></i> Paquetes de Créditos
+                </a>
+            </li>
+            <li>
                 <a th:href="@{/admin/soporte}" class="admin-menu-link" th:classappend="${activeSection == 'soporte'} ? 'active' : ''">
                     <i class="bi bi-chat-right-text"></i> Tickets de Soporte
                 </a>

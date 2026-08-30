@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: common-head('Recargar Créditos')}"></head>
+<body>
+<!-- Navbar -->
+<header th:replace="~{layout :: navbar}"></header>
+
+<main class="container py-5" style="min-height: 80vh;">
+    <!-- Header Section -->
+    <div class="row mb-5 text-center justify-content-center">
+        <div class="col-lg-8">
+            <h1 class="fw-bold text-white mb-2">Recargar Saldo de Créditos</h1>
+            <p class="text-muted-custom fs-5 mb-0">Adquiere créditos para desbloquear minijuegos tácticos avanzados o servicios premium.</p>
+        </div>
+    </div>
+
+    <!-- Current Balance Info Card -->
+    <div class="row mb-5 justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="card glass-card border border-white border-opacity-10 p-4 text-center">
+                <i class="bi bi-wallet2 text-gradient fs-1 d-block mb-2"></i>
+                <span class="fs-8 text-secondary uppercase tracking-wider">Tu saldo actual</span>
+                <h2 class="fw-extrabold text-white mt-1 mb-0" th:text="${saldoCreditos} + ' 🪙'">0 🪙</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Packages Grid -->
+    <div class="row row-cols-1 row-cols-md-3 g-4 justify-content-center">
+        <!-- Package Card Loop -->
+        <div class="col col-lg-3.5" th:each="p : ${paquetes}">
+            <div class="card glass-card h-100 p-4 border border-white border-opacity-10 d-flex flex-column justify-content-between text-center position-relative transition-hover">
+                <!-- Top Corner Badge -->
+                <div th:if="${p.badge != null && !#strings.isEmpty(p.badge)}" 
+                     class="position-absolute top-0 start-50 translate-middle badge bg-warning text-dark border-0 px-3 py-1.5 fs-9 fw-bold rounded-pill text-uppercase shadow-lg"
+                     th:text="${p.badge}">
+                    Oferta
+                </div>
+
+                <div class="mt-2">
+                    <span class="fs-8 text-secondary uppercase text-gradient fw-bold mb-1 d-block" th:text="${p.nombre}">Pack Bronce</span>
+                    <h3 class="fw-extrabold text-white my-3">
+                        <span th:text="${p.creditos}">100</span> <span class="fs-5 text-secondary">🪙</span>
+                    </h3>
+                    <p class="text-muted-custom fs-7 px-2">Perfecto para desbloquear minijuegos y disfrutar de los tableros lúdicos interactivos.</p>
+                </div>
+
+                <div class="mt-4">
+                    <div class="mb-4">
+                        <span class="text-white fs-4 fw-bold" th:text="${p.precio}">5.00</span>
+                        <span class="fs-7 text-secondary">EUR</span>
+                    </div>
+                    <!-- Form to add package to cart (which redirects to checkout) -->
+                    <form th:action="@{/carrito/agregar}" method="POST" class="m-0">
+                        <input type="hidden" name="tipo" value="paquete_creditos">
+                        <input type="hidden" name="id" th:value="${p.id}">
+                        <button type="submit" class="btn btn-gradient w-100 py-2.5 rounded-pill fs-8 fw-bold">
+                            Comprar <i class="bi bi-cart-plus ms-1"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty Catalog State -->
+        <div class="col-12 text-center py-5 text-secondary" th:if="${#lists.isEmpty(paquetes)}">
+            <i class="bi bi-coin fs-1 d-block mb-3 opacity-50"></i>
+            <span class="fs-6">No hay paquetes de créditos activos en este momento. Inténtalo más tarde.</span>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer th:replace="~{layout :: footer}"></footer>
+
+<!-- Bootstrap JS -->
+<div th:replace="~{layout :: bootstrap-js}"></div>
+</body>
+</html>

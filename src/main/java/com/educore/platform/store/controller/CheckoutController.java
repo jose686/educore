@@ -12,6 +12,7 @@ import com.educore.platform.store.service.PedidoService;
 import com.educore.platform.store.service.PromocionService;
 import com.educore.platform.store.service.StripeService;
 import com.educore.platform.users.service.UserPublicService;
+import com.educore.platform.store.service.PaqueteCreditosService;
 import com.stripe.model.checkout.Session;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -47,6 +48,7 @@ public class CheckoutController {
     private final StripeService stripeService;
     private final PedidoService pedidoService;
     private final UserPublicService userPublicService;
+    private final PaqueteCreditosService paqueteCreditosService;
 
     @Value("${stripe.api.publishable-key:}")
     private String stripePublishableKey;
@@ -56,13 +58,15 @@ public class CheckoutController {
                               PaqueteRepository paqueteRepository,
                               StripeService stripeService,
                               PedidoService pedidoService,
-                              UserPublicService userPublicService) {
+                              UserPublicService userPublicService,
+                              PaqueteCreditosService paqueteCreditosService) {
         this.catalogoService = catalogoService;
         this.promocionService = promocionService;
         this.paqueteRepository = paqueteRepository;
         this.stripeService = stripeService;
         this.pedidoService = pedidoService;
         this.userPublicService = userPublicService;
+        this.paqueteCreditosService = paqueteCreditosService;
     }
 
     /**
@@ -108,6 +112,14 @@ public class CheckoutController {
                 } else {
                     throw new IllegalArgumentException("Servicio no identificado");
                 }
+            } else if ("paquete_creditos".equalsIgnoreCase(tipo) || "paquetecreditos".equalsIgnoreCase(tipo)) {
+                Long id = Long.parseLong(idStr);
+                com.educore.platform.store.model.PaqueteCreditos pc = paqueteCreditosService.obtenerPorId(id);
+                if (pc == null) {
+                    throw new IllegalArgumentException("Paquete de créditos no encontrado");
+                }
+                titulo = pc.getNombre();
+                precio = pc.getPrecio();
             } else {
                 return "redirect:/catalogo";
             }
@@ -122,6 +134,9 @@ public class CheckoutController {
             carrito.add(cartItem);
         }
 
+        if ("paquete_creditos".equalsIgnoreCase(tipo) || "paquetecreditos".equalsIgnoreCase(tipo)) {
+            return "redirect:/carrito";
+        }
         if ("servicio".equalsIgnoreCase(tipo)) {
             return "redirect:/juegos?agregado_exito=true";
         }

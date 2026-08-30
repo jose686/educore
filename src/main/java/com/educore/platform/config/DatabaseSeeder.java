@@ -19,6 +19,8 @@ import com.educore.platform.store.repository.ProductoCursoRepository;
 import com.educore.platform.store.repository.DatosFiscalesRepository;
 import com.educore.platform.store.repository.PaqueteRepository;
 import com.educore.platform.store.repository.GuestTokenRepository;
+import com.educore.platform.store.model.PaqueteCreditos;
+import com.educore.platform.store.repository.PaqueteCreditosRepository;
 import com.educore.platform.users.model.Role;
 import com.educore.platform.users.model.Usuario;
 import com.educore.platform.users.repository.UsuarioRepository;
@@ -64,6 +66,7 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final MediaFileRepository mediaFileRepository;
     private final PaqueteRepository paqueteRepository;
     private final GuestTokenRepository guestTokenRepository;
+    private final PaqueteCreditosRepository paqueteCreditosRepository;
 
     public DatabaseSeeder(UsuarioRepository usuarioRepository,
                           CursoRepository cursoRepository,
@@ -76,7 +79,8 @@ public class DatabaseSeeder implements CommandLineRunner {
                           RecursoInteractivoRepository recursoInteractivoRepository,
                           MediaFileRepository mediaFileRepository,
                           PaqueteRepository paqueteRepository,
-                          GuestTokenRepository guestTokenRepository) {
+                          GuestTokenRepository guestTokenRepository,
+                          PaqueteCreditosRepository paqueteCreditosRepository) {
         this.usuarioRepository = usuarioRepository;
         this.cursoRepository = cursoRepository;
         this.productoCursoRepository = productoCursoRepository;
@@ -89,6 +93,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         this.mediaFileRepository = mediaFileRepository;
         this.paqueteRepository = paqueteRepository;
         this.guestTokenRepository = guestTokenRepository;
+        this.paqueteCreditosRepository = paqueteCreditosRepository;
     }
 
     @Override
@@ -235,6 +240,35 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .build();
                 guestTokenRepository.save(token);
                 System.out.println("[DatabaseSeeder] GuestToken de prueba registrado.");
+            }
+
+            // 6. Crear Paquetes de Créditos por defecto
+            if (paqueteCreditosRepository.count() == 0) {
+                paqueteCreditosRepository.save(PaqueteCreditos.builder()
+                        .nombre("Pack Bronce")
+                        .creditos(100)
+                        .precio(new java.math.BigDecimal("5.00"))
+                        .badge("Popular")
+                        .ordenVisualizacion(1)
+                        .activo(true)
+                        .build());
+                paqueteCreditosRepository.save(PaqueteCreditos.builder()
+                        .nombre("Pack Plata")
+                        .creditos(300)
+                        .precio(new java.math.BigDecimal("12.00"))
+                        .badge("20% Descuento")
+                        .ordenVisualizacion(2)
+                        .activo(true)
+                        .build());
+                paqueteCreditosRepository.save(PaqueteCreditos.builder()
+                        .nombre("Pack Oro")
+                        .creditos(600)
+                        .precio(new java.math.BigDecimal("20.00"))
+                        .badge("Mejor Valor")
+                        .ordenVisualizacion(3)
+                        .activo(true)
+                        .build());
+                System.out.println("[DatabaseSeeder] Paquetes de Créditos por defecto registrados.");
             }
         }
     }

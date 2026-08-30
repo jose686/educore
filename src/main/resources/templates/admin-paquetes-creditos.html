@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: common-head('Panel de Administración - Paquetes de Créditos')}"></head>
+<body>
+<div class="admin-wrapper">
+    <!-- Sidebar -->
+    <aside th:replace="~{layout :: admin-sidebar('paquetes-creditos')}"></aside>
+
+    <!-- Main Content -->
+    <div class="admin-main">
+        <header th:replace="~{layout :: admin-navbar('Backoffice Paquetes de Créditos')}"></header>
+
+        <main class="admin-content-body">
+            <!-- Header Section -->
+            <div class="row mb-5 align-items-center">
+                <div class="col-sm-6">
+                    <h2 class="fw-bold text-white mb-2">Paquetes de Créditos</h2>
+                    <p class="text-muted-custom fs-7 mb-0">Gestiona los paquetes de créditos de recarga disponibles para los estudiantes.</p>
+                </div>
+                <div class="col-sm-6 text-sm-end mt-3 mt-sm-0">
+                    <a th:href="@{/admin/paquetes-creditos/nuevo}" class="btn btn-gradient py-2 px-4 rounded-pill fs-8 fw-semibold shadow-sm">
+                        Nuevo Paquete <i class="bi bi-plus-lg ms-1"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Success Alert -->
+            <div th:if="${param.success}" class="alert alert-success border-0 bg-success bg-opacity-10 text-success rounded-3 py-3 px-4 mb-4">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <span th:if="${param.success[0] == 'save'}">¡Paquete guardado con éxito!</span>
+                <span th:if="${param.success[0] == 'delete'}">Paquete eliminado correctamente.</span>
+            </div>
+
+            <!-- Packages Table Card -->
+            <div class="card glass-card border border-white border-opacity-10 p-4">
+                <h5 class="text-white fw-bold mb-4">Catálogo de Paquetes</h5>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover align-middle m-0">
+                        <thead>
+                            <tr>
+                                <th class="fs-8 text-secondary">ID</th>
+                                <th class="fs-8 text-secondary">Nombre</th>
+                                <th class="fs-8 text-secondary">Créditos</th>
+                                <th class="fs-8 text-secondary">Precio</th>
+                                <th class="fs-8 text-secondary">Badge</th>
+                                <th class="fs-8 text-secondary">Orden</th>
+                                <th class="fs-8 text-secondary">Estado</th>
+                                <th class="fs-8 text-secondary text-end">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="p : ${paquetes}">
+                                <td class="fs-7 text-muted-custom" th:text="${p.id}">1</td>
+                                <td>
+                                    <span class="text-white fw-bold" th:text="${p.nombre}">Pack Básico</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1 fs-8 rounded-pill">
+                                        <i class="bi bi-coin me-1"></i> <span th:text="${p.creditos}">100</span>
+                                    </span>
+                                </td>
+                                <td class="fs-7 fw-semibold text-white" th:text="${p.precio} + ' EUR'">5.00 EUR</td>
+                                <td>
+                                    <span th:if="${p.badge != null && !#strings.isEmpty(p.badge)}" 
+                                          class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2.5 py-1 fs-9 rounded-pill"
+                                          th:text="${p.badge}">Badge</span>
+                                    <span th:unless="${p.badge != null && !#strings.isEmpty(p.badge)}" class="text-muted-custom fs-8">-</span>
+                                </td>
+                                <td class="fs-7 text-muted-custom" th:text="${p.ordenVisualizacion}">0</td>
+                                <td>
+                                    <form th:action="@{'/admin/paquetes-creditos/toggle/' + ${p.id}}" method="POST" class="m-0">
+                                        <button type="submit" class="border-0 bg-transparent p-0 shadow-none">
+                                            <span th:if="${p.activo}" class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-20 px-2.5 py-1 fs-8 rounded-pill pointer">
+                                                Activo
+                                            </span>
+                                            <span th:unless="${p.activo}" class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-20 px-2.5 py-1 fs-8 rounded-pill pointer">
+                                                Inactivo
+                                            </span>
+                                        </button>
+                                    </form>
+                                </td>
+                                <td class="text-end">
+                                    <div class="d-inline-flex gap-2">
+                                        <a th:href="@{'/admin/paquetes-creditos/editar/' + ${p.id}}" class="btn btn-outline-light border-white border-opacity-10 btn-sm py-1.5 px-3 rounded-pill fs-8">
+                                            Editar <i class="bi bi-pencil ms-1"></i>
+                                        </a>
+                                        <form th:action="@{'/admin/paquetes-creditos/eliminar/' + ${p.id}}" method="POST" class="m-0" 
+                                              th:onsubmit="'return confirm(\'¿Estás seguro de que deseas eliminar el paquete &quot;' + ${p.nombre} + '&quot;?\');'">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm py-1.5 px-3 rounded-pill fs-8">
+                                                Eliminar <i class="bi bi-trash ms-1"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(paquetes)}">
+                                <td colspan="8" class="text-center py-4 text-muted-custom">
+                                    No hay paquetes de créditos registrados en el sistema.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+<!-- Bootstrap JS -->
+<div th:replace="~{layout :: bootstrap-js}"></div>
+</body>
+</html>

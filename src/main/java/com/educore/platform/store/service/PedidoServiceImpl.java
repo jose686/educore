@@ -15,6 +15,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.educore.platform.store.model.PaqueteCreditos;
+import com.educore.platform.store.service.PaqueteCreditosService;
+import com.educore.platform.users.service.UsuarioService;
+import com.educore.platform.users.model.Usuario;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -41,6 +45,8 @@ public class PedidoServiceImpl implements PedidoService {
     private final PromocionService promocionService;
     private final PaqueteRepository paqueteRepository;
     private final AulaVirtualService aulaVirtualService;
+    private final PaqueteCreditosService paqueteCreditosService;
+    private final UsuarioService usuarioService;
 
     public PedidoServiceImpl(PedidoRepository pedidoRepository,
                              StripeService stripeService,
@@ -50,7 +56,9 @@ public class PedidoServiceImpl implements PedidoService {
                              CatalogoService catalogoService,
                              PromocionService promocionService,
                              PaqueteRepository paqueteRepository,
-                             AulaVirtualService aulaVirtualService) {
+                             AulaVirtualService aulaVirtualService,
+                             PaqueteCreditosService paqueteCreditosService,
+                             UsuarioService usuarioService) {
         this.pedidoRepository = pedidoRepository;
         this.stripeService = stripeService;
         this.userPublicService = userPublicService;
@@ -60,6 +68,8 @@ public class PedidoServiceImpl implements PedidoService {
         this.promocionService = promocionService;
         this.paqueteRepository = paqueteRepository;
         this.aulaVirtualService = aulaVirtualService;
+        this.paqueteCreditosService = paqueteCreditosService;
+        this.usuarioService = usuarioService;
     }
 
     @Override
@@ -233,6 +243,18 @@ public class PedidoServiceImpl implements PedidoService {
                 } else if ("servicio".equalsIgnoreCase(itemTipo)) {
                     log.info("[PEDIDO-WEBHOOK] Ítem de tipo 'servicio' (id: {}) para usuario {}. Sin acción automática.", itemIdStr, email);
 
+                } else if ("paquete_creditos".equalsIgnoreCase(itemTipo) || "paquetecreditos".equalsIgnoreCase(itemTipo)) {
+                    Long paqueteCreditosId = Long.parseLong(itemIdStr);
+                    PaqueteCreditos pc = paqueteCreditosService.obtenerPorId(paqueteCreditosId);
+                    if (pc != null) {
+                        Usuario usuario = usuarioService.obtenerPorEmail(email);
+                        if (usuario != null) {
+                            usuario.setSaldoCreditos(usuario.getSaldoCreditos() + pc.getCreditos());
+                            usuarioService.guardar(usuario);
+                            log.info("[PEDIDO-WEBHOOK] ✅ Añadidos {} créditos al usuario {} por paquete de créditos id {}", 
+                                     pc.getCreditos(), email, paqueteCreditosId);
+                        }
+                    }
                 } else {
                     log.warn("[PEDIDO-WEBHOOK] Tipo de ítem desconocido: '{}'.", itemTipo);
                 }
@@ -255,6 +277,18 @@ public class PedidoServiceImpl implements PedidoService {
                 promocionService.comprarPaquete(paqueteId, email);
                 log.info("[PEDIDO-WEBHOOK] ✅ Paquete {} procesado (individual) para usuario: {}", paqueteId, email);
 
+            } else if ("paquete_creditos".equalsIgnoreCase(tipoProducto) || "paquetecreditos".equalsIgnoreCase(tipoProducto)) {
+                Long paqueteCreditosId = Long.parseLong(idProductoStr);
+                PaqueteCreditos pc = paqueteCreditosService.obtenerPorId(paqueteCreditosId);
+                if (pc != null) {
+                    Usuario usuario = usuarioService.obtenerPorEmail(email);
+                    if (usuario != null) {
+                        usuario.setSaldoCreditos(usuario.getSaldoCreditos() + pc.getCreditos());
+                        usuarioService.guardar(usuario);
+                        log.info("[PEDIDO-WEBHOOK] ✅ Añadidos {} créditos al usuario {} (individual) por paquete de créditos id {}", 
+                                 pc.getCreditos(), email, paqueteCreditosId);
+                    }
+                }
             } else {
                 log.warn("[PEDIDO-WEBHOOK] Tipo de producto no reconocido: '{}'.", tipoProducto);
             }
