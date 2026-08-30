@@ -44,6 +44,9 @@ public class SecurityConfig {
                     new AntPathRequestMatcher("/js/**"),
                     new AntPathRequestMatcher("/images/**"),
                     new AntPathRequestMatcher("/favicon.ico"),
+                    new AntPathRequestMatcher("/uploads/**"),
+                    new AntPathRequestMatcher("/interactivos/**"),
+                    new AntPathRequestMatcher("/static/**"),
                     new AntPathRequestMatcher("/webjars/**"),
                     new AntPathRequestMatcher("/api/v1/stripe/webhook"),
                     new AntPathRequestMatcher("/canjear-token"),
@@ -103,9 +106,9 @@ public class SecurityConfig {
                     new AntPathRequestMatcher("/api/v1/stripe/webhook")
                 )
             )
-            // Permitir frames de origen local (necesario para visualizar H2 en su consola)
+            // Permitir frames de origen local (necesario para visualizar H2 e iframes de minijuegos)
             .headers(headers -> headers
-                .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
+                .frameOptions(frameOptions -> frameOptions.sameOrigin())
             );
 
         return http.build();
