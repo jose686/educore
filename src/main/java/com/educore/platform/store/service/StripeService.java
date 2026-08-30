@@ -88,6 +88,10 @@ public class StripeService {
             builder.putMetadata("cursoId", String.valueOf(cursoId));
             builder.putMetadata("cursoIds", String.valueOf(cursoId));
         }
+        if ("paquete_creditos".equalsIgnoreCase(tipoProducto) || "paquetecreditos".equalsIgnoreCase(tipoProducto)) {
+            builder.putMetadata("tipo", "PAQUETE_CREDITOS");
+            builder.putMetadata("paqueteId", productoId);
+        }
 
         return Session.create(builder.build());
     }
@@ -140,6 +144,11 @@ public class StripeService {
 
             // Guardar ID en formato: tipo_id original (ej: curso_12, paquete_5, servicio_retos_pro)
             idsJoiner.add(item.getTipo() + "_" + item.getId());
+
+            if ("paquete_creditos".equalsIgnoreCase(item.getTipo()) || "paquetecreditos".equalsIgnoreCase(item.getTipo())) {
+                builder.putMetadata("tipo", "PAQUETE_CREDITOS");
+                builder.putMetadata("paqueteId", item.getId());
+            }
         }
 
         builder.putMetadata("email", emailUsuario);

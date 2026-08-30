@@ -66,7 +66,7 @@ public class SecurityConfig {
                     new AntPathRequestMatcher("/admin/**"),
                     new AntPathRequestMatcher("/api/v1/admin/**")
                 ).hasRole("ADMIN")
-                // Rutas de compra, créditos y pedidos para cualquier usuario autenticado
+                // Rutas de compra, créditos, pedidos y aula virtual general para cualquier usuario autenticado
                 .requestMatchers(
                     new AntPathRequestMatcher("/carrito/**"),
                     new AntPathRequestMatcher("/checkout/**"),

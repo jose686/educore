@@ -176,6 +176,11 @@ public class PedidoServiceImpl implements PedidoService {
             return;
         }
 
+        if (pedidoRepository.findByStripeSessionId(session.getId()).isPresent()) {
+            log.info("[PEDIDO-WEBHOOK] ⚠️ La sesión {} ya fue procesada anteriormente. Se omite duplicación.", session.getId());
+            return;
+        }
+
         Map<String, String> metadata = session.getMetadata();
         if (metadata == null) {
             log.error("[PEDIDO-WEBHOOK] La sesión {} no contiene metadata. No se puede procesar.", session.getId());
@@ -192,6 +197,29 @@ public class PedidoServiceImpl implements PedidoService {
         if (email == null || email.isBlank()) {
             log.error("[PEDIDO-WEBHOOK] Email ausente en la metadata de la sesión: {}", session.getId());
             return;
+        }
+
+        // Acreditación de créditos garantizada por metadatos directos
+        String tipoDirecto = metadata.get("tipo");
+        String paqueteIdDirecto = metadata.get("paqueteId");
+        if ("PAQUETE_CREDITOS".equalsIgnoreCase(tipoDirecto) && paqueteIdDirecto != null) {
+            try {
+                Long paqueteCreditosId = Long.parseLong(paqueteIdDirecto);
+                PaqueteCreditos pc = paqueteCreditosService.obtenerPorId(paqueteCreditosId);
+                if (pc != null) {
+                    Usuario usuario = usuarioService.obtenerPorEmail(email);
+                    if (usuario != null) {
+                        int saldoActual = usuario.getSaldoCreditos() != null ? usuario.getSaldoCreditos() : 0;
+                        int creditosComprados = pc.getCreditos() != null ? pc.getCreditos() : 0;
+                        usuario.setSaldoCreditos(saldoActual + creditosComprados);
+                        usuarioService.guardar(usuario);
+                        log.info("[PEDIDO-WEBHOOK] ✅ Añadidos {} créditos al usuario {} por metadato directo tipo=PAQUETE_CREDITOS id={}", 
+                                 creditosComprados, email, paqueteCreditosId);
+                    }
+                }
+            } catch (Exception e) {
+                log.error("[PEDIDO-WEBHOOK] Error al procesar créditos directos para sesión: {}", session.getId(), e);
+            }
         }
 
         // 1. Otorgar suscripción/matrícula
@@ -244,19 +272,7 @@ public class PedidoServiceImpl implements PedidoService {
                     log.info("[PEDIDO-WEBHOOK] Ítem de tipo 'servicio' (id: {}) para usuario {}. Sin acción automática.", itemIdStr, email);
 
                 } else if ("paquete_creditos".equalsIgnoreCase(itemTipo) || "paquetecreditos".equalsIgnoreCase(itemTipo)) {
-                    Long paqueteCreditosId = Long.parseLong(itemIdStr);
-                    PaqueteCreditos pc = paqueteCreditosService.obtenerPorId(paqueteCreditosId);
-                    if (pc != null) {
-                        Usuario usuario = usuarioService.obtenerPorEmail(email);
-                        if (usuario != null) {
-                            int saldoActual = usuario.getSaldoCreditos() != null ? usuario.getSaldoCreditos() : 0;
-                            int creditosComprados = pc.getCreditos() != null ? pc.getCreditos() : 0;
-                            usuario.setSaldoCreditos(saldoActual + creditosComprados);
-                            usuarioService.guardar(usuario);
-                            log.info("[PEDIDO-WEBHOOK] ✅ Añadidos {} créditos al usuario {} por paquete de créditos id {}", 
-                                     creditosComprados, email, paqueteCreditosId);
-                        }
-                    }
+                    log.info("[PEDIDO-WEBHOOK] Ítem paquete_creditos ya procesado mediante metadato directo en procesarCheckoutCompleted.");
                 } else {
                     log.warn("[PEDIDO-WEBHOOK] Tipo de ítem desconocido: '{}'.", itemTipo);
                 }
@@ -280,19 +296,7 @@ public class PedidoServiceImpl implements PedidoService {
                 log.info("[PEDIDO-WEBHOOK] ✅ Paquete {} procesado (individual) para usuario: {}", paqueteId, email);
 
             } else if ("paquete_creditos".equalsIgnoreCase(tipoProducto) || "paquetecreditos".equalsIgnoreCase(tipoProducto)) {
-                Long paqueteCreditosId = Long.parseLong(idProductoStr);
-                PaqueteCreditos pc = paqueteCreditosService.obtenerPorId(paqueteCreditosId);
-                if (pc != null) {
-                    Usuario usuario = usuarioService.obtenerPorEmail(email);
-                    if (usuario != null) {
-                        int saldoActual = usuario.getSaldoCreditos() != null ? usuario.getSaldoCreditos() : 0;
-                        int creditosComprados = pc.getCreditos() != null ? pc.getCreditos() : 0;
-                        usuario.setSaldoCreditos(saldoActual + creditosComprados);
-                        usuarioService.guardar(usuario);
-                        log.info("[PEDIDO-WEBHOOK] ✅ Añadidos {} créditos al usuario {} (individual) por paquete de créditos id {}", 
-                                 creditosComprados, email, paqueteCreditosId);
-                    }
-                }
+                log.info("[PEDIDO-WEBHOOK] Producto individual paquete_creditos ya procesado mediante metadato directo en procesarCheckoutCompleted.");
             } else {
                 log.warn("[PEDIDO-WEBHOOK] Tipo de producto no reconocido: '{}'.", tipoProducto);
             }

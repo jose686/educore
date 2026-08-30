@@ -309,6 +309,7 @@ public class CheckoutController {
         if (sessionId != null && !sessionId.isBlank()) {
             try {
                 com.stripe.model.checkout.Session session = com.stripe.model.checkout.Session.retrieve(sessionId);
+                pedidoService.procesarCheckoutCompleted(session);
                 java.util.Map<String, String> metadata = session.getMetadata();
                 if (metadata != null) {
                     String tipoProducto = metadata.get("tipo_producto");
