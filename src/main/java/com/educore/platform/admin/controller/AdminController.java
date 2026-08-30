@@ -368,29 +368,6 @@ public class AdminController {
     }
 
     // ==========================================
-    // SECCIÓN DE USUARIOS Y ROLES
-    // ==========================================
-
-    /**
-     * Muestra la tabla de todos los usuarios registrados.
-     */
-    @GetMapping("/admin/usuarios")
-    public String listUsers(Model model) {
-        model.addAttribute("usuarios", usuarioService.obtenerTodosLosUsuarios());
-        model.addAttribute("roles", Role.values());
-        return "admin-usuarios";
-    }
-
-    /**
-     * Modifica el rol de un usuario.
-     */
-    @PostMapping("/admin/usuarios/{id}/rol")
-    public String changeUserRole(@PathVariable("id") Long id, @RequestParam("role") Role role) {
-        usuarioService.actualizarRol(id, role);
-        return "redirect:/admin/usuarios?success=role";
-    }
-
-    // ==========================================
     // SECCIÓN DE PROMOCIONES Y CUPONES
     // ==========================================
 

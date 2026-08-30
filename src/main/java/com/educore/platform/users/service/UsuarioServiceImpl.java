@@ -97,4 +97,36 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         return usuarioRepository.save(usuario);
     }
+
+    @Override
+    @Transactional
+    public Usuario actualizarUsuarioPorAdmin(Long id, String nombre, String email, Role role, boolean activo, String password) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("No se encontró ningún usuario con ID: " + id));
+
+        if (!usuario.getEmail().equalsIgnoreCase(email)) {
+            if (usuarioRepository.findByEmail(email).isPresent()) {
+                throw new EmailAlreadyExistsException("El correo electrónico ya está registrado: " + email);
+            }
+            usuario.setEmail(email);
+        }
+
+        usuario.setNombre(nombre);
+        usuario.setRole(role);
+        usuario.setActivo(activo);
+
+        if (password != null && !password.trim().isEmpty()) {
+            usuario.setPassword(passwordEncoder.encode(password));
+        }
+
+        return usuarioRepository.save(usuario);
+    }
+
+    @Override
+    @Transactional
+    public void eliminarUsuario(Long id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("No se encontró ningún usuario con ID: " + id));
+        usuarioRepository.delete(usuario);
+    }
 }

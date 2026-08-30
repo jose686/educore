@@ -26,7 +26,15 @@
                 <div th:if="${param.success}" class="alert alert-success border-0 bg-success bg-opacity-10 text-success rounded-4 py-3 px-4 mb-4" role="alert">
                     <div class="d-flex align-items-center">
                         <i class="bi bi-check-circle-fill me-2 fs-5"></i>
-                        <span>¡Rol de usuario actualizado correctamente en el servidor!</span>
+                        <span th:text="${param.success}">Operación exitosa.</span>
+                    </div>
+                </div>
+
+                <!-- Error notification -->
+                <div th:if="${param.error}" class="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger rounded-4 py-3 px-4 mb-4" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-exclamation-circle-fill me-2 fs-5"></i>
+                        <span th:text="${param.error}">Ha ocurrido un error.</span>
                     </div>
                 </div>
 
@@ -38,43 +46,49 @@
                         <table class="table table-dark table-hover mb-0 align-middle">
                             <thead class="bg-black bg-opacity-40 text-secondary fs-8 border-bottom border-white border-opacity-10">
                                 <tr>
-                                    <th class="ps-4 py-3">Nombre</th>
+                                    <th class="ps-4 py-3">ID</th>
+                                    <th class="py-3">Nombre</th>
                                     <th class="py-3">Correo Electrónico</th>
+                                    <th class="py-3">Rol</th>
                                     <th class="py-3">Estado</th>
-                                    <th class="py-3">Rol Actual</th>
-                                    <th class="py-3 text-end pe-4" style="min-width: 180px;">Asignar Nuevo Rol</th>
+                                    <th class="py-3">Fecha de Registro</th>
+                                    <th class="py-3 text-end pe-4" style="min-width: 180px;">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody class="fs-7 border-0">
                                 
                                 <!-- Loop users -->
                                 <tr class="border-bottom border-white border-opacity-5" th:each="usr : ${usuarios}">
-                                    <td class="ps-4 py-3 fw-semibold text-white">
-                                        <span th:text="${usr.nombre}">Nombre Completo</span>
-                                    </td>
+                                    <td class="ps-4 py-3 text-muted-custom" th:text="${usr.id}">ID</td>
+                                    <td class="py-3 fw-semibold text-white" th:text="${usr.nombre}">Nombre Completo</td>
                                     <td class="text-muted-custom py-3" th:text="${usr.email}">correo@educore.com</td>
+                                    <td class="py-3">
+                                        <span class="badge px-3 py-1 fs-9 rounded-pill" 
+                                              th:classappend="${usr.role.name() == 'ADMIN'} ? 'bg-danger bg-opacity-25 text-danger border border-danger' : (${usr.role.name() == 'TEACHER'} ? 'bg-warning bg-opacity-25 text-warning border border-warning' : (${usr.role.name() == 'STUDENT'} ? 'bg-indigo bg-opacity-25 text-indigo border border-indigo' : 'bg-secondary bg-opacity-25 text-secondary border border-secondary'))" 
+                                              th:text="${usr.role}">VISITOR</span>
+                                    </td>
                                     <td class="py-3">
                                         <span th:if="${usr.activo}" class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-10 fs-9 rounded-pill">Activo</span>
                                         <span th:unless="${usr.activo}" class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-10 fs-9 rounded-pill">Inactivo</span>
                                     </td>
-                                    <td class="py-3">
-                                        <span class="badge px-3 py-1 fs-9 rounded-pill" 
-                                              th:classappend="${usr.role.name() == 'ADMIN'} ? 'bg-danger bg-opacity-25 text-danger-300 border border-danger' : (${usr.role.name() == 'TEACHER'} ? 'bg-warning bg-opacity-25 text-warning-300 border border-warning' : (${usr.role.name() == 'STUDENT'} ? 'bg-indigo bg-opacity-25 text-indigo-300 border border-indigo' : 'bg-secondary bg-opacity-25 text-secondary-300 border border-secondary'))" 
-                                              th:text="${usr.role}">VISITOR</span>
-                                    </td>
+                                    <td class="text-muted-custom py-3">N/A</td>
                                     <td class="text-end pe-4 py-3">
-                                        <!-- Role Changer Form (Submits instantly on selector change) -->
-                                        <form th:action="@{'/admin/usuarios/' + ${usr.id} + '/rol'}" method="POST" class="d-inline-block">
-                                            <select name="role" class="form-select form-select-sm bg-dark bg-opacity-50 border border-white border-opacity-10 text-white fs-8 rounded-pill px-3 py-1.5" style="min-width: 140px;" onchange="this.form.submit()">
-                                                <option th:each="r : ${roles}" th:value="${r}" th:text="${r}" th:selected="${usr.role == r}"></option>
-                                            </select>
-                                        </form>
+                                        <div class="d-flex gap-2 justify-content-end">
+                                            <a th:href="@{'/admin/usuarios/editar/' + ${usr.id}}" class="btn btn-sm btn-outline-light border-white border-opacity-10 px-3.5 rounded-pill fs-8">
+                                                <i class="bi bi-pencil-fill me-1 text-gradient"></i> Editar
+                                            </a>
+                                            <form th:action="@{'/admin/usuarios/eliminar/' + ${usr.id}}" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas eliminar o dar de baja a este usuario?')" class="d-inline-block">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger border-danger border-opacity-30 px-3.5 rounded-pill fs-8">
+                                                    <i class="bi bi-trash3-fill me-1"></i> Eliminar
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
 
                                 <!-- Empty State -->
                                 <tr th:if="${#lists.isEmpty(usuarios)}">
-                                    <td colspan="5" class="text-center py-5 text-secondary">
+                                    <td colspan="7" class="text-center py-5 text-secondary">
                                         <i class="bi bi-people-fill fs-1 d-block mb-3 opacity-50"></i>
                                         <span class="fs-7">No se han registrado usuarios en el sistema.</span>
                                     </td>

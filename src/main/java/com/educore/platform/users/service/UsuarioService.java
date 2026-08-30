@@ -52,4 +52,14 @@ public interface UsuarioService {
      * @return El usuario actualizado.
      */
     Usuario actualizarPerfil(Long id, String nombre, String email, String password);
+
+    /**
+     * Actualiza un usuario desde la administración.
+     */
+    Usuario actualizarUsuarioPorAdmin(Long id, String nombre, String email, com.educore.platform.users.model.Role role, boolean activo, String password);
+
+    /**
+     * Elimina un usuario por su ID.
+     */
+    void eliminarUsuario(Long id);
 }

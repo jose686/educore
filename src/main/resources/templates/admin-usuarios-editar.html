@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: common-head('Editar Usuario - Administrador')}"></head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside th:replace="~{layout :: admin-sidebar('usuarios')}"></aside>
+
+        <!-- Main Area -->
+        <div class="admin-main">
+            <!-- Navbar -->
+            <header th:replace="~{layout :: admin-navbar('Editar Usuario')}"></header>
+
+            <!-- Content Body -->
+            <main class="admin-content-body">
+                
+                <!-- Header Section -->
+                <div class="row mb-5 text-center text-md-start align-items-center">
+                    <div class="col-md-12">
+                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-20 px-3 py-1.5 fs-8 rounded-pill mb-2">
+                            <i class="bi bi-shield-lock-fill me-1"></i> Control de Acceso
+                        </span>
+                        <h2 class="fw-bold text-white mb-2" th:text="'Modificar perfil de ' + ${usuario.nombre}">Editar Usuario</h2>
+                        <p class="text-muted-custom fs-6 mb-0">Actualiza las credenciales, rol y estado de este usuario de forma directa en el servidor.</p>
+                    </div>
+                </div>
+
+                <!-- Form Card -->
+                <div class="card glass-card border border-white border-opacity-10 rounded-4 p-4 p-md-5" style="max-width: 800px;">
+                    
+                    <!-- Alert Messages -->
+                    <div th:if="${param.error}" class="alert alert-danger bg-danger bg-opacity-10 text-danger border border-danger border-opacity-20 rounded-3 mb-4 fs-7 py-3 px-4">
+                        <i class="bi bi-exclamation-circle-fill me-2 fs-6 align-middle"></i>
+                        <span th:text="${param.error}" class="align-middle">Error en la operación.</span>
+                    </div>
+
+                    <!-- Form -->
+                    <form th:action="@{'/admin/usuarios/actualizar/' + ${usuario.id}}" method="POST" class="needs-validation" novalidate>
+                        
+                        <!-- Row 1: Nombre & Email -->
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-6">
+                                <label for="nombre" class="form-label text-secondary fw-semibold fs-8 mb-2">Nombre Completo</label>
+                                <input type="text" id="nombre" name="nombre" th:value="${usuario.nombre}" class="form-control bg-dark bg-opacity-50 text-white border-white border-opacity-10 py-2.5 px-3 fs-7" required style="color: #ffffff;" />
+                                <div class="invalid-feedback">Por favor, introduce el nombre completo.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="email" class="form-label text-secondary fw-semibold fs-8 mb-2">Correo Electrónico</label>
+                                <input type="email" id="email" name="email" th:value="${usuario.email}" class="form-control bg-dark bg-opacity-50 text-white border-white border-opacity-10 py-2.5 px-3 fs-7" required style="color: #ffffff;" />
+                                <div class="invalid-feedback">Introduce un correo electrónico válido.</div>
+                            </div>
+                        </div>
+
+                        <!-- Row 2: Rol & Estado Activo -->
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-6">
+                                <label for="role" class="form-label text-secondary fw-semibold fs-8 mb-2">Rol Asignado</label>
+                                <select id="role" name="role" class="form-select form-control bg-dark bg-opacity-50 text-white border-white border-opacity-10 py-2.5 px-3 fs-7" required style="color: #ffffff;">
+                                    <option th:each="r : ${roles}" th:value="${r}" th:text="${r}" th:selected="${usuario.role == r}"></option>
+                                </select>
+                                <div class="invalid-feedback">Selecciona un rol.</div>
+                            </div>
+                            <div class="col-md-6 d-flex align-items-center">
+                                <div class="form-check form-switch pt-3">
+                                    <input class="form-check-input bg-dark border-white border-opacity-20" type="checkbox" id="activo" name="activo" th:checked="${usuario.activo}" value="true" />
+                                    <label class="form-check-label text-white fw-medium fs-7 ms-2" for="activo">Usuario Activo / Habilitado</label>
+                                    <div class="fs-9 text-muted-custom mt-1">Si está desmarcado, el usuario no podrá iniciar sesión.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Row 3: Nueva Contraseña (Opcional) -->
+                        <div class="mb-5">
+                            <label for="password" class="form-label text-secondary fw-semibold fs-8 mb-2">Nueva Contraseña (opcional)</label>
+                            <input type="password" id="password" name="password" class="form-control bg-dark bg-opacity-50 text-white border-white border-opacity-10 py-2.5 px-3 fs-7" placeholder="Dejar en blanco para mantener la contraseña actual" style="color: #ffffff;" />
+                            <div class="fs-9 text-muted-custom mt-1">El valor introducido será encriptado de forma segura en el servidor.</div>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-flex gap-3 justify-content-end pt-3 border-top border-white border-opacity-5">
+                            <a th:href="@{/admin/usuarios}" class="btn btn-outline-light border-white border-opacity-10 py-2.5 px-4 fs-8 rounded-pill text-muted-custom">
+                                Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-gradient py-2.5 px-5 fs-8 rounded-pill">
+                                <i class="bi bi-floppy me-1"></i> Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS validation script -->
+    <script>
+        (function () {
+            'use strict'
+            var forms = document.querySelectorAll('.needs-validation')
+            Array.prototype.slice.call(forms)
+                .forEach(function (forms) {
+                    forms.addEventListener('submit', function (event) {
+                        if (!forms.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+                        forms.classList.add('was-validated')
+                    }, false)
+                })
+        })()
+    </script>
+
+    <!-- Bootstrap JS -->
+    <div th:replace="~{layout :: bootstrap-js}"></div>
+</body>
+</html>

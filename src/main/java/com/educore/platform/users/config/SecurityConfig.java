@@ -43,6 +43,7 @@ public class SecurityConfig {
                     new AntPathRequestMatcher("/css/**"),
                     new AntPathRequestMatcher("/js/**"),
                     new AntPathRequestMatcher("/images/**"),
+                    new AntPathRequestMatcher("/favicon.ico"),
                     new AntPathRequestMatcher("/webjars/**"),
                     new AntPathRequestMatcher("/api/v1/stripe/webhook"),
                     new AntPathRequestMatcher("/canjear-token"),
@@ -59,7 +60,8 @@ public class SecurityConfig {
                 ).hasAnyRole("ADMIN", "TEACHER")
                 // Backoffice de Administración
                 .requestMatchers(
-                    new AntPathRequestMatcher("/admin/**")
+                    new AntPathRequestMatcher("/admin/**"),
+                    new AntPathRequestMatcher("/api/v1/admin/**")
                 ).hasRole("ADMIN")
                 // Rutas privadas del aula virtual (LMS)
                 .requestMatchers(
