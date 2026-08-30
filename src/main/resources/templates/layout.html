@@ -246,6 +246,10 @@
             padding: 40px;
             flex-grow: 1;
         }
+
+        .navbar-nav .nav-link {
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body>
@@ -315,7 +319,7 @@
                     <div sec:authorize="isAuthenticated()" class="dropdown">
                         <button class="btn btn-outline-light btn-sm dropdown-toggle px-3.5 rounded-pill fs-8 d-flex align-items-center gap-2" type="button" id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-person-circle text-gradient fs-7"></i>
-                            <span sec:authentication="name" class="text-white fw-medium">Usuario</span>
+                            <span sec:authentication="name" class="text-white fw-medium d-inline-block text-truncate align-middle" style="max-width: 140px;">Usuario</span>
                             <i class="bi bi-chevron-down fs-9 ms-1 opacity-70"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end bg-dark border border-white border-opacity-10 rounded-3 shadow-lg" aria-labelledby="userMenuDropdown">
