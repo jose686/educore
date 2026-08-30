@@ -112,7 +112,7 @@ public class PedidoServiceImpl implements PedidoService {
                 item = item.trim();
                 if (item.isEmpty()) continue;
 
-                int underscoreIdx = item.indexOf('_');
+                int underscoreIdx = item.lastIndexOf('_');
                 String tipo = underscoreIdx > 0 ? item.substring(0, underscoreIdx) : "desconocido";
                 String referenciaId = underscoreIdx > 0 ? item.substring(underscoreIdx + 1) : item;
 
@@ -139,6 +139,12 @@ public class PedidoServiceImpl implements PedidoService {
                         } else if ("servicio_analisis_partida".equals(referenciaId)) {
                             titulo = "Análisis de Partida por Maestro FIDE";
                             precioUnitario = new BigDecimal("14.99");
+                        }
+                    } else if ("paquete_creditos".equalsIgnoreCase(tipo) || "paquetecreditos".equalsIgnoreCase(tipo)) {
+                        com.educore.platform.store.model.PaqueteCreditos pc = paqueteCreditosService.obtenerPorId(Long.parseLong(referenciaId));
+                        if (pc != null) {
+                            titulo = "Recarga de Créditos: " + pc.getNombre() + " (" + pc.getCreditos() + " pts)";
+                            precioUnitario = pc.getPrecio();
                         }
                     }
                 } catch (Exception e) {

@@ -142,7 +142,8 @@
                                         <div class="fs-9 text-muted" th:text="'Ref ID: ' + ${detalle.referenciaId}">Ref ID</div>
                                     </td>
                                     <td class="py-3 text-center">
-                                        <span class="badge bg-secondary text-uppercase fs-9" th:text="${detalle.tipo}">Curso</span>
+                                        <span class="badge bg-primary text-uppercase fs-9" th:if="${detalle.tipo == 'paquete_creditos' || detalle.tipo == 'paquetecreditos'}">Créditos</span>
+                                        <span class="badge bg-secondary text-uppercase fs-9" th:unless="${detalle.tipo == 'paquete_creditos' || detalle.tipo == 'paquetecreditos'}" th:text="${detalle.tipo}">Curso</span>
                                     </td>
                                     <td class="py-3 text-end fw-semibold text-dark">
                                         <span th:if="${detalle.precioUnitario.compareTo(T(java.math.BigDecimal).ZERO) > 0}"

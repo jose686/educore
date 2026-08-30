@@ -51,7 +51,10 @@
                                     <div th:each="item : ${carrito}" class="d-flex align-items-center justify-content-between p-3 bg-white bg-opacity-5 rounded-3 border border-white border-opacity-5">
                                         <div>
                                             <span class="d-block text-white fw-semibold fs-7" th:text="${item.titulo}">Título del Producto</span>
-                                            <span class="badge bg-secondary bg-opacity-10 text-muted-custom border border-white border-opacity-5 fs-9 mt-1 px-2 py-0.5 rounded-pill text-uppercase" th:text="${item.tipo}">TIPO</span>
+                                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 fs-9 mt-1 px-2 py-0.5 rounded-pill text-uppercase" th:if="${item.tipo == 'paquete_creditos' || item.tipo == 'paquetecreditos'}">
+                                                <i class="bi bi-coin me-1"></i> Créditos
+                                            </span>
+                                            <span class="badge bg-secondary bg-opacity-10 text-muted-custom border border-white border-opacity-5 fs-9 mt-1 px-2 py-0.5 rounded-pill text-uppercase" th:unless="${item.tipo == 'paquete_creditos' || item.tipo == 'paquetecreditos'}" th:text="${item.tipo}">TIPO</span>
                                         </div>
                                         <div class="d-flex align-items-center gap-3">
                                             <span class="text-white fw-bold fs-7" th:text="${#numbers.formatDecimal(item.precio, 1, 'POINT', 2, 'COMMA')} + ' €'">0,00 €</span>

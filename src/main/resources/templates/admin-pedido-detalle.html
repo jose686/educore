@@ -120,8 +120,9 @@
                                         <span class="badge fs-9 px-2 py-1 rounded-pill"
                                               th:classappend="${detalle.tipo == 'curso'} ? 'bg-indigo bg-opacity-25 text-indigo-300 border border-indigo' :
                                                                (${detalle.tipo == 'paquete'} ? 'bg-warning bg-opacity-20 text-warning border border-warning' :
-                                                                                               'bg-info bg-opacity-20 text-info border border-info')"
-                                              th:text="${#strings.toUpperCase(detalle.tipo)}">CURSO</span>
+                                                                (${detalle.tipo == 'paquete_creditos' or detalle.tipo == 'paquetecreditos'} ? 'bg-primary bg-opacity-20 text-primary border border-primary' :
+                                                                                                                                              'bg-info bg-opacity-20 text-info border border-info'))"
+                                              th:text="${(detalle.tipo == 'paquete_creditos' or detalle.tipo == 'paquetecreditos') ? 'CRÉDITOS' : #strings.toUpperCase(detalle.tipo)}">CURSO</span>
                                     </td>
                                     <td class="py-3 text-end pe-3 text-white fw-semibold" th:text="${#numbers.formatDecimal(detalle.precioUnitario, 1, 2)} + ' €'">0,00 €</td>
                                 </tr>

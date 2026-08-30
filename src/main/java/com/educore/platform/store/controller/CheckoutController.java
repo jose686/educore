@@ -118,7 +118,7 @@ public class CheckoutController {
                 if (pc == null) {
                     throw new IllegalArgumentException("Paquete de créditos no encontrado");
                 }
-                titulo = pc.getNombre();
+                titulo = pc.getNombre() + " (" + pc.getCreditos() + " Créditos)";
                 precio = pc.getPrecio();
             } else {
                 return "redirect:/catalogo";

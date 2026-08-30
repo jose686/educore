@@ -62,7 +62,8 @@
                                         <div th:each="detalle : ${pedido.detalles}" class="d-flex align-items-center gap-2 mb-1">
                                             <i th:if="${detalle.tipo == 'curso'}" class="bi bi-mortarboard text-indigo-300"></i>
                                             <i th:if="${detalle.tipo == 'paquete'}" class="bi bi-collection-fill text-warning"></i>
-                                            <i th:if="${detalle.tipo != 'curso' and detalle.tipo != 'paquete'}" class="bi bi-controller text-info"></i>
+                                            <i th:if="${detalle.tipo == 'paquete_creditos' or detalle.tipo == 'paquetecreditos'}" class="bi bi-coin text-primary"></i>
+                                            <i th:if="${detalle.tipo != 'curso' and detalle.tipo != 'paquete' and detalle.tipo != 'paquete_creditos' and detalle.tipo != 'paquetecreditos'}" class="bi bi-controller text-info"></i>
                                             <span th:text="${detalle.titulo}">Curso Ajedrez</span>
                                         </div>
                                     </td>
