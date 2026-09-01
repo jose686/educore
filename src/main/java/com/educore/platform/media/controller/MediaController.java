@@ -41,6 +41,7 @@ public class MediaController {
      * @param filename Nombre único del archivo solicitado.
      * @return El recurso completo o parcial con su tipo de contenido correspondiente.
      */
+    @CrossOrigin(origins = "*")
     @GetMapping("/media/**")
     public ResponseEntity<Resource> serveFile(jakarta.servlet.http.HttpServletRequest request) {
         try {
@@ -50,13 +51,18 @@ public class MediaController {
             Resource resource = mediaService.loadFileAsResource(filename);
             if (resource.exists() || resource.isReadable()) {
                 MediaType mediaType;
-                if (filename.toLowerCase().endsWith(".m3u8")) {
+                String lower = filename.toLowerCase();
+                if (lower.endsWith(".m3u8")) {
                     mediaType = MediaType.parseMediaType("application/x-mpegURL");
-                } else if (filename.toLowerCase().endsWith(".ts")) {
+                } else if (lower.endsWith(".ts")) {
                     mediaType = MediaType.parseMediaType("video/MP2T");
-                } else if (filename.toLowerCase().endsWith(".css")) {
+                } else if (lower.endsWith(".mp4")) {
+                    mediaType = MediaType.parseMediaType("video/mp4");
+                } else if (lower.endsWith(".webm")) {
+                    mediaType = MediaType.parseMediaType("video/webm");
+                } else if (lower.endsWith(".css")) {
                     mediaType = MediaType.parseMediaType("text/css");
-                } else if (filename.toLowerCase().endsWith(".js")) {
+                } else if (lower.endsWith(".js")) {
                     mediaType = MediaType.parseMediaType("application/javascript");
                 } else {
                     mediaType = org.springframework.http.MediaTypeFactory.getMediaType(resource).orElse(MediaType.APPLICATION_OCTET_STREAM);
@@ -64,6 +70,7 @@ public class MediaController {
 
                 return ResponseEntity.ok()
                         .contentType(mediaType)
+                        .header(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*")
                         .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
                         .body(resource);
             } else {

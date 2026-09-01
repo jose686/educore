@@ -13,18 +13,15 @@ import java.nio.file.Path;
 @Service
 public class VideoConversionService {
 
-    @Async
-    public void convertMp4ToHls(Path inputPath, Path outputPath) {
+    public boolean convertMp4ToHls(Path inputPath, Path outputPath) {
         try {
             // Comando FFmpeg para transcodificar MP4 a HLS
-            // ffmpeg -i input.mp4 -profile:v baseline -level 3.0 -s 1280x720 -start_number 0 -hls_time 10 -hls_list_size 0 -f hls output.m3u8
             ProcessBuilder pb = new ProcessBuilder(
                     "ffmpeg",
                     "-y", // Sobrescribir archivos existentes sin preguntar
                     "-i", inputPath.toString(),
                     "-profile:v", "baseline",
                     "-level", "3.0",
-                    "-s", "1280x720",
                     "-start_number", "0",
                     "-hls_time", "10",
                     "-hls_list_size", "0",
@@ -32,30 +29,25 @@ public class VideoConversionService {
                     outputPath.toString()
             );
 
-            // Redirigir salidas del comando al output estándar de Spring para facilitar auditoría y depuración
             pb.redirectErrorStream(true);
-            pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+            pb.redirectOutput(ProcessBuilder.Redirect.DISCARD);
 
             Process process = pb.start();
             int exitCode = process.waitFor();
 
-            if (exitCode == 0) {
+            if (exitCode == 0 && Files.exists(outputPath)) {
                 System.out.println("[VideoConversionService] Conversión HLS completada con éxito: " + outputPath.getFileName());
+                return true;
             } else {
                 System.err.println("[VideoConversionService] Error en la conversión FFmpeg. Código salida: " + exitCode);
+                return false;
             }
         } catch (IOException | InterruptedException ex) {
             System.err.println("[VideoConversionService] Excepción durante transcodificación HLS: " + ex.getMessage());
             if (ex instanceof InterruptedException) {
                 Thread.currentThread().interrupt();
             }
-        } finally {
-            // Eliminar el archivo de vídeo temporal MP4 de entrada
-            try {
-                Files.deleteIfExists(inputPath);
-            } catch (IOException e) {
-                System.err.println("[VideoConversionService] No se pudo limpiar archivo temporal: " + e.getMessage());
-            }
+            return false;
         }
     }
 }

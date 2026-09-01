@@ -32,7 +32,7 @@ public class MediaServiceImpl implements MediaService {
     private final VideoConversionService videoConversionService;
 
     public MediaServiceImpl(
-            @Value("${file.upload-dir:./uploads}") String uploadDir,
+            @Value("${app.media.upload-dir:./uploads}") String uploadDir,
             MediaFileRepository mediaFileRepository,
             VideoConversionService videoConversionService) {
         this.fileStorageLocation = Paths.get(uploadDir).toAbsolutePath().normalize();
@@ -90,10 +90,23 @@ public class MediaServiceImpl implements MediaService {
             String generatedFilename;
 
             if (tipo == MediaType.VIDEO) {
-                generatedFilename = uuid + ".m3u8";
                 Path tempInputPath = this.fileStorageLocation.resolve("temp_" + uuid + extension);
                 Files.copy(file.getInputStream(), tempInputPath, StandardCopyOption.REPLACE_EXISTING);
-                videoConversionService.convertMp4ToHls(tempInputPath, this.fileStorageLocation.resolve(generatedFilename));
+                String hlsFilename = uuid + ".m3u8";
+                Path hlsPath = this.fileStorageLocation.resolve(hlsFilename);
+
+                boolean hlsOk = videoConversionService.convertMp4ToHls(tempInputPath, hlsPath);
+                if (hlsOk) {
+                    generatedFilename = hlsFilename;
+                    try {
+                        Files.deleteIfExists(tempInputPath);
+                    } catch (Exception ignored) {}
+                } else {
+                    // Fallback: Si FFmpeg no está disponible o falla, guardar directamente como vídeo MP4/original
+                    generatedFilename = uuid + extension;
+                    Path targetLocation = this.fileStorageLocation.resolve(generatedFilename);
+                    Files.move(tempInputPath, targetLocation, StandardCopyOption.REPLACE_EXISTING);
+                }
             } else {
                 generatedFilename = uuid + extension;
                 Path targetLocation = this.fileStorageLocation.resolve(generatedFilename);

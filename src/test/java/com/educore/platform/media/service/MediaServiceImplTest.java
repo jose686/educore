@@ -112,6 +112,7 @@ class MediaServiceImplTest {
     void uploadFile_ShouldSaveVideoAndConvertHls() {
         MockMultipartFile file = new MockMultipartFile("file", "video.mp4", "video/mp4", "video_data".getBytes());
         when(mediaFileRepository.save(any(MediaFile.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(videoConversionService.convertMp4ToHls(any(Path.class), any(Path.class))).thenReturn(true);
 
         mediaService.uploadFile(file, "video-alias", CategoriaMedia.GENERAL);
 
@@ -120,6 +121,21 @@ class MediaServiceImplTest {
         verify(mediaFileRepository, times(1)).save(captor.capture());
         assertEquals(MediaType.VIDEO, captor.getValue().getTipo());
         assertTrue(captor.getValue().getFilename().endsWith(".m3u8"));
+    }
+
+    @Test
+    void uploadFile_ShouldSaveVideoAndFallbackToMp4_WhenHlsConversionFails() {
+        MockMultipartFile file = new MockMultipartFile("file", "video.mp4", "video/mp4", "video_data".getBytes());
+        when(mediaFileRepository.save(any(MediaFile.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(videoConversionService.convertMp4ToHls(any(Path.class), any(Path.class))).thenReturn(false);
+
+        mediaService.uploadFile(file, "video-fallback-alias", CategoriaMedia.GENERAL);
+
+        verify(videoConversionService, times(1)).convertMp4ToHls(any(Path.class), any(Path.class));
+        ArgumentCaptor<MediaFile> captor = ArgumentCaptor.forClass(MediaFile.class);
+        verify(mediaFileRepository, times(1)).save(captor.capture());
+        assertEquals(MediaType.VIDEO, captor.getValue().getTipo());
+        assertTrue(captor.getValue().getFilename().endsWith(".mp4"));
     }
 
     @Test

@@ -14,8 +14,8 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
-# Crear directorio de subidas
-RUN mkdir -p uploads
+# Instalar FFmpeg para transcodificación de vídeo HLS y crear directorio de subidas
+RUN apk add --no-cache ffmpeg && mkdir -p uploads
 
 # Copiar el empaquetado final
 COPY --from=build /app/target/*.jar app.jar
