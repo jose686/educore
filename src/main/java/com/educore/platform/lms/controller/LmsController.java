@@ -18,6 +18,8 @@ import java.util.List;
 
 import com.educore.platform.store.service.CatalogoService;
 
+import com.educore.platform.media.service.MediaService;
+
 /**
  * Controlador de vistas privadas para el Aula Virtual (LMS).
  */
@@ -28,15 +30,18 @@ public class LmsController {
     private final UserPublicService userPublicService;
     private final RecursoInteractivoService recursoService;
     private final CatalogoService catalogoService;
+    private final MediaService mediaService;
 
     public LmsController(LmsService lmsService,
                          UserPublicService userPublicService,
                          RecursoInteractivoService recursoService,
-                         CatalogoService catalogoService) {
+                         CatalogoService catalogoService,
+                         MediaService mediaService) {
         this.lmsService = lmsService;
         this.userPublicService = userPublicService;
         this.recursoService = recursoService;
         this.catalogoService = catalogoService;
+        this.mediaService = mediaService;
     }
 
     /**
@@ -95,9 +100,20 @@ public class LmsController {
     }
 
     /**
+     * Mapeo defensivo: redirige solicitudes accidentales con rutas relativas a recursos interactivos
+     * (ej. GET /aula/1/leccion/tablero-ajedrez-interactivo) hacia la URL del recurso de medios correspondiente.
+     */
+    @GetMapping("/aula/{cursoId:\\d+}/leccion/{slug:[^0-9].*}")
+    public String redirigirRecursoRelativo(@PathVariable("cursoId") Long cursoId,
+                                           @PathVariable("slug") String slug) {
+        String resolvedUrl = mediaService.resolveUrlByAliasOrPath(slug);
+        return "redirect:" + resolvedUrl;
+    }
+
+    /**
      * Reproductor de lecciones del aula virtual. Comprueba que el alumno tenga acceso al curso.
      */
-    @GetMapping("/aula/{cursoId}/leccion/{leccionId}")
+    @GetMapping("/aula/{cursoId:\\d+}/leccion/{leccionId:\\d+}")
     public String verLeccion(@PathVariable("cursoId") Long cursoId,
                              @PathVariable("leccionId") Long leccionId,
                              Model model) {
@@ -121,6 +137,9 @@ public class LmsController {
             RecursoInteractivo recurso = recursoService.obtenerPorIdentificador(leccion.getRutaScriptInteractivo());
             if (recurso != null && recurso.isActivo()) {
                 model.addAttribute("recursoInteractivo", recurso);
+            } else {
+                String resolvedUrl = mediaService.resolveUrlByAliasOrPath(leccion.getRutaScriptInteractivo());
+                model.addAttribute("resolvedInteractiveUrl", resolvedUrl);
             }
         }
         

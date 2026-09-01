@@ -60,6 +60,8 @@ public class MediaController {
                     mediaType = MediaType.parseMediaType("video/mp4");
                 } else if (lower.endsWith(".webm")) {
                     mediaType = MediaType.parseMediaType("video/webm");
+                } else if (lower.endsWith(".html") || lower.endsWith(".htm")) {
+                    mediaType = MediaType.parseMediaType("text/html;charset=UTF-8");
                 } else if (lower.endsWith(".css")) {
                     mediaType = MediaType.parseMediaType("text/css");
                 } else if (lower.endsWith(".js")) {

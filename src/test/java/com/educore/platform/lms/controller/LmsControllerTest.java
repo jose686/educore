@@ -28,6 +28,8 @@ import com.educore.platform.store.model.ProductoCurso;
 import java.util.List;
 import java.util.Optional;
 
+import com.educore.platform.media.service.MediaService;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
@@ -41,6 +43,9 @@ class LmsControllerTest {
 
     @MockBean
     private CatalogoService catalogoService;
+
+    @MockBean
+    private MediaService mediaService;
 
     @Test
     void anonymousUser_ShouldRedirectToLogin_WhenAccessingPrivateArea() throws Exception {
@@ -112,5 +117,16 @@ class LmsControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("mis-cursos"))
                 .andExpect(model().attributeExists("cursos"));
+    }
+
+    @Test
+    @WithMockUser(username = "alumno@educore.com", roles = "STUDENT")
+    void nonNumericLessonSlug_ShouldRedirectToMediaUrl() throws Exception {
+        when(mediaService.resolveUrlByAliasOrPath("tablero-ajedrez-interactivo"))
+                .thenReturn("/media/tablero-ajedrez-interactivo.html");
+
+        mockMvc.perform(get("/aula/1/leccion/tablero-ajedrez-interactivo"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/media/tablero-ajedrez-interactivo.html"));
     }
 }

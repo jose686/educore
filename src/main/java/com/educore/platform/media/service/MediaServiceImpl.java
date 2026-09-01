@@ -256,9 +256,17 @@ public class MediaServiceImpl implements MediaService {
         if (aliasOrPath == null || aliasOrPath.isBlank()) {
             return aliasOrPath;
         }
-        return mediaFileRepository.findByAlias(aliasOrPath)
+
+        String resolved = mediaFileRepository.findByAlias(aliasOrPath)
+                .or(() -> mediaFileRepository.findByUrl(aliasOrPath))
+                .or(() -> mediaFileRepository.findByFilename(aliasOrPath))
                 .map(MediaFile::getUrl)
                 .orElse(aliasOrPath);
+
+        if (!resolved.startsWith("/") && !resolved.startsWith("http://") && !resolved.startsWith("https://")) {
+            return "/media/" + resolved;
+        }
+        return resolved;
     }
 
     private MediaType detectMediaType(String filename) {
