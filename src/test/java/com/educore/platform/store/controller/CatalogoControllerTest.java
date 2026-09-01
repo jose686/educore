@@ -24,6 +24,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 import org.springframework.transaction.annotation.Transactional;
 
+import com.educore.platform.lms.service.AulaVirtualService;
+import com.educore.platform.lms.service.LmsService;
+import com.educore.platform.store.service.PromocionService;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+import static org.mockito.ArgumentMatchers.eq;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
@@ -34,6 +41,15 @@ class CatalogoControllerTest {
 
     @MockBean
     private CatalogoService catalogoService;
+
+    @MockBean
+    private PromocionService promocionService;
+
+    @MockBean
+    private AulaVirtualService aulaVirtualService;
+
+    @MockBean
+    private LmsService lmsService;
 
     @Test
     void catalogShouldBePubliclyAccessible() throws Exception {
@@ -73,12 +89,31 @@ class CatalogoControllerTest {
                 .estado("PUBLISHED")
                 .build();
 
-        // Stub del servicio para que no lance excepción
         when(catalogoService.obtenerPorId(productId)).thenReturn(mockProduct);
 
-        // POST autenticado (con token CSRF) debe procesarse con redirección al catálogo y éxito
         mockMvc.perform(post("/comprar/" + productId).with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/catalogo?compra_exitosa=true"));
+    }
+
+    @Test
+    @WithMockUser(username = "alumno@educore.com")
+    void freeCourseEnrollment_ShouldEnrollDirectlyWithoutPaymentGateway() throws Exception {
+        UUID productId = UUID.randomUUID();
+        ProductoCurso mockProduct = ProductoCurso.builder()
+                .id(productId)
+                .titulo("Curso Gratuito de Aperturas")
+                .precio(BigDecimal.ZERO)
+                .lmsCursoId(15L)
+                .estado("PUBLISHED")
+                .build();
+
+        when(catalogoService.obtenerPorId(productId)).thenReturn(mockProduct);
+
+        mockMvc.perform(post("/cursos/inscribir/" + productId).with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/mis-cursos?inscripcion_exitosa=true"));
+
+        verify(aulaVirtualService, times(1)).matricularAlumno(eq("alumno@educore.com"), eq(15L));
     }
 }

@@ -328,6 +328,7 @@ public class AdminController {
             producto.setEstado("DRAFT");
         }
         catalogoService.guardarProducto(producto);
+        syncLmsCursoData(producto);
         return "redirect:/admin/cursos/listado?success=create";
     }
 
@@ -358,7 +359,33 @@ public class AdminController {
         }
 
         catalogoService.guardarProducto(dbProducto);
+        syncLmsCursoData(dbProducto);
         return "redirect:/admin/cursos/listado?success=update";
+    }
+
+    private void syncLmsCursoData(ProductoCurso producto) {
+        if (producto.getLmsCursoId() != null) {
+            try {
+                com.educore.platform.lms.model.Curso lmsCurso;
+                try {
+                    lmsCurso = lmsService.obtenerCursoPorId(producto.getLmsCursoId());
+                } catch (Exception e) {
+                    lmsCurso = com.educore.platform.lms.model.Curso.builder()
+                            .id(producto.getLmsCursoId())
+                            .teacherId(1L)
+                            .build();
+                }
+                lmsCurso.setTitulo(producto.getTitulo());
+                lmsCurso.setDescripcion(producto.getDescripcionCorta());
+                lmsCurso.setImagenUrl(producto.getImagenPortadaUrl());
+                if (producto.getPrecio() != null) {
+                    lmsCurso.setPrecio(producto.getPrecio().doubleValue());
+                }
+                lmsService.guardarCurso(lmsCurso);
+            } catch (Exception e) {
+                // Ignorar error puntual de sync en LMS
+            }
+        }
     }
 
     /**

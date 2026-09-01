@@ -67,14 +67,33 @@
 
                                 <!-- Price -->
                                 <div class="mb-4">
-                                    <label for="precio" class="form-label">Precio Ofertado (€)</label>
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <label for="precio" class="form-label mb-0">Precio Ofertado (€)</label>
+                                        <div class="form-check form-switch m-0">
+                                            <input class="form-check-input cursor-pointer" type="checkbox" id="esGratuitoCheck"
+                                                th:checked="*{precio != null && precio == 0}"
+                                                onchange="toggleEsGratuito(this)">
+                                            <label class="form-check-label text-muted-custom fs-8 fw-semibold cursor-pointer" for="esGratuitoCheck">Curso Gratuito</label>
+                                        </div>
+                                    </div>
                                     <div class="input-group">
                                         <span
                                             class="input-group-text bg-transparent border-end-0 border-white border-opacity-10 text-secondary">€</span>
                                         <input type="number" id="precio" th:field="*{precio}" step="0.01" min="0"
                                             class="form-control border-start-0" placeholder="49.99" required>
                                     </div>
+                                    <small class="text-muted-custom fs-9 mt-1 d-block">Establecer en 0.00 para permitir la inscripción directa sin pasarela de pago.</small>
                                 </div>
+                                <script>
+                                    function toggleEsGratuito(checkbox) {
+                                        var precioInput = document.getElementById('precio');
+                                        if (checkbox.checked) {
+                                            precioInput.value = '0.00';
+                                        } else if (precioInput.value === '0' || precioInput.value === '0.00') {
+                                            precioInput.value = '29.99';
+                                        }
+                                    }
+                                </script>
 
                                 <!-- Imagen de Portada -->
                                 <div class="mb-4">

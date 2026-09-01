@@ -49,4 +49,8 @@ public class ProductoCurso {
      */
     @Column(name = "lms_curso_id", nullable = false)
     private Long lmsCursoId;
+
+    public boolean isGratis() {
+        return precio == null || precio.compareTo(BigDecimal.ZERO) <= 0;
+    }
 }

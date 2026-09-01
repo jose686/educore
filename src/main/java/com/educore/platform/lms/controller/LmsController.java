@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import java.util.List;
 
+import com.educore.platform.store.service.CatalogoService;
+
 /**
  * Controlador de vistas privadas para el Aula Virtual (LMS).
  */
@@ -25,11 +27,16 @@ public class LmsController {
     private final LmsService lmsService;
     private final UserPublicService userPublicService;
     private final RecursoInteractivoService recursoService;
+    private final CatalogoService catalogoService;
 
-    public LmsController(LmsService lmsService, UserPublicService userPublicService, RecursoInteractivoService recursoService) {
+    public LmsController(LmsService lmsService,
+                         UserPublicService userPublicService,
+                         RecursoInteractivoService recursoService,
+                         CatalogoService catalogoService) {
         this.lmsService = lmsService;
         this.userPublicService = userPublicService;
         this.recursoService = recursoService;
+        this.catalogoService = catalogoService;
     }
 
     /**
@@ -45,6 +52,26 @@ public class LmsController {
             // Re-fetch authentication after refresh
             auth = SecurityContextHolder.getContext().getAuthentication();
             List<Curso> cursosMatriculados = lmsService.obtenerCursosEstudiante(email);
+
+            // Enriquecer datos del curso con la oferta comercial de ProductoCurso si está disponible
+            for (Curso curso : cursosMatriculados) {
+                try {
+                    catalogoService.obtenerPorLmsCursoId(curso.getId()).ifPresent(prod -> {
+                        if (prod.getTitulo() != null && !prod.getTitulo().isBlank()) {
+                            curso.setTitulo(prod.getTitulo());
+                        }
+                        if (prod.getDescripcionCorta() != null && !prod.getDescripcionCorta().isBlank()) {
+                            curso.setDescripcion(prod.getDescripcionCorta());
+                        }
+                        if (prod.getImagenPortadaUrl() != null && !prod.getImagenPortadaUrl().isBlank()) {
+                            curso.setImagenUrl(prod.getImagenPortadaUrl());
+                        }
+                    });
+                } catch (Exception e) {
+                    // Ignorar posibles errores de enriquecimiento
+                }
+            }
+
             model.addAttribute("cursos", cursosMatriculados);
         }
         

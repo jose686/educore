@@ -73,7 +73,12 @@
                                             class="badge bg-secondary bg-opacity-10 text-secondary border border-white border-opacity-10"
                                             th:text="${curso.lmsCursoId}">1</span>
                                     </td>
-                                    <td class="text-white fw-bold py-3" th:text="${curso.precio} + ' €'">29.99 €</td>
+                                    <td class="text-white fw-bold py-3">
+                                        <span th:if="${curso.precio == null || curso.precio == 0}"
+                                            class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-20 fs-8">GRATIS</span>
+                                        <span th:unless="${curso.precio == null || curso.precio == 0}"
+                                            th:text="${curso.precio} + ' €'">29.99 €</span>
+                                    </td>
                                     <td class="py-3">
                                         <span th:if="${curso.estado == 'PUBLISHED'}"
                                             class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-10 fs-9 rounded-pill">Publicado</span>

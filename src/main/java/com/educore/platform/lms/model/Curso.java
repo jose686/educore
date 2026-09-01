@@ -51,4 +51,12 @@ public class Curso {
         }
         return this.modulos;
     }
+
+    public boolean isGratis() {
+        return precio == null || precio <= 0.0;
+    }
+
+    public String getImagenPortadaUrl() {
+        return this.imagenUrl;
+    }
 }

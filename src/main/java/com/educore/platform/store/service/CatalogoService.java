@@ -39,4 +39,9 @@ public interface CatalogoService {
      * Obtiene todos los productos de curso del catálogo, sin importar su estado.
      */
     List<ProductoCurso> obtenerTodos();
+
+    /**
+     * Obtiene un producto de curso por el ID de su curso correspondiente en el LMS.
+     */
+    java.util.Optional<ProductoCurso> obtenerPorLmsCursoId(Long lmsCursoId);
 }

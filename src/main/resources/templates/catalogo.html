@@ -69,34 +69,59 @@
                         
                         <!-- Price and purchase row -->
                         <div class="d-flex align-items-center justify-content-between mt-4 pt-3 border-top border-white border-opacity-10">
-                            <div class="d-flex flex-column">
-                                <span class="fs-8 text-secondary uppercase">Precio</span>
-                                <!-- Jerarquía: Base - Auto - Cupón -->
-                                <th:block th:with="
-                                    autoDesc=${descuentosAutomaticos != null and descuentosAutomaticos[producto.lmsCursoId] != null ? descuentosAutomaticos[producto.lmsCursoId] : 0},
-                                    cupDesc=${cuponDescuento != null ? cuponDescuento.descuentoPorcentaje : 0},
-                                    totalDesc=${(autoDesc + cupDesc > 100) ? 100 : (autoDesc + cupDesc)},
-                                    precioFinal=${producto.precio * (100 - totalDesc) / 100.0}
-                                ">
-                                    <div th:if="${totalDesc > 0}">
-                                        <span class="fs-7 text-decoration-line-through text-secondary" th:text="${#numbers.formatDecimal(producto.precio, 1, 'POINT', 2, 'COMMA')} + ' €'"></span>
-                                        <span th:if="${autoDesc > 0}" class="badge bg-danger bg-opacity-15 text-danger border border-danger border-opacity-20 fs-9 ms-1" th:text="'-' + ${autoDesc} + '%'" ></span>
-                                        <span class="fs-4 fw-bold text-white d-block" th:text="${#numbers.formatDecimal(precioFinal, 1, 'POINT', 2, 'COMMA')} + ' €'"></span>
+                            <th:block th:with="
+                                autoDesc=${descuentosAutomaticos != null and descuentosAutomaticos[producto.lmsCursoId] != null ? descuentosAutomaticos[producto.lmsCursoId] : 0},
+                                cupDesc=${cuponDescuento != null ? cuponDescuento.descuentoPorcentaje : 0},
+                                totalDesc=${(autoDesc + cupDesc > 100) ? 100 : (autoDesc + cupDesc)},
+                                precioFinal=${producto.precio * (100 - totalDesc) / 100.0},
+                                esGratis=${precioFinal <= 0 or producto.precio == 0}
+                            ">
+                                <div class="d-flex flex-column">
+                                    <span class="fs-8 text-secondary uppercase">Precio</span>
+                                    <!-- Jerarquía: Base - Auto - Cupón -->
+                                    <div th:if="${esGratis}">
+                                        <span class="fs-4 fw-bold text-success">GRATIS</span>
                                     </div>
-                                    <div th:unless="${totalDesc > 0}">
-                                        <span class="fs-4 fw-bold text-white" th:text="${#numbers.formatDecimal(producto.precio, 1, 'POINT', 2, 'COMMA')} + ' €'"></span>
+                                    <div th:unless="${esGratis}">
+                                        <div th:if="${totalDesc > 0}">
+                                            <span class="fs-7 text-decoration-line-through text-secondary" th:text="${#numbers.formatDecimal(producto.precio, 1, 'POINT', 2, 'COMMA')} + ' €'"></span>
+                                            <span th:if="${autoDesc > 0}" class="badge bg-danger bg-opacity-15 text-danger border border-danger border-opacity-20 fs-9 ms-1" th:text="'-' + ${autoDesc} + '%'" ></span>
+                                            <span class="fs-4 fw-bold text-white d-block" th:text="${#numbers.formatDecimal(precioFinal, 1, 'POINT', 2, 'COMMA')} + ' €'"></span>
+                                        </div>
+                                        <div th:unless="${totalDesc > 0}">
+                                            <span class="fs-4 fw-bold text-white" th:text="${#numbers.formatDecimal(producto.precio, 1, 'POINT', 2, 'COMMA')} + ' €'"></span>
+                                        </div>
                                     </div>
-                                </th:block>
-                            </div>
+                                </div>
 
-                            <!-- Add to Cart Form -->
-                            <form th:action="@{/carrito/agregar}" method="POST" class="m-0">
-                                <input type="hidden" name="tipo" value="curso">
-                                <input type="hidden" name="id" th:value="${producto.id}">
-                                <button type="submit" class="btn btn-gradient d-flex align-items-center fs-8 py-2 px-3">
-                                    Añadir al Carrito <i class="bi bi-cart-plus ms-2"></i>
-                                </button>
-                            </form>
+                                <!-- Action Buttons -->
+                                <div>
+                                    <!-- Ya matriculado -->
+                                    <div th:if="${cursosInscritos != null and cursosInscritos.contains(producto.lmsCursoId)}">
+                                        <a th:href="@{/mis-cursos}" class="btn btn-outline-success d-flex align-items-center fs-8 py-2 px-3 rounded-pill">
+                                            Continuar <i class="bi bi-play-circle-fill ms-1.5"></i>
+                                        </a>
+                                    </div>
+                                    <!-- No matriculado y Gratis -->
+                                    <div th:unless="${cursosInscritos != null and cursosInscritos.contains(producto.lmsCursoId)}" th:if="${esGratis}">
+                                        <form th:action="@{'/cursos/inscribir/' + ${producto.id}}" method="POST" class="m-0">
+                                            <button type="submit" class="btn btn-success d-flex align-items-center fs-8 py-2 px-3 rounded-pill fw-bold">
+                                                Inscribirse gratis <i class="bi bi-check-circle-fill ms-1.5"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <!-- No matriculado y De Pago -->
+                                    <div th:unless="${(cursosInscritos != null and cursosInscritos.contains(producto.lmsCursoId)) or esGratis}">
+                                        <form th:action="@{/carrito/agregar}" method="POST" class="m-0">
+                                            <input type="hidden" name="tipo" value="curso">
+                                            <input type="hidden" name="id" th:value="${producto.id}">
+                                            <button type="submit" class="btn btn-gradient d-flex align-items-center fs-8 py-2 px-3">
+                                                Añadir al Carrito <i class="bi bi-cart-plus ms-2"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </th:block>
                         </div>
                     </div>
                 </div>

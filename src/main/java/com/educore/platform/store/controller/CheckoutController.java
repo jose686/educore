@@ -36,6 +36,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.educore.platform.lms.service.AulaVirtualService;
+
 /**
  * Controlador para manejar el carrito de compras (Shopping Cart), validación de cupones y checkout general.
  */
@@ -49,6 +51,7 @@ public class CheckoutController {
     private final PedidoService pedidoService;
     private final UserPublicService userPublicService;
     private final PaqueteCreditosService paqueteCreditosService;
+    private final AulaVirtualService aulaVirtualService;
 
     @Value("${stripe.api.publishable-key:}")
     private String stripePublishableKey;
@@ -59,7 +62,8 @@ public class CheckoutController {
                               StripeService stripeService,
                               PedidoService pedidoService,
                               UserPublicService userPublicService,
-                              PaqueteCreditosService paqueteCreditosService) {
+                              PaqueteCreditosService paqueteCreditosService,
+                              AulaVirtualService aulaVirtualService) {
         this.catalogoService = catalogoService;
         this.promocionService = promocionService;
         this.paqueteRepository = paqueteRepository;
@@ -67,6 +71,7 @@ public class CheckoutController {
         this.pedidoService = pedidoService;
         this.userPublicService = userPublicService;
         this.paqueteCreditosService = paqueteCreditosService;
+        this.aulaVirtualService = aulaVirtualService;
     }
 
     /**
@@ -244,6 +249,30 @@ public class CheckoutController {
             } catch (IllegalArgumentException e) {
                 return "redirect:/carrito?coupon=" + couponCode;
             }
+        }
+
+        BigDecimal subtotal = carrito.stream()
+                .map(CartItem::getPrecio)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal descuentoMonto = subtotal.multiply(BigDecimal.valueOf(cupDesc))
+                .divide(BigDecimal.valueOf(100), RoundingMode.HALF_UP);
+        BigDecimal totalCobrar = subtotal.subtract(descuentoMonto);
+
+        if (totalCobrar.compareTo(BigDecimal.ZERO) <= 0) {
+            for (CartItem item : carrito) {
+                if ("curso".equalsIgnoreCase(item.getTipo())) {
+                    try {
+                        ProductoCurso prod = catalogoService.obtenerPorId(UUID.fromString(item.getId()));
+                        if (prod != null) {
+                            aulaVirtualService.matricularAlumno(email, prod.getLmsCursoId());
+                        }
+                    } catch (Exception e) {
+                        // Ignorar errores de procesamiento puntual
+                    }
+                }
+            }
+            session.removeAttribute("carrito");
+            return "redirect:/mis-cursos?inscripcion_exitosa=true";
         }
 
         // Obtener la URL base

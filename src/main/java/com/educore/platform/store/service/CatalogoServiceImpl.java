@@ -48,4 +48,9 @@ public class CatalogoServiceImpl implements CatalogoService {
     public List<ProductoCurso> obtenerTodos() {
         return productoCursoRepository.findAll();
     }
+
+    @Override
+    public java.util.Optional<ProductoCurso> obtenerPorLmsCursoId(Long lmsCursoId) {
+        return productoCursoRepository.findByLmsCursoId(lmsCursoId);
+    }
 }

@@ -31,15 +31,17 @@
                     
                     <!-- Cover image or placeholder -->
                     <div class="ratio ratio-16x9 bg-dark bg-opacity-50 border-bottom border-white border-opacity-10 d-flex align-items-center justify-content-center">
-                        <img th:if="${curso.imagenUrl != null && !curso.imagenUrl.isEmpty()}" 
-                             th:src="${curso.imagenUrl}" 
-                             class="img-fluid object-fit-cover" 
-                             th:alt="${curso.titulo}">
-                        <div th:unless="${curso.imagenUrl != null && !curso.imagenUrl.isEmpty()}" 
-                             class="d-flex flex-column align-items-center justify-content-center text-secondary h-100">
-                            <i class="bi bi-mortarboard fs-1 text-gradient"></i>
-                            <span class="fs-7 mt-2">Aula Virtual</span>
-                        </div>
+                        <th:block th:with="coverImg=${curso.imagenUrl != null && !curso.imagenUrl.isEmpty() ? curso.imagenUrl : (curso.imagenPortadaUrl != null && !curso.imagenPortadaUrl.isEmpty() ? curso.imagenPortadaUrl : null)}">
+                            <img th:if="${coverImg != null}" 
+                                 th:src="${coverImg}" 
+                                 class="img-fluid object-fit-cover w-100 h-100" 
+                                 th:alt="${curso.titulo}">
+                            <div th:unless="${coverImg != null}" 
+                                 class="d-flex flex-column align-items-center justify-content-center text-secondary h-100">
+                                <i class="bi bi-mortarboard fs-1 text-gradient"></i>
+                                <span class="fs-7 mt-2">Aula Virtual</span>
+                            </div>
+                        </th:block>
                     </div>
 
                     <!-- Card Body -->

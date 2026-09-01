@@ -23,6 +23,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Verifica la protección de rutas del aula virtual según el rol y la comprobación de matrícula.
  */
 import org.springframework.transaction.annotation.Transactional;
+import com.educore.platform.store.service.CatalogoService;
+import com.educore.platform.store.model.ProductoCurso;
+import java.util.List;
+import java.util.Optional;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -34,6 +38,9 @@ class LmsControllerTest {
 
     @MockBean
     private LmsService lmsService;
+
+    @MockBean
+    private CatalogoService catalogoService;
 
     @Test
     void anonymousUser_ShouldRedirectToLogin_WhenAccessingPrivateArea() throws Exception {
@@ -85,5 +92,25 @@ class LmsControllerTest {
                 .andExpect(view().name("reproductor"))
                 .andExpect(model().attributeExists("leccion"))
                 .andExpect(model().attributeExists("curso"));
+    }
+
+    @Test
+    @WithMockUser(username = "alumno@educore.com", roles = "STUDENT")
+    void studentWithEnrollment_ShouldGetMisCursosWithEnrichedData() throws Exception {
+        Curso mockCurso = Curso.builder().id(10L).titulo("Curso Base LMS 10").descripcion("Desc Base").build();
+        ProductoCurso mockProducto = ProductoCurso.builder()
+                .lmsCursoId(10L)
+                .titulo("Aprende Ajedrez desde Cero")
+                .descripcionCorta("Curso comercial completo")
+                .imagenPortadaUrl("/images/chess-cover.jpg")
+                .build();
+
+        when(lmsService.obtenerCursosEstudiante("alumno@educore.com")).thenReturn(List.of(mockCurso));
+        when(catalogoService.obtenerPorLmsCursoId(10L)).thenReturn(Optional.of(mockProducto));
+
+        mockMvc.perform(get("/mis-cursos"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("mis-cursos"))
+                .andExpect(model().attributeExists("cursos"));
     }
 }

@@ -19,4 +19,9 @@ public interface ProductoCursoRepository extends JpaRepository<ProductoCurso, UU
      * @return Lista de productos correspondientes.
      */
     List<ProductoCurso> findByEstado(String estado);
+
+    /**
+     * Busca el ProductoCurso correspondiente a un id de curso del LMS.
+     */
+    java.util.Optional<ProductoCurso> findByLmsCursoId(Long lmsCursoId);
 }
