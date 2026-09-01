@@ -120,6 +120,16 @@
                                         la base de datos para habilitar el acceso al alumno tras la compra.</small>
                                 </div>
 
+                                <!-- Estado de Publicación -->
+                                <div class="mb-4">
+                                    <label for="estado" class="form-label">Estado de Publicación</label>
+                                    <select id="estado" th:field="*{estado}" class="form-select">
+                                        <option value="DRAFT">Borrador (Oculto en catálogo público)</option>
+                                        <option value="PUBLISHED">Publicado (Visible en catálogo público)</option>
+                                    </select>
+                                    <small class="text-muted-custom fs-9 mt-1 d-block">Los cursos en estado Borrador sólo son visibles por los administradores.</small>
+                                </div>
+
                                 <!-- Submit Button -->
                                 <button type="submit" class="btn btn-gradient w-100 py-3 mt-3"
                                     th:text="${isEdit} ? 'Guardar Cambios' : 'Registrar Oferta'">
@@ -181,18 +191,25 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             // Controladores para Selección de Portada
-            document.getElementById('btn-select-featured-image').addEventListener('click', function  () {
-                openMediaGalleryModal();
-            });
+            var btnSelect = document.getElementById('btn-select-featured-image');
+            if (btnSelect) {
+                btnSelect.addEventListener('click', function () {
+                    openMediaGalleryModal();
+                });
+            }
 
-            document.getElementById('btn-clear-featured-image').addEventListener('click', functio n () {
-                document.getElementById('imagenPortadaUrl').value = '';
-                var previewImg = document.getElementById('thumbnail-preview-img');
-                var previewPlaceholder = document.getElementById('thumbnail-preview-placeholder')   previewImg.src = '';
-                previewImg.classList.add('d-none');
-                previewPlaceholder.classList.remove('d-none');
-                this.classList.add('d-none');
-            });
+            var btnClear = document.getElementById('btn-clear-featured-image');
+            if (btnClear) {
+                btnClear.addEventListener('click', function () {
+                    document.getElementById('imagenPortadaUrl').value = '';
+                    var previewImg = document.getElementById('thumbnail-preview-img');
+                    var previewPlaceholder = document.getElementById('thumbnail-preview-placeholder');
+                    previewImg.src = '';
+                    previewImg.classList.add('d-none');
+                    previewPlaceholder.classList.remove('d-none');
+                    this.classList.add('d-none');
+                });
+            }
         });
 
         function openMediaGalleryModal() {
@@ -208,25 +225,28 @@
             var grid = document.getElementById('modal-media-grid');
             var empty = document.getElementById('modal-media-empty');
 
-            list.remove('d-none');
+            loader.classList.remove('d-none');
             grid.classList.add('d-none');
             empty.classList.add('d-none');
 
-            fetch('/admin             .then(function (response) {
-                    if ( !response.ok) throw new Error('Error al cargar medios');
+            fetch('/admin/media?selectMode=true&tipo=IMAGEN')
+                .then(function (response) {
+                    if (!response.ok) throw new Error('Error al cargar medios');
                     return response.text();
                 })
                 .then(function (html) {
-                    var par ser = new DOMParser();
+                    var parser = new DOMParser();
                     var doc = parser.parseFromString(html, 'text/html');
                     var imgElements = doc.querySelectorAll('#mediaGrid img');
 
-                    grid.innerHTML        if (imgElements.length === 0) {
-    empty.classList.remove('d-none');
+                    grid.innerHTML = '';
+                    if (imgElements.length === 0) {
+                        empty.classList.remove('d-none');
                     } else {
                         imgElements.forEach(function (img) {
                             var src = img.getAttribute('src');
-                             var col = document.createElement('div');
+                            if (!src) return;
+                            var col = document.createElement('div');
                             col.className = 'col-md-4 col-6';
                             col.innerHTML = `
                                 <div class="card glass-card border border-white border-opacity-10 p-2 h-100 cursor-pointer hover-bg-white-5" onclick="selectImage('${src}')" style="transition: all 0.2s ease;">
@@ -243,12 +263,12 @@
                 })
                 .catch(function (err) {
                     console.error(err);
-                    empty. innerHTML = `<i class="bi bi-exclamation-triangle-fill text-danger fs-1 d-block mb-3"></i><h5 class="text-white fw-bold">Error de carga</h5><p class="text-muted-custom mb-0">${err.message}</p>`;
+                    empty.innerHTML = `<i class="bi bi-exclamation-triangle-fill text-danger fs-1 d-block mb-3"></i><h5 class="text-white fw-bold">Error de carga</h5><p class="text-muted-custom mb-0">${err.message}</p>`;
                     empty.classList.remove('d-none');
                 })
                 .finally(function () {
                     loader.classList.add('d-none');
-                 });
+                });
         }
 
         function selectImage(url) {
@@ -258,12 +278,16 @@
             var btnClear = document.getElementById('btn-clear-featured-image');
 
             previewImg.src = url;
-            previewImg.classList.remov
+            previewImg.classList.remove('d-none');
             previewImg.classList.add('w-100', 'h-100', 'object-fit-cover');
             previewPlaceholder.classList.add('d-none');
-            btnClear.classList.remove('d-none');
+            if (btnClear) {
+                btnClear.classList.remove('d-none');
+            }
 
-            mediaGalleryModal.hide();
+            if (mediaGalleryModal) {
+                mediaGalleryModal.hide();
+            }
         }
     </script>
 </body>

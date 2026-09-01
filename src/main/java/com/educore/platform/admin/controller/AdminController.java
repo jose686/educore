@@ -325,7 +325,7 @@ public class AdminController {
     @PostMapping("/admin/cursos/nuevo")
     public String saveNewCourse(@ModelAttribute("producto") ProductoCurso producto) {
         if (producto.getEstado() == null || producto.getEstado().isBlank()) {
-            producto.setEstado("PUBLISHED");
+            producto.setEstado("DRAFT");
         }
         catalogoService.guardarProducto(producto);
         return "redirect:/admin/cursos/listado?success=create";
@@ -353,6 +353,9 @@ public class AdminController {
         dbProducto.setPrecio(formProducto.getPrecio());
         dbProducto.setImagenPortadaUrl(formProducto.getImagenPortadaUrl());
         dbProducto.setLmsCursoId(formProducto.getLmsCursoId());
+        if (formProducto.getEstado() != null && !formProducto.getEstado().isBlank()) {
+            dbProducto.setEstado(formProducto.getEstado());
+        }
 
         catalogoService.guardarProducto(dbProducto);
         return "redirect:/admin/cursos/listado?success=update";

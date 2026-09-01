@@ -333,8 +333,8 @@ class AdminControllerTest {
 
     @Test
     @WithMockUser(username = "admin@educore.com", roles = "ADMIN")
-    void adminUser_ShouldCreateCourse() throws Exception {
-        ProductoCurso course = ProductoCurso.builder().titulo("New Course").build();
+    void adminUser_ShouldCreateCourse_WithEstado() throws Exception {
+        ProductoCurso course = ProductoCurso.builder().titulo("New Course").estado("DRAFT").build();
         when(catalogoService.guardarProducto(any())).thenReturn(course);
 
         mockMvc.perform(post("/admin/cursos/nuevo")
@@ -342,6 +342,10 @@ class AdminControllerTest {
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/cursos/listado?success=create"));
+
+        ArgumentCaptor<ProductoCurso> captor = ArgumentCaptor.forClass(ProductoCurso.class);
+        verify(catalogoService, times(1)).guardarProducto(captor.capture());
+        assertEquals("DRAFT", captor.getValue().getEstado());
     }
 
     @Test
@@ -359,10 +363,10 @@ class AdminControllerTest {
 
     @Test
     @WithMockUser(username = "admin@educore.com", roles = "ADMIN")
-    void adminUser_ShouldUpdateCourse() throws Exception {
+    void adminUser_ShouldUpdateCourse_AndPersistEstado() throws Exception {
         UUID courseId = UUID.randomUUID();
-        ProductoCurso existing = ProductoCurso.builder().id(courseId).titulo("Old").build();
-        ProductoCurso form = ProductoCurso.builder().titulo("New").build();
+        ProductoCurso existing = ProductoCurso.builder().id(courseId).titulo("Old").estado("DRAFT").build();
+        ProductoCurso form = ProductoCurso.builder().titulo("New").estado("PUBLISHED").build();
 
         when(catalogoService.obtenerPorId(courseId)).thenReturn(existing);
         when(catalogoService.guardarProducto(any())).thenReturn(existing);
@@ -372,6 +376,10 @@ class AdminControllerTest {
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/cursos/listado?success=update"));
+
+        ArgumentCaptor<ProductoCurso> captor = ArgumentCaptor.forClass(ProductoCurso.class);
+        verify(catalogoService, times(1)).guardarProducto(captor.capture());
+        assertEquals("PUBLISHED", captor.getValue().getEstado());
     }
 
     @Test
